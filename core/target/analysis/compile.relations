@@ -1,9 +1,0 @@
-products:
-   D:\workspace\project\cloud-parent\core\src\main\java\com\chinascope\cloud\App.java -> D:\workspace\project\cloud-parent\core\target\classes\com\chinascope\cloud\App.class
-binary dependencies:
-   D:\workspace\project\cloud-parent\core\src\main\java\com\chinascope\cloud\App.java -> D:\Program Files\Java\jdk1.8.0_91\jre\lib\rt.jar
-source dependencies:
-   D:\workspace\project\cloud-parent\core\src\main\java\com\chinascope\cloud\App.java -> D:\workspace\project\cloud-parent\core\src\main\java\com\chinascope\cloud\App.java
-external dependencies:
-class names:
-   D:\workspace\project\cloud-parent\core\src\main\java\com\chinascope\cloud\App.java -> com.chinascope.cloud.App
