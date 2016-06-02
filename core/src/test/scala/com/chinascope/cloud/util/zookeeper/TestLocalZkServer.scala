@@ -1,9 +1,9 @@
 package com.chinascope.cloud.util.zookeeper
 
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.ExponentialBackoffRetry
-import org.apache.curator.test.{TestingCluster, TestingServer, TestingZooKeeperServer}
+import org.apache.curator.test.{TestingCluster, TestingServer}
 import org.apache.curator.utils.CloseableUtils
 
 /**
