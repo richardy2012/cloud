@@ -1,12 +1,15 @@
 package com.chinascope.cloud.zookeeper
 
+import java.nio.ByteBuffer
+
 import com.chinascope.cloud.config.{CloudConf, ZookeeperConfiguration}
-import com.chinascope.cloud.util.Logging
+import com.chinascope.cloud.util.{Constant, Logging}
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
-import org.apache.zookeeper.KeeperException
+import org.apache.zookeeper.{CreateMode, KeeperException}
 
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
 /**
@@ -65,6 +68,48 @@ private[cloud] class CuratorZKClient private(
       client.delete().forPath(path)
     }
   }
+
+  /**
+    * Defines how the object is serialized and persisted.
+    */
+  override def persist(path: String, obj: Object): Unit = {
+    serializeIntoFile(path, obj)
+  }
+
+  /**
+    * Defines how the object referred by its name is removed from the store.
+    */
+  override def unpersist(name: String): Unit = {
+
+  }
+
+  private def serializeIntoFile(path: String, value: AnyRef) {
+    val serialized = conf.serializer.newInstance().serialize(value)
+    val bytes = new Array[Byte](serialized.remaining())
+    serialized.get(bytes)
+    client.create().withMode(CreateMode.PERSISTENT).forPath(path, bytes)
+  }
+
+  /**
+    * Gives all objects, matching a prefix. This defines how objects are
+    * read/deserialized back.
+    */
+  override def read[T: ClassTag](path: String, prefix: String): Seq[T] = {
+    client.getChildren.forPath(path).filter(_.startsWith(prefix)).map(deserializeFromFile[T]).flatten
+  }
+
+  private def deserializeFromFile[T](path: String)(implicit m: ClassTag[T]): Option[T] = {
+    val fileData = client.getData().forPath(path)
+    try {
+      Some(conf.serializer.newInstance().deserialize[T](ByteBuffer.wrap(fileData)))
+    } catch {
+      case e: Exception =>
+        logWarning("Exception while reading persisted file, deleting", e)
+        client.delete().forPath(path)
+        None
+    }
+  }
+
 }
 
 private[cloud] object CuratorZKClient {

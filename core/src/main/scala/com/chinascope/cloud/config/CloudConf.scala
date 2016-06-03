@@ -2,8 +2,10 @@ package com.chinascope.cloud.config
 
 import java.util.concurrent.ConcurrentHashMap
 
+import com.chinascope.cloud.serializer.{JavaSerializer, Serializer}
 import com.chinascope.cloud.util.{Logging, Utils}
 import com.chinascope.cloud.zookeeper.ZKClient
+import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
 
 import scala.collection.JavaConverters._
@@ -13,7 +15,7 @@ import scala.collection.JavaConverters._
   *
   * @param loadDefaults whether to also load values from Java system properties
   */
-private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Logging with ZookeeperConfiguration{
+private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Logging with ZookeeperConfiguration {
 
   /** Create a CloudConf that loads defaults from system properties and the classpath */
   def this() = this(true)
@@ -31,11 +33,17 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this
   }
 
+  private[cloud] var zkRetry: RetryPolicy = _
+  private[cloud] var zkClient: ZKClient = _
+  private[cloud] var serializer: Serializer = _
 
-  private[cloud] def zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval",zkRetryInterval), this.getInt("zookeeper.retryAttempts",zkRetryAttemptsCount))
-  private[cloud] def zkClient = ZKClient(this)
 
-
+  private[cloud] def init() = {
+    this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
+    this.zkClient = ZKClient(this)
+    //serializer
+    this.serializer = new JavaSerializer(this)
+  }
 
 
   /** Set a configuration variable. */
@@ -72,7 +80,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   /** Set a parameter if it isn't already configured */
   def setIfMissing(key: String, value: String): CloudConf = {
     if (settings.putIfAbsent(key, value) == null) {
-     logWarning(s"$key have exists")
+      logWarning(s"$key have exists")
     }
     this
   }

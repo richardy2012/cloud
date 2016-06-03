@@ -19,7 +19,7 @@ private[cloud] class ZooKeeperLeaderElectionAgent(
   private var leaderLatch: LeaderLatch = _
   private var status = LeadershipStatus.NOT_LEADER
 
-  val ELECTION_DIR = conf.get(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY, Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR) + "/leader"
+  val ELECTION_DIR = conf.get(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY, Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR) + Constant.ELECTION_DIR
 
   private def start() {
     logInfo("Starting ZooKeeper LeaderElection agent")

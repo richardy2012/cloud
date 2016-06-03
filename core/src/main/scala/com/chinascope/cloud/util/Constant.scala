@@ -7,7 +7,10 @@ private[cloud] object Constant {
 
   //cloud.deploy.zookeeper.dir
   final val CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY = "cloud.deploy.zookeeper.dir"
-  final val CLOUD_DEPLOY_ZOOKEEPER_DIR = "cloud" //root of application for zookeeper
+  final val CLOUD_DEPLOY_ZOOKEEPER_DIR = "/cloud" //root of application for zookeeper
+
+  final val ELECTION_DIR = "/leader"
+
 
 
 }

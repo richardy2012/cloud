@@ -23,5 +23,8 @@ private[cloud] class Master(
 
   override def electedLeader(): Unit = ???
 
-  override def revokedLeadership(): Unit = ???
+  override def revokedLeadership(): Unit = {
+    logError("Leadership has been revoked -- master shutting down.")
+    System.exit(0)
+  }
 }

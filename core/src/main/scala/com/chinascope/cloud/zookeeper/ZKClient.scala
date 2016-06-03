@@ -18,6 +18,23 @@ abstract class ZKClient(conf: CloudConf) {
 
   def deleteRecursive(path: String): Unit
 
+  /**
+    * Defines how the object is serialized and persisted. Implementation will
+    * depend on the store used.
+    */
+  def persist(path: String, obj: Object): Unit
+
+  /**
+    * Defines how the object referred by its name is removed from the store.
+    */
+  def unpersist(path: String): Unit
+
+  /**
+    * Gives all objects, matching a prefix. This defines how objects are
+    * read/deserialized back.
+    */
+  def read[T: ClassTag](path: String,prefix: String): Seq[T]
+
   def zk[T: ClassTag](): T
 }
 
