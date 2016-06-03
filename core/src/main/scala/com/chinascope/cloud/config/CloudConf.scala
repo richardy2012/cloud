@@ -3,6 +3,8 @@ package com.chinascope.cloud.config
 import java.util.concurrent.ConcurrentHashMap
 
 import com.chinascope.cloud.util.{Logging, Utils}
+import com.chinascope.cloud.zookeeper.ZKClient
+import org.apache.curator.retry.ExponentialBackoffRetry
 
 import scala.collection.JavaConverters._
 
@@ -11,7 +13,7 @@ import scala.collection.JavaConverters._
   *
   * @param loadDefaults whether to also load values from Java system properties
   */
-private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Logging {
+private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Logging with ZookeeperConfiguration{
 
   /** Create a CloudConf that loads defaults from system properties and the classpath */
   def this() = this(true)
@@ -22,12 +24,18 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     loadFromSystemProperties()
   }
 
-  private[spark] def loadFromSystemProperties(): CloudConf = {
+  private[cloud] def loadFromSystemProperties(): CloudConf = {
     for ((key, value) <- Utils.getSystemProperties) {
       set(key, value)
     }
     this
   }
+
+
+  private[cloud] def zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval",zkRetryInterval), this.getInt("zookeeper.retryAttempts",zkRetryAttemptsCount))
+  private[cloud] def zkClient = ZKClient(this)
+
+
 
 
   /** Set a configuration variable. */
@@ -76,48 +84,48 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   }
 
   /** Get a parameter; throws a NoSuchElementException if it's not set */
-  def get(key: String): String = {
+  private[cloud] def get(key: String): String = {
     getOption(key).getOrElse(throw new NoSuchElementException(key))
   }
 
   /** Get a parameter, falling back to a default if not set */
-  def get(key: String, defaultValue: String): String = {
+  private[cloud] def get(key: String, defaultValue: String): String = {
     getOption(key).getOrElse(defaultValue)
   }
 
   /** Get a parameter as an Option */
-  def getOption(key: String): Option[String] = {
+  private[cloud] def getOption(key: String): Option[String] = {
     Option(settings.get(key)).orElse(throw new NoSuchElementException(key))
   }
 
   /** Get all parameters as a list of pairs */
-  def getAll: Array[(String, String)] = {
+  private[cloud] def getAll: Array[(String, String)] = {
     settings.entrySet().asScala.map(x => (x.getKey, x.getValue)).toArray
   }
 
   /** Get a parameter as an integer, falling back to a default if not set */
-  def getInt(key: String, defaultValue: Int): Int = {
+  private[cloud] def getInt(key: String, defaultValue: Int): Int = {
     getOption(key).map(_.toInt).getOrElse(defaultValue)
   }
 
   /** Get a parameter as a long, falling back to a default if not set */
-  def getLong(key: String, defaultValue: Long): Long = {
+  private[cloud] def getLong(key: String, defaultValue: Long): Long = {
     getOption(key).map(_.toLong).getOrElse(defaultValue)
   }
 
   /** Get a parameter as a double, falling back to a default if not set */
-  def getDouble(key: String, defaultValue: Double): Double = {
+  private[cloud] def getDouble(key: String, defaultValue: Double): Double = {
     getOption(key).map(_.toDouble).getOrElse(defaultValue)
   }
 
   /** Get a parameter as a boolean, falling back to a default if not set */
-  def getBoolean(key: String, defaultValue: Boolean): Boolean = {
+  private[cloud] def getBoolean(key: String, defaultValue: Boolean): Boolean = {
     getOption(key).map(_.toBoolean).getOrElse(defaultValue)
   }
 
 
   /** Does the configuration contain a given parameter? */
-  def contains(key: String): Boolean = {
+  private[cloud] def contains(key: String): Boolean = {
     settings.containsKey(key)
   }
 

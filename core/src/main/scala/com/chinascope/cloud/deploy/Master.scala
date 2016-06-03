@@ -1,5 +1,6 @@
 package com.chinascope.cloud.deploy
 
+import com.chinascope.cloud.deploy.election.LeaderCandidate
 import com.chinascope.cloud.util.Logging
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.PathChildrenCache
@@ -13,16 +14,14 @@ import org.apache.curator.framework.state.ConnectionState
 private[cloud] class Master(
                              var serverId: String,
 
-                           ) extends LeaderSelectorListener with AutoCloseable with Logging{
+                           ) extends LeaderCandidate with Logging {
   private var client: CuratorFramework = _
   private val leaderSelector: LeaderSelector = _
   private val workersCache: PathChildrenCache = _
 
   def this() =
 
-  override def takeLeadership(client: CuratorFramework): Unit = ???
+  override def electedLeader(): Unit = ???
 
-  override def close(): Unit = ???
-
-  override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = ???
+  override def revokedLeadership(): Unit = ???
 }

@@ -8,12 +8,15 @@ import scala.util.Try
 /**
   * Created by soledede.weng on 2016/6/2.
   */
-class ZookeeperConfiguration extends Configuration {
+trait ZookeeperConfiguration extends Configuration {
   /**
     * Default ZooKeeper client's connection string.
     */
   lazy val logShow = Try(config.getBoolean("log.show")).getOrElse(true)
-  lazy val zkonnectionString: String = Try(config.getString("zookeeper.connectionString")).getOrElse("localhost:2181")
+
+  lazy val zkNamespace: String = Try(config.getString("zookeeper.namespace")).getOrElse("root")
+
+  lazy val zkConnectionString: String = Try(config.getString("zookeeper.connectionString")).getOrElse("localhost:2181")
 
   /**
     * Default ZooKeeper client's connection timeout.
@@ -28,12 +31,12 @@ class ZookeeperConfiguration extends Configuration {
   /**
     * Default number of connection retries to Zookeeper ensemble.
     */
-  lazy val zkRetryAttemptsCount: Int = Try(config.getInt("zookeeper.retryAttempts")).getOrElse(5)
+  lazy val zkRetryAttemptsCount: Int = Try(config.getInt("zookeeper.retryAttempts")).getOrElse(3)
 
   /**
     * Default interval between connection retries to Zookeeper ensemble.
     */
-  lazy val zkRetryInterval: Int = Try(config.getInt("zookeeper.retryInterval")).getOrElse(2000)
+  lazy val zkRetryInterval: Int = Try(config.getInt("zookeeper.retryInterval")).getOrElse(5000)
 
   /**
     * Default retry policy.
