@@ -2,37 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ff87ca50-0592-4c91-ab5c-ecc8a0920fbd" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/core/src/main/resources/log4j-defaults.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/core/src/main/resources/log4j-linux.properties" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/DeployAllpication.scala" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/Node.scala" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/deploy/MonsterMaster$.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/deploy/MonsterMaster.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/Job$$anon$1.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/Job$.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/util/zookeeper/TestLocalZkServer$$anon$1.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/util/zookeeper/TestLocalZkServer$.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/util/zookeeper/TestLocalZkServer.class" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/deploy/Master.class" afterPath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/deploy/Master.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/Job.class" afterPath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/Job.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/JobState$.class" afterPath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/JobState$.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/JobState.class" afterPath="$PROJECT_DIR$/core/target/classes/com/chinascope/cloud/entity/JobState.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/pom.xml" afterPath="$PROJECT_DIR$/core/pom.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/resources/application.conf" afterPath="$PROJECT_DIR$/core/src/main/resources/application.conf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/Factory.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/Factory.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/CloudConf.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/CloudConf.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/LogConfiguration.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/LogConfiguration.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/ZookeeperConfiguration.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/ZookeeperConfiguration.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/Master.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/Master.scala" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZooKeeperLeaderElectionAgent.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZooKeeperLeaderElectionAgent.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/entity/Job.java" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/entity/Job.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/serializer/ByteBufferInputStream.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/serializer/ByteBufferInputStream.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/serializer/SerializationDebugger.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/serializer/SerializationDebugger.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/util/Constant.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/util/Constant.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/util/NextIterator.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/util/NextIterator.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/CuratorZKClient.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/CuratorZKClient.scala" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/ZKClient.scala" afterPath="$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/ZKClient.scala" />
     </list>
     <ignored path="cloud-parent.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -68,12 +38,26 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="LogConfiguration.scala" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/LogConfiguration.scala">
+      <file leaf-file-name="ZKClient.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/ZKClient.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="35" selection-start-line="0" selection-start-column="35" selection-end-line="0" selection-end-column="35" />
-              <folding />
+            <state relative-caret-position="172">
+              <caret line="37" column="6" selection-start-line="37" selection-start-column="6" selection-end-line="37" selection-end-column="6" />
+              <folding>
+                <element signature="e#40#84#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CuratorZKClient.scala" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/CuratorZKClient.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="532">
+              <caret line="38" column="49" selection-start-line="38" selection-start-column="43" selection-end-line="38" selection-end-column="49" />
+              <folding>
+                <element signature="e#40#66#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -81,8 +65,8 @@
       <file leaf-file-name="Master.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/Master.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="190">
-              <caret line="31" column="59" selection-start-line="31" selection-start-column="59" selection-end-line="31" selection-end-column="59" />
+            <state relative-caret-position="203">
+              <caret line="19" column="55" selection-start-line="19" selection-start-column="55" selection-end-line="19" selection-end-column="55" />
               <folding>
                 <element signature="e#37#81#0" expanded="true" />
               </folding>
@@ -90,21 +74,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="log4j-defaults.properties" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/core/src/main/resources/log4j-defaults.properties">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="330">
-              <caret line="17" column="52" selection-start-line="17" selection-start-column="52" selection-end-line="17" selection-end-column="52" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="DeployAllpication.scala" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/DeployAllpication.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="278">
-              <caret line="18" column="48" selection-start-line="18" selection-start-column="48" selection-end-line="18" selection-end-column="48" />
+            <state relative-caret-position="158">
+              <caret line="17" column="26" selection-start-line="17" selection-start-column="26" selection-end-line="17" selection-end-column="26" />
               <folding>
                 <element signature="e#37#72#0" expanded="true" />
               </folding>
@@ -128,7 +102,7 @@
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZookeeperElectionFactory.scala">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="240">
-              <caret line="8" column="106" selection-start-line="8" selection-start-column="106" selection-end-line="8" selection-end-column="106" />
+              <caret line="8" column="111" selection-start-line="8" selection-start-column="111" selection-end-line="8" selection-end-column="111" />
               <folding />
             </state>
           </provider>
@@ -137,8 +111,8 @@
       <file leaf-file-name="ZooKeeperLeaderElectionAgent.scala" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZooKeeperLeaderElectionAgent.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="380">
-              <caret line="43" column="14" selection-start-line="43" selection-start-column="14" selection-end-line="43" selection-end-column="14" />
+            <state relative-caret-position="96">
+              <caret line="90" column="4" selection-start-line="90" selection-start-column="4" selection-end-line="90" selection-end-column="4" />
               <folding>
                 <element signature="e#46#116#0" expanded="true" />
               </folding>
@@ -289,8 +263,8 @@
     </treeState>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="85" />
-    <option name="y" value="20" />
+    <option name="x" value="-23" />
+    <option name="y" value="39" />
     <option name="width" value="1971" />
     <option name="height" value="1066" />
   </component>
@@ -1429,15 +1403,15 @@
       <workItem from="1464861392754" duration="1931000" />
       <workItem from="1464917784009" duration="5267000" />
       <workItem from="1464924004976" duration="15078000" />
-      <workItem from="1464943453866" duration="7231000" />
+      <workItem from="1464943453866" duration="7477000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="53003000" />
+    <option name="totallyTimeSpent" value="53249000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="85" y="20" width="1971" height="1066" extended-state="0" />
+    <frame x="-23" y="39" width="1971" height="1066" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1448,7 +1422,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3219616" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3042999" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3042999" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2251951" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -1459,7 +1433,7 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39801544" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39911798" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1482,13 +1456,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/DeployAllpication.scala</url>
+          <line>18</line>
+          <properties />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZooKeeperLeaderElectionAgent.scala</url>
           <line>35</line>
           <properties />
-          <option name="timeStamp" value="1" />
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
-      <option name="time" value="2" />
+      <option name="time" value="5" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1799,31 +1779,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/ZKClient.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="44" column="0" selection-start-line="44" selection-start-column="0" selection-end-line="44" selection-end-column="0" />
-          <folding>
-            <element signature="e#40#84#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/config/ZookeeperConfiguration.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="41" column="44" selection-start-line="41" selection-start-column="33" selection-end-line="41" selection-end-column="44" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/CuratorZKClient.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="29" column="48" selection-start-line="29" selection-start-column="48" selection-end-line="29" selection-end-column="48" />
-          <folding>
-            <element signature="e#40#66#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1853,30 +1813,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/LeaderElectionFactory.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="6" column="6" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="6" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/Factory.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="260">
           <caret line="16" column="29" selection-start-line="16" selection-start-column="29" selection-end-line="16" selection-end-column="29" />
           <folding>
             <element signature="e#30#74#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/Master.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="190">
-          <caret line="31" column="59" selection-start-line="31" selection-start-column="59" selection-end-line="31" selection-end-column="59" />
-          <folding>
-            <element signature="e#37#81#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1889,12 +1831,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/LeaderElectionFactory.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="6" column="6" selection-start-line="6" selection-start-column="6" selection-end-line="6" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/DeployAllpication.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="18" column="48" selection-start-line="18" selection-start-column="48" selection-end-line="18" selection-end-column="48" />
+        <state relative-caret-position="158">
+          <caret line="17" column="26" selection-start-line="17" selection-start-column="26" selection-end-line="17" selection-end-column="26" />
           <folding>
             <element signature="e#37#72#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/Master.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="203">
+          <caret line="19" column="55" selection-start-line="19" selection-start-column="55" selection-end-line="19" selection-end-column="55" />
+          <folding>
+            <element signature="e#37#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/ZKClient.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="172">
+          <caret line="37" column="6" selection-start-line="37" selection-start-column="6" selection-end-line="37" selection-end-column="6" />
+          <folding>
+            <element signature="e#40#84#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/zookeeper/CuratorZKClient.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="532">
+          <caret line="38" column="49" selection-start-line="38" selection-start-column="43" selection-end-line="38" selection-end-column="49" />
+          <folding>
+            <element signature="e#40#66#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1902,15 +1882,15 @@
     <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZookeeperElectionFactory.scala">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
-          <caret line="8" column="106" selection-start-line="8" selection-start-column="106" selection-end-line="8" selection-end-column="106" />
+          <caret line="8" column="111" selection-start-line="8" selection-start-column="111" selection-end-line="8" selection-end-column="111" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/core/src/main/scala/com/chinascope/cloud/deploy/election/ZooKeeperLeaderElectionAgent.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="380">
-          <caret line="43" column="14" selection-start-line="43" selection-start-column="14" selection-end-line="43" selection-end-column="14" />
+        <state relative-caret-position="96">
+          <caret line="90" column="4" selection-start-line="90" selection-start-column="4" selection-end-line="90" selection-end-column="4" />
           <folding>
             <element signature="e#46#116#0" expanded="true" />
           </folding>

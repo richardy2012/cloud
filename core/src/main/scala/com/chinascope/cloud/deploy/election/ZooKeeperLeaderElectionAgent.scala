@@ -87,8 +87,8 @@ private[cloud] class ZooKeeperLeaderElectionAgent(
     }
   }
 
-  //start()
-  startLocal()
+  start()
+  //startLocal()
 }
 
 
