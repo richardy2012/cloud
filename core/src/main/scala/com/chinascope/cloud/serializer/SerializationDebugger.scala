@@ -10,7 +10,7 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
-private[spark] object SerializationDebugger extends Logging {
+private[cloud] object SerializationDebugger extends Logging {
 
   /**
    * Improve the given NotSerializableException with the serialization path leading from the given

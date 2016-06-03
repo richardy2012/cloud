@@ -1,9 +1,12 @@
 package com.chinascope.cloud.deploy.election
 
-import com.chinascope.cloud.config.CloudConf
+import com.chinascope.cloud.config.{CloudConf, ZookeeperConfiguration}
 import com.chinascope.cloud.util.{Constant, Logging}
-import org.apache.curator.framework.CuratorFramework
+import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.framework.recipes.leader.{LeaderLatch, LeaderLatchListener}
+import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
+import org.apache.curator.retry.ExponentialBackoffRetry
+import org.apache.curator.test.TestingServer
 
 /**
   * Created by soledede.weng on 2016/6/3.
@@ -21,9 +24,25 @@ private[cloud] class ZooKeeperLeaderElectionAgent(
 
   val ELECTION_DIR = conf.get(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY, Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR) + Constant.ELECTION_DIR
 
-  private def start() {
+  private def start() = {
     logInfo("Starting ZooKeeper LeaderElection agent")
     zk = conf.zkClient.zk[CuratorFramework]()
+    leaderLatch = new LeaderLatch(zk, ELECTION_DIR)
+    leaderLatch.addListener(this)
+    leaderLatch.start()
+  }
+
+  private def startLocal(): Unit = {
+    val server = new TestingServer()
+    val zk = CuratorFrameworkFactory.newClient(server.getConnectString(), new ExponentialBackoffRetry(1000, 3))
+    zk.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+      @Override
+      def stateChanged(client: CuratorFramework, newState: ConnectionState) {
+        println("连接状态:" + newState.name())
+      }
+    })
+    zk.start()
+    this.zk = zk
     leaderLatch = new LeaderLatch(zk, ELECTION_DIR)
     leaderLatch.addListener(this)
     leaderLatch.start()
@@ -68,7 +87,8 @@ private[cloud] class ZooKeeperLeaderElectionAgent(
     }
   }
 
-  start()
+  //start()
+  startLocal()
 }
 
 

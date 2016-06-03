@@ -12,10 +12,10 @@ import scala.collection.JavaConversions._
 private[cloud] object Factory {
 
 
-  def leaderElection(conf: CloudConf, leaderElectionFactoryType: String): LeaderElectionFactory = {
+  def leaderElection(conf: CloudConf, leaderElectionFactoryType: String= "zk"): LeaderElectionFactory = {
     leaderElectionFactoryType match {
       case "zk" => new ZookeeperElectionFactory(conf)
-      case _ =>
+      case _ => null
     }
   }
 

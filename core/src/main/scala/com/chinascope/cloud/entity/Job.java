@@ -26,7 +26,7 @@ public class Job {
     public Job(Integer id, String name, Integer state, Boolean needPartition, String partitioner, String schedule, String cron, String logical, String dependencyJobName, Integer dependencyJobId, String dependencyLogical, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
         this.id = id;
         this.name = name;
-        this. = state;
+        this.state = state;
         this.needPartition = needPartition;
         this.partitioner = partitioner;
         this.schedule = schedule;

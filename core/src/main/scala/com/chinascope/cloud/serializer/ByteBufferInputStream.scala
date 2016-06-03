@@ -3,6 +3,7 @@ package com.chinascope.cloud.serializer
 import java.io.InputStream
 import java.nio.{ByteBuffer, MappedByteBuffer}
 
+import com.chinascope.cloud.util.Logging
 import sun.nio.ch.DirectBuffer
 
 /**
@@ -11,7 +12,7 @@ import sun.nio.ch.DirectBuffer
   */
 private[cloud]
 class ByteBufferInputStream(private var buffer: ByteBuffer, dispose: Boolean = false)
-  extends InputStream {
+  extends InputStream with Logging{
 
   override def read(): Int = {
     if (buffer == null || buffer.remaining() == 0) {

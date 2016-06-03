@@ -43,7 +43,7 @@ private[cloud] object ZKClient {
   def apply(conf: CloudConf, zkType: String = "curator"): ZKClient = {
     zkType match {
       case "curator" => CuratorZKClient(conf)
-      case _ =>
+      case _ => null
     }
 
   }

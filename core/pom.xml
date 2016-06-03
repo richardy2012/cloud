@@ -16,7 +16,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.main.class>com.foofv.crawler.agent.AgentMaster</project.main.class>
+        <project.main.class>com.chinascope.cloud.deploy.DeployAllpication</project.main.class>
         <project.exec.jar.name>DistributedMaster</project.exec.jar.name>
     </properties>
 

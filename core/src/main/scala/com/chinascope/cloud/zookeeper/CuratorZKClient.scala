@@ -17,28 +17,22 @@ import scala.reflect.ClassTag
   *
   * Client for Curator framework
   */
-private[cloud] class CuratorZKClient private(
-                                              var conf: CloudConf,
-                                              var namespace: String = "cloud",
-                                              var connectionString: String,
-                                              var connectionTimeout: Int,
-                                              var sessionTimeout: Int,
-                                              var retryPolicy: RetryPolicy
-                                            ) extends ZKClient(conf) with Logging with ZookeeperConfiguration {
+private[cloud] class CuratorZKClient(
+                                      var conf: CloudConf
+                                    ) extends ZKClient(conf) with Logging with ZookeeperConfiguration {
 
-  private var zNmespace = conf.get("zookeeper.namespace", zkNamespace)
-  private var zConnectionString = conf.get("zookeeper.connectionString", zkConnectionString)
-  private var zConnectionTimeout = conf.getInt("zookeeper.connectionTimeout", zkConnectionTimeout)
-  private var zSessionTimeout = conf.getInt("zookeeper.sessionTimeout", zkSessionTimeout)
-
-  def this(conf: CloudConf) = this(conf, zNmespace, zConnectionString, zConnectionTimeout, zSessionTimeout, conf.zkRetry)
+  private val zNmespace: String = conf.get("zookeeper.namespace", zkNamespace)
+  private val zConnectionString: String = conf.get("zookeeper.connectionString", zkConnectionString)
+  private val zConnectionTimeout: Int = conf.getInt("zookeeper.connectionTimeout", zkConnectionTimeout)
+  private val zSessionTimeout: Int = conf.getInt("zookeeper.sessionTimeout", zkSessionTimeout)
+  private val zRetry: RetryPolicy = if (conf.zkRetry == null) zkDefaultRetryPolicy else conf.zkRetry
 
   val client = CuratorFrameworkFactory.builder()
-    .connectString(connectionString)
-    .connectionTimeoutMs(connectionTimeout)
-    .sessionTimeoutMs(sessionTimeout)
-    .retryPolicy(retryPolicy)
-    .namespace(namespace)
+    .connectString(zConnectionString)
+    .connectionTimeoutMs(zConnectionTimeout)
+    .sessionTimeoutMs(zSessionTimeout)
+    .retryPolicy(zRetry)
+    .namespace(zNmespace)
     .build()
 
 
@@ -79,8 +73,8 @@ private[cloud] class CuratorZKClient private(
   /**
     * Defines how the object referred by its name is removed from the store.
     */
-  override def unpersist(name: String): Unit = {
-
+  override def unpersist(path: String): Unit = {
+    client.delete().forPath(path)
   }
 
   private def serializeIntoFile(path: String, value: AnyRef) {
@@ -118,11 +112,13 @@ private[cloud] object CuratorZKClient {
   def apply(
              conf: CloudConf
            ): ZKClient = {
-    if (curatorClient == null) {
-      this.synchronized {
-        if (curatorClient == null) curatorClient = new CuratorZKClient(conf)
-      }
+    //if (curatorClient == null) {
+    this.synchronized {
+      //if (curatorClient == null)
+      curatorClient = new CuratorZKClient(conf)
+      //}
     }
+    //}
     curatorClient
   }
 }

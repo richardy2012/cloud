@@ -35,12 +35,14 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   private[cloud] var zkRetry: RetryPolicy = _
   private[cloud] var zkClient: ZKClient = _
+  private[cloud] var zkNodeClient: ZKClient = _
   private[cloud] var serializer: Serializer = _
 
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
     this.zkClient = ZKClient(this)
+    this.zkNodeClient = ZKClient(this)
     //serializer
     this.serializer = new JavaSerializer(this)
   }
@@ -58,6 +60,16 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this
   }
 
+  def readConfigFromZookeeper(): CloudConf = {
+    //new zkclient
+    val zk = ZKClient(this)
+    //read /cloud/configs from zookeeper
+    //TODO
+    //Watch /cloud/configs
+    //TODO
+    //parse configs and set to this
+    this
+  }
 
   /** Set JAR files to distribute to the cluster. */
   def setJars(jars: Seq[String]): CloudConf = {
@@ -93,17 +105,12 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   /** Get a parameter; throws a NoSuchElementException if it's not set */
   private[cloud] def get(key: String): String = {
-    getOption(key).getOrElse(throw new NoSuchElementException(key))
+    Option(settings.get(key)).getOrElse(throw new NoSuchElementException(key))
   }
 
   /** Get a parameter, falling back to a default if not set */
   private[cloud] def get(key: String, defaultValue: String): String = {
-    getOption(key).getOrElse(defaultValue)
-  }
-
-  /** Get a parameter as an Option */
-  private[cloud] def getOption(key: String): Option[String] = {
-    Option(settings.get(key)).orElse(throw new NoSuchElementException(key))
+    Option(settings.get(key)).getOrElse(defaultValue)
   }
 
   /** Get all parameters as a list of pairs */
@@ -113,22 +120,22 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   /** Get a parameter as an integer, falling back to a default if not set */
   private[cloud] def getInt(key: String, defaultValue: Int): Int = {
-    getOption(key).map(_.toInt).getOrElse(defaultValue)
+    Option(settings.get(key)).map(_.toInt).getOrElse(defaultValue)
   }
 
   /** Get a parameter as a long, falling back to a default if not set */
   private[cloud] def getLong(key: String, defaultValue: Long): Long = {
-    getOption(key).map(_.toLong).getOrElse(defaultValue)
+    Option(settings.get(key)).map(_.toLong).getOrElse(defaultValue)
   }
 
   /** Get a parameter as a double, falling back to a default if not set */
   private[cloud] def getDouble(key: String, defaultValue: Double): Double = {
-    getOption(key).map(_.toDouble).getOrElse(defaultValue)
+    Option(settings.get(key)).map(_.toDouble).getOrElse(defaultValue)
   }
 
   /** Get a parameter as a boolean, falling back to a default if not set */
   private[cloud] def getBoolean(key: String, defaultValue: Boolean): Boolean = {
-    getOption(key).map(_.toBoolean).getOrElse(defaultValue)
+    Option(settings.get(key)).map(_.toBoolean).getOrElse(defaultValue)
   }
 
 

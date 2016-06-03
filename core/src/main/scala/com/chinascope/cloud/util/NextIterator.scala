@@ -4,7 +4,7 @@ package com.chinascope.cloud.util
   * Created by soledede.weng on 2016/6/2.
   * Provides a basic/boilerplate Iterator implementation.
   * */
-private[spark] abstract class NextIterator[U] extends Iterator[U] {
+private[cloud] abstract class NextIterator[U] extends Iterator[U] {
 
   private var gotNext = false
   private var nextValue: U = _

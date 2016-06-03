@@ -5,7 +5,7 @@ import scala.util.Try
 /**
   * Created by soledede.weng on 2016/6/2.
   */
-class LogConfiguration extends Configuration{
+trait LogConfiguration extends Configuration{
   /**
     * log4j
     */

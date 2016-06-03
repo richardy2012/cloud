@@ -12,8 +12,6 @@ trait ZookeeperConfiguration extends Configuration {
   /**
     * Default ZooKeeper client's connection string.
     */
-  lazy val logShow = Try(config.getBoolean("log.show")).getOrElse(true)
-
   lazy val zkNamespace: String = Try(config.getString("zookeeper.namespace")).getOrElse("root")
 
   lazy val zkConnectionString: String = Try(config.getString("zookeeper.connectionString")).getOrElse("localhost:2181")
