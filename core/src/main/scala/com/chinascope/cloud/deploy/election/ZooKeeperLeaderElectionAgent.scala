@@ -26,7 +26,8 @@ private[cloud] class ZooKeeperLeaderElectionAgent(
 
   private def start() = {
     logInfo("Starting ZooKeeper LeaderElection agent")
-    zk = conf.zkClient.zk[CuratorFramework]()
+
+    this.zk = conf.zkClient.zk[CuratorFramework]()
     leaderLatch = new LeaderLatch(zk, ELECTION_DIR)
     leaderLatch.addListener(this)
     leaderLatch.start()

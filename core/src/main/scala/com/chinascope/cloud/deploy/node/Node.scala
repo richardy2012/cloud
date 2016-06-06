@@ -1,4 +1,4 @@
-package com.chinascope.cloud.deploy
+package com.chinascope.cloud.deploy.node
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.util.Logging
@@ -12,6 +12,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
 
   def start() = {
+    startZK()
+  }
+
+  private def startZK() = {
 
   }
 

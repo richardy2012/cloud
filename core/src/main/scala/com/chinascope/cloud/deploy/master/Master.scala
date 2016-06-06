@@ -1,14 +1,11 @@
-package com.chinascope.cloud.deploy
+package com.chinascope.cloud.deploy.master
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.election.LeaderCandidate
+import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.util.{Constant, Logging}
-import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.PathChildrenCache
-import org.apache.curator.framework.recipes.leader.{LeaderSelector, LeaderSelectorListener}
-import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
-import org.apache.curator.retry.ExponentialBackoffRetry
-import org.apache.curator.test.TestingServer
 
 
 /**

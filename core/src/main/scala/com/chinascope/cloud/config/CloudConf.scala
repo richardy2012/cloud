@@ -48,6 +48,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   }
 
 
+
+
   /** Set a configuration variable. */
   private[cloud] def set(key: String, value: String): CloudConf = {
     if (key == null) {
