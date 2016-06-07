@@ -4,9 +4,7 @@ package com.chinascope.cloud.deploy.node
   * Created by soledede.weng on 2016/6/6.
   * No Center point
   */
-private[cloud] class NodeInfo(
-
-                             ) extends Serializable {
+private[cloud] class NodeInfo() extends Serializable {
 
   var id: String = _
   var host: String = _

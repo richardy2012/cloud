@@ -1,5 +1,8 @@
 package com.chinascope.cloud.util;
 
+/**
+ * Created by soledede.weng on 2016/6/2.
+ */
 public enum ByteUnit {
   BYTE (1),
   KiB (1024L),

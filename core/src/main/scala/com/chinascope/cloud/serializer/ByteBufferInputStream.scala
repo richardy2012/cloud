@@ -7,6 +7,7 @@ import com.chinascope.cloud.util.Logging
 import sun.nio.ch.DirectBuffer
 
 /**
+  * Created by soledede.weng on 2016/6/2.
   * Reads data from a ByteBuffer, and optionally cleans it up using StorageUtils.dispose()
   * at the end of the stream (e.g. to close a memory-mapped file).
   */

@@ -19,8 +19,8 @@ object DeployAllpication {
 
     //start zk client for leader
     conf.zkClient.start()
-    // init catagory in zookeepers
-    //TODO
+    // init boost dir  in zookeepers
+    Node.bootstrap(conf.zkClient)
 
     //leader election
     val master = new Master(conf)

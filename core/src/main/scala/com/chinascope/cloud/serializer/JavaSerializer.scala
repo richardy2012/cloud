@@ -8,6 +8,12 @@ import com.chinascope.cloud.util.Utils
 
 import scala.reflect.ClassTag
 
+/**
+  * Created by soledede.weng on 2016/6/2.
+  * @param out
+  * @param counterReset
+  * @param extraDebugInfo
+  */
 private[cloud] class JavaSerializationStream(
     out: OutputStream, counterReset: Int, extraDebugInfo: Boolean)
   extends SerializationStream {

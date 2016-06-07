@@ -10,6 +10,10 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.control.NonFatal
 
+
+/**
+  * Created by soledede.weng on 2016/6/2.
+  */
 private[cloud] object SerializationDebugger extends Logging {
 
   /**
