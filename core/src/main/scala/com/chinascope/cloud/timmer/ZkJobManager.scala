@@ -11,11 +11,15 @@ import scala.collection.mutable
   */
 class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
 
-  val jobNames = new mutable.HashSet[String]()
-  val zk = conf.zkNodeClient
+  private val jobNames = new mutable.HashSet[String]()
+  private val zk = conf.zkNodeClient
 
   override def schedule(job: Job): Unit = {
+    conf.schedule.schedule(job)
+  }
 
+  override def addJobName(jobName: String): Unit = {
+    jobNames + jobName
   }
 
   override def submitJob(job: Job): Msg = {
@@ -29,6 +33,8 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
   }
 
   private def submitToZk(job: Job) = {
+    //  add jobname to zk
+    zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
     // /cloud/jobs/worker-xxx/jobnamexxx
     zk.persist(zk.getChildren(Constant.JOBS_DIR).map(p => (zk.getChildren(p).size, p)).sortBy(_._1).take(0)(0)._2 + "/" + job.getName, job)
   }

@@ -4,6 +4,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.chinascope.cloud.config.CloudConf
+import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.util.{Constant, Logging}
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
@@ -48,12 +49,12 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
     assginsCache.getListenable.addListener(assginsCacheListener)
 
     // Watch list of jobname
-    val jobnameCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOP_UNIQUE_NAME, true)
+    val jobnameCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOB_UNIQUE_NAME, true)
     //watch list of assgin task for local worker
     assginsCache.getListenable.addListener(jobUniqueNameListener)
 
 
-    val timmerJobCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOP_UNIQUE_NAME, true)
+    val timmerJobCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOB_UNIQUE_NAME, true)
     //watch jobs by local workers for timmer schedule
     assginsCache.getListenable.addListener(timmerJobScheduleListener)
   }
@@ -99,7 +100,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
-          println(s"new jobname ${event.getData.getPath} added!")
+          val path = event.getData.getPath
+          println(s"new jobname ${path} added!")
+          //update jobnames for every node
+          conf.jobManager.addJobName(path.replace(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR + Constant.JOB_UNIQUE_NAME + "/", ""))
         }
         catch {
           case e: Exception => {
@@ -118,7 +122,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
-          println(s"add  job ${event.getData.getPath} for timmer schedule!")
+          val path = event.getData.getPath
+          println(s"add  job ${path} for timmer schedule!")
+          conf.schedule.schedule(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
         }
         catch {
           case e: Exception => {
@@ -140,8 +146,8 @@ private[cloud] object Node {
 
   def bootstrap(zk: ZKClient) = {
     zk.mkdir(Constant.JOBS_DIR)
-    zk.mkdir(Constant.JOP_QUEUE)
-    zk.mkdir(Constant.JOP_UNIQUE_NAME)
+    zk.mkdir(Constant.JOB_QUEUE)
+    zk.mkdir(Constant.JOB_UNIQUE_NAME)
 
     zk.mkdir(Constant.WORKER_DIR)
     zk.mkdir(Constant.RESOURCE_DIR)

@@ -26,9 +26,9 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   final val JOB_TIMER_TRIGGER_TEMPLE = "/jobs/worker-"
 
   //zk dir for distribute queue jobs
-  final val JOP_QUEUE = "/queue/job"
+  final val JOB_QUEUE = "/queue/job"
   //zk dir for jobname
-  final val JOP_UNIQUE_NAME = "/jobname"
+  final val JOB_UNIQUE_NAME = "/jobname"
   //zk dir for partition task assign
   final val ASSIGN = "/assign"
 

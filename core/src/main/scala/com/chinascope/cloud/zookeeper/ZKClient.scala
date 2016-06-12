@@ -37,6 +37,8 @@ abstract class ZKClient(conf: CloudConf) {
     */
   def read[T: ClassTag](path: String,prefix: String): Seq[T]
 
+  def read[T: ClassTag](path: String): Option[T]
+
   def zk[T: ClassTag](): T
 }
 

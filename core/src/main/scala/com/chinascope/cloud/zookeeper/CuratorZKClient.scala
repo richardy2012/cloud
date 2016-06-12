@@ -89,6 +89,11 @@ private[cloud] class CuratorZKClient(
     client.getChildren.forPath(path)
   }
 
+
+  override def read[T: ClassTag](path: String): Option[T] = {
+    deserializeFromFile(path)
+  }
+
   /**
     * Gives all objects, matching a prefix. This defines how objects are
     * read/deserialized back.
