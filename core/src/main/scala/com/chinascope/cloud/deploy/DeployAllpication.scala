@@ -28,7 +28,8 @@ object DeployAllpication {
     //start node
     val node = new Node(conf)
     node.start()
-    //Thread.sleep(10*60*60*1000)
+    //Thread.sleep(4 * 60 * 1000)
+    //node.stop()
     Thread.currentThread().suspend()
   }
 

@@ -16,6 +16,9 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   final val ELECTION_DIR = "/leader"
   //zk dir for checking if worker is down
   final val WORKER_DIR = "/workers"
+
+  final val WORKER_TMP_TEMPLE = "/workers/worker_"
+
   //zk dir for watch resource of workers
   final val RESOURCE_DIR = "/resource"
   //zk dir for watch jobs of every worker
@@ -30,5 +33,7 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   final val STATUS = "/status"
   //zk dir for watch status of cluster
   final val CLUSTER_STATUS = "/cluster_status"
+
+  final val WORKER_CODE_COUNTER_DIR = "/counter"
 
 }
