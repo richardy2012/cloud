@@ -23,9 +23,13 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
   }
 
   override def submitJob(job: Job): Msg = {
-    if (jobNames.contains(job.getName)) new Msg(-1, "jobname must unique!", jobNames)
+    if (jobNames.contains(job.getName)) {
+      logWarning("jobname must unique!")
+      new Msg(-1, "jobname must unique!", jobNames)
+    }
     else {
       submitToZk(job)
+      logInfo("job submited!")
       new Msg(0, "submited!")
     }
 

@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import com.chinascope.cloud.serializer.{JavaSerializer, Serializer}
 import com.chinascope.cloud.timmer.ZkJobManager
+import com.chinascope.cloud.timmer.schedule.trigger.{CronTrigger, Trigger}
 import com.chinascope.cloud.timmer.schedule.{DefaultSchedule, Schedule}
 import com.chinascope.cloud.util.{Logging, Utils}
 import com.chinascope.cloud.zookeeper.ZKClient
@@ -42,6 +43,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   private[cloud] var jobManager: ZkJobManager = _
   private[cloud] var schedule: Schedule = _
+  private[cloud] var cronTrigger: Trigger = _
 
 
   private[cloud] def init() = {
@@ -53,6 +55,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
     this.jobManager = new ZkJobManager(this)
     this.schedule = new DefaultSchedule(this)
+    this.cronTrigger = new CronTrigger(this)
   }
 
 

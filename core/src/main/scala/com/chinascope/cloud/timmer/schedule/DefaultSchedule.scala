@@ -9,7 +9,9 @@ import com.chinascope.cloud.util.Logging
   */
 private[cloud] class DefaultSchedule(conf: CloudConf) extends Schedule with Logging {
 
-  override def schedule(job: Job): Unit = {
+  val trigger = conf.cronTrigger
 
+  override def schedule(job: Job): Unit = {
+    trigger.trigger(job)
   }
 }
