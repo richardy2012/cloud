@@ -29,6 +29,8 @@ abstract class ZKClient(conf: CloudConf) {
     */
   def unpersist(path: String): Unit
 
+  def getChildren(path: String): Seq[String]
+
   /**
     * Gives all objects, matching a prefix. This defines how objects are
     * read/deserialized back.

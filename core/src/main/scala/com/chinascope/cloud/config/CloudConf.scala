@@ -3,6 +3,8 @@ package com.chinascope.cloud.config
 import java.util.concurrent.ConcurrentHashMap
 
 import com.chinascope.cloud.serializer.{JavaSerializer, Serializer}
+import com.chinascope.cloud.timmer.ZkJobManager
+import com.chinascope.cloud.timmer.schedule.{DefaultSchedule, Schedule}
 import com.chinascope.cloud.util.{Logging, Utils}
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.RetryPolicy
@@ -38,6 +40,9 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   private[cloud] var zkNodeClient: ZKClient = _
   private[cloud] var serializer: Serializer = _
 
+  private[cloud] var jobManager: ZkJobManager = _
+  private[cloud] var schedule: Schedule = _
+
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
@@ -45,9 +50,10 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.zkNodeClient = ZKClient(this)
     //serializer
     this.serializer = new JavaSerializer(this)
+
+    this.jobManager = new ZkJobManager(this)
+    this.schedule = new DefaultSchedule(this)
   }
-
-
 
 
   /** Set a configuration variable. */

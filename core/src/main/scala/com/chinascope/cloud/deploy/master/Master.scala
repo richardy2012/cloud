@@ -17,7 +17,6 @@ private[cloud] class Master(
                            ) extends LeaderCandidate with Logging {
   private val zk: CuratorFramework = this.conf.zkClient.zk[CuratorFramework]
 
-
   // Watch list of workers
   // conf.get(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY, Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR)
   private val workersCache: PathChildrenCache = new PathChildrenCache(zk, Constant.WORKER_DIR, true)
@@ -34,6 +33,8 @@ private[cloud] class Master(
     val state = "ALIVE"
     logInfo("I have been elected leader! New state: " + state)
     watchs()
+    //recovery
+    //TODO
   }
 
   private def watchs() = {

@@ -17,18 +17,23 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   //zk dir for checking if worker is down
   final val WORKER_DIR = "/workers"
 
-  final val WORKER_TMP_TEMPLE = "/workers/worker_"
+  final val WORKER_TMP_TEMPLE = "/workers/worker-"
 
   //zk dir for watch resource of workers
   final val RESOURCE_DIR = "/resource"
   //zk dir for watch jobs of every worker
   final val JOBS_DIR = "/jobs"
+  final val JOB_TIMER_TRIGGER_TEMPLE = "/jobs/worker-"
+
   //zk dir for distribute queue jobs
   final val JOP_QUEUE = "/queue/job"
   //zk dir for jobname
   final val JOP_UNIQUE_NAME = "/jobname"
   //zk dir for partition task assign
   final val ASSIGN = "/assign"
+
+  final val ASSIGN_TEMPLE = "/assign/worker-"
+
   //zk dir for watch status of partitions
   final val STATUS = "/status"
   //zk dir for watch status of cluster

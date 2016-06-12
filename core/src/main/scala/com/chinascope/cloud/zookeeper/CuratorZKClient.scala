@@ -81,7 +81,12 @@ private[cloud] class CuratorZKClient(
     val serialized = conf.serializer.newInstance().serialize(value)
     val bytes = new Array[Byte](serialized.remaining())
     serialized.get(bytes)
-    client.create().withMode(CreateMode.PERSISTENT).forPath(path, bytes)
+    client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, bytes)
+  }
+
+
+  override def getChildren(path: String): Seq[String] = {
+    client.getChildren.forPath(path)
   }
 
   /**

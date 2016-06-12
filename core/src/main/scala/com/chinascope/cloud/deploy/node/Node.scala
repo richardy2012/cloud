@@ -8,6 +8,7 @@ import com.chinascope.cloud.util.{Constant, Logging}
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.atomic.{DistributedAtomicInteger, DistributedAtomicLong}
+import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheEvent, PathChildrenCacheListener}
 import org.apache.curator.framework.recipes.nodes.{PersistentEphemeralNode, PersistentNode}
 import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 import org.apache.curator.retry.RetryNTimes
@@ -20,13 +21,15 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   private val zk: CuratorFramework = this.conf.zkNodeClient.zk[CuratorFramework]
   var workerNode: PersistentNode = _
   var nodeId: Long = _
+
+
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
       logInfo(s"node status:${newState.name()}")
-
       while (!newState.isConnected) Thread.sleep(100)
       boostrapTmpNodeToZk
       logInfo(s"Node worker_${nodeId} Started.")
+      watchs()
     }
   })
 
@@ -37,6 +40,22 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
   def stop() = {
     zk.close()
+  }
+
+  private def watchs() = {
+    val assginsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.ASSIGN_TEMPLE + nodeId, true)
+    //watch assgin task for local worker
+    assginsCache.getListenable.addListener(assginsCacheListener)
+
+    // Watch list of jobname
+    val jobnameCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOP_UNIQUE_NAME, true)
+    //watch list of assgin task for local worker
+    assginsCache.getListenable.addListener(jobUniqueNameListener)
+
+
+    val timmerJobCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOP_UNIQUE_NAME, true)
+    //watch jobs by local workers for timmer schedule
+    assginsCache.getListenable.addListener(timmerJobScheduleListener)
   }
 
   private def startZK() = {
@@ -56,6 +75,59 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   private def boostrapTmpNodeToZk() = {
     workerNode = new PersistentNode(zk, CreateMode.EPHEMERAL, false, Constant.WORKER_TMP_TEMPLE + workerId, "Idle".getBytes)
     workerNode.start()
+  }
+
+  private[cloud] val assginsCacheListener = new PathChildrenCacheListener() {
+    override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
+
+      event.getType match {
+        case PathChildrenCacheEvent.Type.CHILD_UPDATED => try {
+          println(s"assign worker${event.getData.getPath} some partition task")
+        }
+        catch {
+          case e: Exception => {
+            log.error("Exception while trying to re-assign tasks", e)
+          }
+        }
+        case _ =>
+      }
+    }
+  }
+
+  private[cloud] val jobUniqueNameListener = new PathChildrenCacheListener() {
+    override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
+
+      event.getType match {
+        case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
+          println(s"new jobname ${event.getData.getPath} added!")
+        }
+        catch {
+          case e: Exception => {
+            log.error("Exception while add jobname", e)
+          }
+        }
+        case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
+          println(s"new jobname ${event.getData.getPath} removed!")
+        case _ =>
+      }
+    }
+  }
+
+  private[cloud] val timmerJobScheduleListener = new PathChildrenCacheListener() {
+    override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
+
+      event.getType match {
+        case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
+          println(s"add  job ${event.getData.getPath} for timmer schedule!")
+        }
+        catch {
+          case e: Exception => {
+            log.error("Exception while recieve timmer schedule", e)
+          }
+        }
+        case _ =>
+      }
+    }
   }
 
 
@@ -78,7 +150,6 @@ private[cloud] object Node {
 
     zk.mkdir(Constant.STATUS)
     zk.mkdir(Constant.CLUSTER_STATUS)
-
 
   }
 
