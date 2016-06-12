@@ -177,6 +177,8 @@ public final class CronExpression implements Serializable, Cloneable {
 
     String jobName;
 
+    Date nextStartTime = getNextValidTimeAfter(new Date());
+
     protected static final int SECOND = 0;
     protected static final int MINUTE = 1;
     protected static final int HOUR = 2;
