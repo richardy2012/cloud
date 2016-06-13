@@ -12,6 +12,12 @@ private[cloud] class DefaultSchedule(conf: CloudConf) extends Schedule with Logg
   val trigger = conf.cronTrigger
 
   override def schedule(job: Job): Unit = {
-    trigger.trigger(job)
+    if (job.getCron != null && job.getCron.trim.equalsIgnoreCase(""))
+      trigger.trigger(job)
+  }
+
+  override def deleteJob(job: Job): Unit = {
+    if (job.getCron != null && job.getCron.trim.equalsIgnoreCase(""))
+      trigger.deleteJob(job)
   }
 }

@@ -21,7 +21,6 @@ import org.apache.zookeeper.CreateMode
 private[cloud] class Node(conf: CloudConf) extends Logging {
   private val zk: CuratorFramework = this.conf.zkNodeClient.zk[CuratorFramework]
   var workerNode: PersistentNode = _
-  var nodeId: Long = _
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
@@ -29,7 +28,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
       logInfo(s"node status:${newState.name()}")
       while (!newState.isConnected) Thread.sleep(100)
       boostrapTmpNodeToZk
-      logInfo(s"Node worker_${nodeId} Started.")
+      logInfo(s"Node worker_${Node.nodeId} Started.")
       watchs()
     }
   })
@@ -44,7 +43,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   }
 
   private def watchs() = {
-    val assginsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.ASSIGN_TEMPLE + nodeId, true)
+    val assginsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.ASSIGN_TEMPLE + Node.nodeId, true)
     //watch assgin task for local worker
     assginsCache.getListenable.addListener(assginsCacheListener)
 
@@ -69,8 +68,8 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
     while (!countValue.succeeded()) {
       countValue = count.increment()
     }
-    nodeId = countValue.postValue()
-    nodeId
+    Node.nodeId = countValue.postValue()
+    Node.nodeId
   }
 
   private def boostrapTmpNodeToZk() = {
@@ -123,7 +122,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
-          println(s"add  job ${path} for timmer schedule!")
+          logInfo(s"add  job ${path} for timmer schedule!")
           conf.schedule.schedule(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
         }
         catch {
@@ -131,6 +130,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
             log.error("Exception while recieve timmer schedule", e)
           }
         }
+        case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
+          val path = event.getData.getPath
+          logInfo(s"delete  job ${path} for timmer schedule!")
+          conf.schedule.deleteJob(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
         case _ =>
       }
     }
@@ -142,7 +145,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 private[cloud] object Node {
   //check if this node is a leader
   var isLeader = new AtomicBoolean(false)
-
+  var nodeId: Long = _
 
   def bootstrap(zk: ZKClient) = {
     zk.mkdir(Constant.JOBS_DIR)

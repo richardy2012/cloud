@@ -160,4 +160,52 @@ public class Job {
     public void setEntExecTime(Long entExecTime) {
         this.entExecTime = entExecTime;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Job job = (Job) o;
+
+        if (id != null ? !id.equals(job.id) : job.id != null) return false;
+        if (name != null ? !name.equals(job.name) : job.name != null) return false;
+        if (state != null ? !state.equals(job.state) : job.state != null) return false;
+        if (needPartition != null ? !needPartition.equals(job.needPartition) : job.needPartition != null) return false;
+        if (partitioner != null ? !partitioner.equals(job.partitioner) : job.partitioner != null) return false;
+        if (schedule != null ? !schedule.equals(job.schedule) : job.schedule != null) return false;
+        if (cron != null ? !cron.equals(job.cron) : job.cron != null) return false;
+        if (logical != null ? !logical.equals(job.logical) : job.logical != null) return false;
+        if (dependencyJobName != null ? !dependencyJobName.equals(job.dependencyJobName) : job.dependencyJobName != null)
+            return false;
+        if (dependencyJobId != null ? !dependencyJobId.equals(job.dependencyJobId) : job.dependencyJobId != null)
+            return false;
+        if (dependencyLogical != null ? !dependencyLogical.equals(job.dependencyLogical) : job.dependencyLogical != null)
+            return false;
+        if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
+        if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
+        if (startExecTime != null ? !startExecTime.equals(job.startExecTime) : job.startExecTime != null) return false;
+        return entExecTime != null ? entExecTime.equals(job.entExecTime) : job.entExecTime == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (state != null ? state.hashCode() : 0);
+        result = 31 * result + (needPartition != null ? needPartition.hashCode() : 0);
+        result = 31 * result + (partitioner != null ? partitioner.hashCode() : 0);
+        result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
+        result = 31 * result + (cron != null ? cron.hashCode() : 0);
+        result = 31 * result + (logical != null ? logical.hashCode() : 0);
+        result = 31 * result + (dependencyJobName != null ? dependencyJobName.hashCode() : 0);
+        result = 31 * result + (dependencyJobId != null ? dependencyJobId.hashCode() : 0);
+        result = 31 * result + (dependencyLogical != null ? dependencyLogical.hashCode() : 0);
+        result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
+        result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
+        result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
+        result = 31 * result + (entExecTime != null ? entExecTime.hashCode() : 0);
+        return result;
+    }
 }

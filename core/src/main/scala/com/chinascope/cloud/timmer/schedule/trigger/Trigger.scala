@@ -9,4 +9,6 @@ private[cloud] trait Trigger {
 
   def trigger(job: Job)
 
+  def deleteJob(job: Job)
+
 }

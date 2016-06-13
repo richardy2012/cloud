@@ -7,6 +7,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
+import java.text.SimpleDateFormat
 import java.util.{Locale, Properties, Random, UUID}
 import java.util.concurrent._
 import javax.net.ssl.HttpsURLConnection
@@ -77,6 +78,12 @@ private[cloud] object Utils extends Logging {
     result = result + ((bytes(2) & 0xFFL) << 40)
     result = result + ((bytes(1) & 0xFFL) << 48)
     result + ((bytes(0) & 0xFFL) << 56)
+  }
+
+  def convertDateFormat(time: Long, format: String = "yyyy-MM-dd HH:mm:ss SSS"): String = {
+    val date = new java.util.Date(time)
+    val formatter = new SimpleDateFormat(format)
+    formatter.format(date)
   }
 
   /** Serialize via nested stream using specific serializer */
@@ -242,6 +249,7 @@ private[cloud] object Utils extends Logging {
       }
     }
   }
+
   /**
     * Execute a block of code, then a finally block, but if exceptions happen in
     * the finally block, do not suppress the original exception.
@@ -429,7 +437,6 @@ private[cloud] object Utils extends Logging {
   }
 
 
-
   def tryOrIOException[T](block: => T): T = {
     try {
       block
@@ -442,8 +449,6 @@ private[cloud] object Utils extends Logging {
         throw new IOException(e)
     }
   }
-
-
 
 
   /**
@@ -468,9 +473,6 @@ private[cloud] object Utils extends Logging {
   }
 
 
-
-
-
   /** Return the class name of the given object, removing all dollar signs */
   def getFormattedClassName(obj: AnyRef): String = {
     obj.getClass.getSimpleName.replace("$", "")
@@ -486,7 +488,6 @@ private[cloud] object Utils extends Logging {
 
   /** Return an empty JSON object */
   def emptyJson: JsonAST.JObject = JObject(List[JField]())
-
 
 
   /**
