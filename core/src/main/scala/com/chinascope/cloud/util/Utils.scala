@@ -8,7 +8,7 @@ import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.text.SimpleDateFormat
-import java.util.{Locale, Properties, Random, UUID}
+import java.util._
 import java.util.concurrent._
 import javax.net.ssl.HttpsURLConnection
 
@@ -84,6 +84,11 @@ private[cloud] object Utils extends Logging {
     val date = new java.util.Date(time)
     val formatter = new SimpleDateFormat(format)
     formatter.format(date)
+  }
+
+  def convertDateFormat(time: Date, format: String = "yyyy-MM-dd HH:mm:ss SSS"): String = {
+    val formatter = new SimpleDateFormat(format)
+    formatter.format(time)
   }
 
   /** Serialize via nested stream using specific serializer */
