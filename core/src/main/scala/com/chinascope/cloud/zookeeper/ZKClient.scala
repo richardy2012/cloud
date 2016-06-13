@@ -14,6 +14,8 @@ abstract class ZKClient(conf: CloudConf) {
 
   def close(): Unit
 
+  def isStarted(): Boolean
+
   def mkdir(path: String): Unit
 
   def deleteRecursive(path: String): Unit

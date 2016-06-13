@@ -18,12 +18,12 @@ import scala.collection.mutable
 private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
 
   val cronExpressionQueue = new PriorityBlockingQueue[CronExpression](1000, new Comparator[CronExpression] {
-    override def compare(c1: CronExpression, c2: CronExpression): Int = (c2.getNextStartTime.getTime - c1.getNextStartTime.getTime).toInt
+    override def compare(c1: CronExpression, c2: CronExpression): Int = (c1.getNextStartTime.getTime - c2.getNextStartTime.getTime).toInt
   })
   //Map(jobName->Job)
   val expToJob = new mutable.HashMap[String, Job]()
 
-  val timerPeriodSchedule = new CloudTimerWorker(name = "timerPeriodSchedule", interval = 1000, callback = checkAndSubmitJobToZK)
+  val timerPeriodSchedule = new CloudTimerWorker(name = "timerPeriodSchedule", interval = 1000, callback = () => checkAndSubmitJobToZK())
   timerPeriodSchedule.startUp()
 
 
@@ -53,16 +53,20 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
 
   def checkAndSubmitJobToZK(): Long = {
     val cron = cronExpressionQueue.peek()
-    if (cron.isSatisfiedBy(new Date())) {
-      val popCron = cronExpressionQueue.poll()
-      popCron.setNextStartTime(popCron.getNextValidTimeAfter(new Date()))
-      cronExpressionQueue.offer(popCron)
-      //TODO submit job to distribute queue
-      conf.queue.put(expToJob(popCron.getJobName))
-    }
-    val nextTime = cron.getNextStartTime
-    val period = System.currentTimeMillis() - nextTime.getTime
-    if (period <= 0) checkAndSubmitJobToZK
-    else period
+    if (cron != null) {
+      if (cron.isSatisfiedBy(new Date())) {
+        val popCron = cronExpressionQueue.poll()
+        popCron.setNextStartTime(popCron.getNextValidTimeAfter(new Date()))
+        cronExpressionQueue.offer(popCron)
+        //TODO submit job to distribute queue
+        conf.queue.put(expToJob(popCron.getJobName))
+      }
+      val nextTime = cron.getNextStartTime
+      val period = System.currentTimeMillis() - nextTime.getTime
+      if (period <= 0) checkAndSubmitJobToZK
+      else period
+    } else -1
   }
+
+
 }

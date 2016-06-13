@@ -48,7 +48,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   private[cloud] var schedule: Schedule = _
   private[cloud] var cronTrigger: Trigger = _
 
-  private[cloud] var queue: Queue[Job] = _
+  private[cloud] var queue: Queue[Job] = null
 
 
   private[cloud] def init() = {
@@ -62,9 +62,19 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.schedule = new DefaultSchedule(this)
     this.cronTrigger = new CronTrigger(this)
 
-    this.queue = new ZookeeperDistributeQueue(this)
+
   }
 
+  def initQueue() = {
+    if (this.queue == null) {
+      this.synchronized {
+        if (this.queue == null)
+          this.queue = new ZookeeperDistributeQueue(this)
+      }
+    }
+
+
+  }
 
   /** Set a configuration variable. */
   private[cloud] def set(key: String, value: String): CloudConf = {

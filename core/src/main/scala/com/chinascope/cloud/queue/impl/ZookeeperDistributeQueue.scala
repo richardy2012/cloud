@@ -4,7 +4,7 @@ import java.nio.ByteBuffer
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.queue.Queue
-import com.chinascope.cloud.util.Constant
+import com.chinascope.cloud.util.{Constant, Utils}
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.queue.{DistributedQueue, QueueBuilder, QueueConsumer, QueueSerializer}
 import org.apache.curator.framework.state.ConnectionState
@@ -17,8 +17,11 @@ import scala.reflect.ClassTag
 private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf, path: String = Constant.JOB_QUEUE) extends Queue[T](conf) {
   private var queue: DistributedQueue[T] = _
   private val linkedQueue = new LinkedBlockingQueue[T](conf)
+  private var zk: CuratorFramework = _
+  if (!conf.zkNodeClient.isStarted()) zk = conf.zkClient.zk[CuratorFramework]()
+  else zk = conf.zkNodeClient.zk[CuratorFramework]()
 
-  private val builder = QueueBuilder.builder(conf.zkNodeClient.zk[CuratorFramework](), createQueueConsumer, createQueueSerializer, path)
+  private val builder = QueueBuilder.builder(zk, createQueueConsumer, createQueueSerializer, path)
   queue = builder.buildQueue()
   queue.start()
 
@@ -42,10 +45,7 @@ private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf, path
   private def createQueueSerializer(): QueueSerializer[T] = {
     new QueueSerializer[T] {
       override def serialize(item: T): Array[Byte] = {
-        val serialized = conf.serializer.newInstance().serialize(item)
-        val bytes = new Array[Byte](serialized.remaining())
-        serialized.get(bytes)
-        bytes
+        Utils.serializeIntoToBytes(conf.serializer, item)
       }
 
       override def deserialize(bytes: Array[Byte]): T = {

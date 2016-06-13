@@ -45,4 +45,7 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   //queue
   final val LINKEDQUEUE_CAPACITY_KEY = "cloud.linked.block.queue.block.size"
 
+  //env
+  final val CLOUD_LOCAL_IP = "CLOUD_LOCAL_IP"
+
 }

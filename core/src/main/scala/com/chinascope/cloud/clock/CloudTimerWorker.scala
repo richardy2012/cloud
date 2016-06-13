@@ -114,7 +114,7 @@ private[cloud] class CloudTimerWorker(name: String,
 
 }
 
-private[crawler] object CloudTimerWorker {
+private[cloud] object CloudTimerWorker {
   def initCache(workerName: String, expiredTime: Long): LoadingCache[java.lang.String, java.lang.Long] = {
     val cacheLoader: CacheLoader[java.lang.String, java.lang.Long] =
       new CacheLoader[java.lang.String, java.lang.Long]() {

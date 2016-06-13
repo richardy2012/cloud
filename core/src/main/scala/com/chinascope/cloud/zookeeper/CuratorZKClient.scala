@@ -5,6 +5,7 @@ import java.nio.ByteBuffer
 import com.chinascope.cloud.config.{CloudConf, ZookeeperConfiguration}
 import com.chinascope.cloud.util.{Constant, Logging}
 import org.apache.curator.RetryPolicy
+import org.apache.curator.framework.imps.CuratorFrameworkState
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.zookeeper.{CreateMode, KeeperException}
 
@@ -41,6 +42,14 @@ private[cloud] class CuratorZKClient(
   override def start() = client.start()
 
   override def close(): Unit = client.close()
+
+
+  override def isStarted(): Boolean = {
+    client.getState match {
+      case CuratorFrameworkState.STARTED => true
+      case _ => false
+    }
+  }
 
   override def mkdir(path: String) {
     if (client.checkExists().forPath(path) == null) {

@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.entity.Job
-import com.chinascope.cloud.util.{Constant, Logging}
+import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.atomic.{DistributedAtomicInteger, DistributedAtomicLong}
@@ -22,16 +22,23 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   private val zk: CuratorFramework = this.conf.zkNodeClient.zk[CuratorFramework]
   var workerNode: PersistentNode = _
 
+  final val WORKER_PREFIX = "worker-"
+
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
       logInfo(s"node status:${newState.name()}")
       while (!newState.isConnected) Thread.sleep(100)
+      init
       boostrapTmpNodeToZk
-      logInfo(s"Node worker_${Node.nodeId} Started.")
+      logInfo(s"Node $WORKER_PREFIX${Node.nodeId} Started.")
       watchs()
     }
   })
+
+  private def init() = {
+    conf.initQueue()
+  }
 
   def start() = {
     logInfo("Starting Worker Node")
@@ -68,14 +75,17 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
     while (!countValue.succeeded()) {
       countValue = count.increment()
     }
-    Node.nodeId = countValue.postValue()
-    Node.nodeId
+    countValue.postValue()
   }
 
   private def boostrapTmpNodeToZk() = {
-    workerNode = new PersistentNode(zk, CreateMode.EPHEMERAL, false, Constant.WORKER_TMP_TEMPLE + workerId, "Idle".getBytes)
+    Node.nodeId = workerId
+    workerNode = new PersistentNode(zk, CreateMode.EPHEMERAL, false, Constant.WORKER_TMP_TEMPLE + Node.nodeId,
+      Utils.serializeIntoToBytes(conf.serializer, new NodeInfo(WORKER_PREFIX + Node.nodeId)))
     workerNode.start()
+
   }
+
 
   private[cloud] val assginsCacheListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {

@@ -8,11 +8,10 @@ import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.text.SimpleDateFormat
-import java.util._
 import java.util.concurrent._
 import javax.net.ssl.HttpsURLConnection
 
-import com.chinascope.cloud.serializer.{DeserializationStream, SerializationStream, SerializerInstance}
+import com.chinascope.cloud.serializer.{DeserializationStream, SerializationStream, Serializer, SerializerInstance}
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -35,7 +34,7 @@ import org.slf4j.Logger
   * Created by soledede.weng on 2016/6/2.
   */
 private[cloud] object Utils extends Logging {
-  val random = new Random()
+  val random = new java.util.Random()
   private val MAX_DIR_CREATION_ATTEMPTS: Int = 10
   @volatile private var localRootDirs: Array[String] = null
 
@@ -86,9 +85,38 @@ private[cloud] object Utils extends Logging {
     formatter.format(date)
   }
 
-  def convertDateFormat(time: Date, format: String = "yyyy-MM-dd HH:mm:ss SSS"): String = {
+  def convertDateFormat(time: java.util.Date): String = {
+    val format: String = "yyyy-MM-dd HH:mm:ss SSS"
     val formatter = new SimpleDateFormat(format)
     formatter.format(time)
+  }
+
+  def inferDefaultCores(): Int = {
+    Runtime.getRuntime.availableProcessors()
+  }
+
+  def inferDefaultMemory(): Int = {
+    val ibmVendor = System.getProperty("java.vendor").contains("IBM")
+    var totalMb = 0
+    try {
+      val bean = ManagementFactory.getOperatingSystemMXBean()
+      if (ibmVendor) {
+        val beanClass = Class.forName("com.ibm.lang.management.OperatingSystemMXBean")
+        val method = beanClass.getDeclaredMethod("getTotalPhysicalMemory")
+        totalMb = (method.invoke(bean).asInstanceOf[Long] / 1024 / 1024).toInt
+      } else {
+        val beanClass = Class.forName("com.sun.management.OperatingSystemMXBean")
+        val method = beanClass.getDeclaredMethod("getTotalPhysicalMemorySize")
+        totalMb = (method.invoke(bean).asInstanceOf[Long] / 1024 / 1024).toInt
+      }
+    } catch {
+      case e: Exception => {
+        totalMb = 2 * 1024
+        System.out.println("Failed to get total physical memory. Using " + totalMb + " MB")
+      }
+    }
+    // Leave out 1 GB for the operating system, but don't return a negative memory size
+    math.max(totalMb - 1024, 512)
   }
 
   /** Serialize via nested stream using specific serializer */
@@ -323,7 +351,7 @@ private[cloud] object Utils extends Logging {
   private lazy val localIpAddress: InetAddress = findLocalInetAddress()
 
   private def findLocalInetAddress(): InetAddress = {
-    val defaultIpOverride = System.getenv("CLOUD_LOCAL_IP")
+    val defaultIpOverride = System.getenv(Constant.CLOUD_LOCAL_IP)
     if (defaultIpOverride != null) {
       InetAddress.getByName(defaultIpOverride)
     } else {
@@ -359,6 +387,13 @@ private[cloud] object Utils extends Logging {
       }
       address
     }
+  }
+
+  def serializeIntoToBytes[T: ClassTag](serializer: Serializer, value: T): Array[Byte] = {
+    val serialized = serializer.newInstance().serialize(value)
+    val bytes = new Array[Byte](serialized.remaining())
+    serialized.get(bytes)
+    bytes
   }
 
   private var customHostname: Option[String] = sys.env.get("CLOUD_LOCAL_HOSTNAME")

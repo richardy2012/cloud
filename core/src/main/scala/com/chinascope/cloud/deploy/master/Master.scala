@@ -2,11 +2,13 @@ package com.chinascope.cloud.deploy.master
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.election.LeaderCandidate
-import com.chinascope.cloud.deploy.node.Node
+import com.chinascope.cloud.deploy.node.{Node, NodeInfo}
 import com.chinascope.cloud.util.{Constant, Logging}
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache._
 import org.apache.curator.utils.CloseableUtils
+
+import scala.collection.mutable
 
 
 /**
@@ -27,11 +29,14 @@ private[cloud] class Master(
   //Watch status of job task partition
   private val partitionJobsTreeNodeCache = new TreeCache(zk, Constant.STATUS)
 
-  override def electedLeader(): Unit = {
+  val idToNodes = new mutable.HashMap[String, NodeInfo]()
+  val nodes = new mutable.HashSet[NodeInfo]()
 
+  override def electedLeader(): Unit = {
     Node.isLeader.compareAndSet(false, true)
     val state = "ALIVE"
     logInfo("I have been elected leader! New state: " + state)
+    init
     watchs()
     //recovery
     //TODO
@@ -39,6 +44,10 @@ private[cloud] class Master(
     processJob()
   }
 
+
+  private def init() = {
+    conf.initQueue()
+  }
 
   private def watchs() = {
     // Watch on the list of workers
@@ -57,9 +66,19 @@ private[cloud] class Master(
 
 
   private def processJob() = {
+    val thread = new Thread("receive and assgin job to nodes") {
+      setDaemon(true)
+
+      override def run(): Unit = {
+        checkAndAssginJob
+      }
+    }
+
+  }
+
+  def checkAndAssginJob() = {
     while (true) {
       val job = conf.queue.take()
-
     }
   }
 
@@ -77,20 +96,31 @@ private[cloud] class Master(
 
   private[cloud] val workersCacheListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
-
       event.getType match {
-        case PathChildrenCacheEvent.Type.CHILD_REMOVED => try {
-          //getAbsentWorkerTasks(event.getData.getPath.replaceFirst("/workers/", ""))
-          println(s"worker${event.getData.getPath} is lost")
-        }
-        catch {
-          case e: Exception => {
-            log.error("Exception while trying to re-assign tasks", e)
-          }
-        }
+        case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
+          whenNodeDeleted(event.getData.getPath)
+        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+          whenNodeAdded(event.getData.getPath)
         case _ =>
       }
     }
+  }
+
+  private def whenNodeAdded(path: String): Unit = {
+    val nodeInfo = conf.zkClient.read[NodeInfo](path)
+    nodeInfo match {
+      case Some(node) =>
+        val nodeId = node.id
+        nodes += node
+        idToNodes(nodeId) = node
+        logInfo(s"node $nodeId registered! path: ${path}")
+      case None => logWarning("Are you sure this is your node!")
+    }
+  }
+
+  private def whenNodeDeleted(path: String) = {
+
+    println(s"worker${path} is lost")
   }
 
   private[cloud] val resourceCacheListener = new PathChildrenCacheListener() {
