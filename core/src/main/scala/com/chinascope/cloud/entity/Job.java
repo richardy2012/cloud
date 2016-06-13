@@ -208,4 +208,25 @@ public class Job {
         result = 31 * result + (entExecTime != null ? entExecTime.hashCode() : 0);
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Job{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", state=" + state +
+                ", needPartition=" + needPartition +
+                ", partitioner='" + partitioner + '\'' +
+                ", schedule='" + schedule + '\'' +
+                ", cron='" + cron + '\'' +
+                ", logical='" + logical + '\'' +
+                ", dependencyJobName='" + dependencyJobName + '\'' +
+                ", dependencyJobId=" + dependencyJobId +
+                ", dependencyLogical='" + dependencyLogical + '\'' +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", startExecTime=" + startExecTime +
+                ", entExecTime=" + entExecTime +
+                '}';
+    }
 }

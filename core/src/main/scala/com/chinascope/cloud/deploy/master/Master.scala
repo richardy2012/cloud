@@ -35,7 +35,10 @@ private[cloud] class Master(
     watchs()
     //recovery
     //TODO
+    //recieve jobs from distribute queue
+    processJob()
   }
+
 
   private def watchs() = {
     // Watch on the list of workers
@@ -50,6 +53,14 @@ private[cloud] class Master(
 
     this.partitionJobsTreeNodeCache.getListenable.addListener(partitionStatusCacheListener)
     this.partitionJobsTreeNodeCache.start()
+  }
+
+
+  private def processJob() = {
+    while (true) {
+      val job = conf.queue.take()
+
+    }
   }
 
   override def revokedLeadership(): Unit = {

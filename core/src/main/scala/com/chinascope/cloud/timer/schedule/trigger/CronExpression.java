@@ -1,4 +1,4 @@
-package com.chinascope.cloud.timmer.schedule.trigger;
+package com.chinascope.cloud.timer.schedule.trigger;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -175,7 +175,7 @@ public final class CronExpression implements Serializable, Cloneable {
 
     private static final long serialVersionUID = 12423409423L;
 
-    String jobName;
+    private String jobName;
 
     private Date nextStartTime = getNextValidTimeAfter(new Date());
 
@@ -185,6 +185,14 @@ public final class CronExpression implements Serializable, Cloneable {
 
     public void setNextStartTime(Date nextStartTime) {
         this.nextStartTime = nextStartTime;
+    }
+
+    public String getJobName() {
+        return jobName;
+    }
+
+    public void setJobName(String jobName) {
+        this.jobName = jobName;
     }
 
     protected static final int SECOND = 0;

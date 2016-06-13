@@ -1,4 +1,4 @@
-package com.chinascope.cloud.timmer.schedule
+package com.chinascope.cloud.timer.schedule
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.entity.Job

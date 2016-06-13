@@ -3,7 +3,7 @@ package com.chinascope.cloud.util.zookeeper
 import java.text.ParseException
 import java.util.Date
 
-import com.chinascope.cloud.timmer.schedule.trigger.CronExpression
+import com.chinascope.cloud.timer.schedule.trigger.CronExpression
 
 
 /**

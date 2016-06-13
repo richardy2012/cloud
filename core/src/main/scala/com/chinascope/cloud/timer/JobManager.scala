@@ -1,4 +1,4 @@
-package com.chinascope.cloud.timmer
+package com.chinascope.cloud.timer
 
 import com.chinascope.cloud.entity.{Job, Msg}
 

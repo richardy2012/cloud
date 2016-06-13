@@ -41,4 +41,8 @@ private[cloud] object Constant extends ZookeeperConfiguration {
 
   final val WORKER_CODE_COUNTER_DIR = "/counter"
 
+
+  //queue
+  final val LINKEDQUEUE_CAPACITY_KEY = "cloud.linked.block.queue.block.size"
+
 }

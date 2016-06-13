@@ -64,7 +64,7 @@ private[cloud] class CloudTimerWorker(name: String,
       }
     } else {
       var newPeriod = callback()
-      if (newPeriod == -1) {
+      if (newPeriod <= 0) {
         newPeriod = getDefaultIntervaltime
       }
       if (newPeriod > 0) {
