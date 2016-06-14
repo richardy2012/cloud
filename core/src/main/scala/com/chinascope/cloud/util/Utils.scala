@@ -149,6 +149,7 @@ private[cloud] object Utils extends Logging {
     }
   }
 
+
   /**
     * Get the ClassLoader which loaded Cloud.
     */

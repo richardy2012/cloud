@@ -2,6 +2,7 @@ package com.chinascope.cloud.deploy.node
 
 import java.lang.management.ManagementFactory
 
+import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.Utils
 
 /**
@@ -12,11 +13,12 @@ private[cloud] case class NodeInfo(
                                     var id: String,
                                     var host: String,
                                     var cores: Int,
-                                    var memory: Int,
-                                    var coresUsed: Double = 0.0,
-                                    var coresFree: Double = 1.1,
-                                    var memoryUsed: Double = 0.0,
-                                    var memoryFree: Double = 1.0
+                                    var memory: Int
                                   ) extends Serializable {
+  val monitorInfo = ResourseTool.getResMonitorInfo()
+  var cpuUsageRatio: Double = monitorInfo.cpuUsageRatio
+  var memUsageRatio: Double = monitorInfo.memUsageRatio
+  var availableCores: Int = (cores - Math.round(cores * cpuUsageRatio)).toInt
+
   def this(id: String) = this(id, Utils.localHostName, Utils.inferDefaultCores, Utils.inferDefaultMemory)
 }

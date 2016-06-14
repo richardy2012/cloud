@@ -1,6 +1,6 @@
 package com.chinascope.cloud.util
 
-import com.chinascope.cloud.config.{ LogConfiguration}
+import com.chinascope.cloud.config.{LogConfiguration}
 import org.apache.log4j.{LogManager, PropertyConfigurator}
 import org.slf4j.{Logger, LoggerFactory}
 import org.slf4j.impl.StaticLoggerBinder
@@ -9,7 +9,7 @@ import org.slf4j.impl.StaticLoggerBinder
   * Created by soledede.weng on 2016/6/2.
   */
 
-trait Logging extends LogConfiguration {
+private[cloud] trait Logging extends LogConfiguration {
   @transient private var log_ : Logger = null
   if (!logShow)
     log_ = LoggerFactory.getLogger(logName)
@@ -20,7 +20,7 @@ trait Logging extends LogConfiguration {
     this.getClass.getName.stripSuffix("$")
   }
 
-  protected def log: Logger = {
+  protected def log(): Logger = {
     if (log_ == null) {
       initializeIfNecessary()
       log_ = LoggerFactory.getLogger(logName)
@@ -94,9 +94,9 @@ trait Logging extends LogConfiguration {
       Option(getClass.getClassLoader.getResource(defaultLogProps)) match {
         case Some(url) =>
           PropertyConfigurator.configure(url)
-          System.err.println(s"Using Crawler's default log4j profile: $defaultLogProps")
+          System.err.println(s"Using Cloud's default log4j profile: $defaultLogProps")
         case None =>
-          System.err.println(s"Crawler was unable to load $defaultLogProps")
+          System.err.println(s"Cloud was unable to load $defaultLogProps")
       }
     }
     Logging.initialized = true
@@ -105,7 +105,7 @@ trait Logging extends LogConfiguration {
   }
 }
 
-private object Logging {
+private[cloud] object Logging {
   @volatile private var initialized = false
   val initLock = new Object()
   try {
@@ -118,4 +118,10 @@ private object Logging {
   } catch {
     case e: ClassNotFoundException =>
   }
+
+}
+
+private[cloud] object JavaLogging extends Logging {
+
+
 }
