@@ -3,10 +3,11 @@ package com.chinascope.cloud.zookeeper
 import java.nio.ByteBuffer
 
 import com.chinascope.cloud.config.{CloudConf, ZookeeperConfiguration}
-import com.chinascope.cloud.util.{Constant, Logging}
+import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.imps.CuratorFrameworkState
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
+import org.apache.curator.utils.CloseableUtils
 import org.apache.zookeeper.{CreateMode, KeeperException}
 
 import scala.collection.JavaConverters._
@@ -41,7 +42,9 @@ private[cloud] class CuratorZKClient(
 
   override def start() = client.start()
 
-  override def close(): Unit = client.close()
+  override def close(): Unit = started {
+    CloseableUtils.closeQuietly(client)
+  }
 
 
   override def isStarted(): Boolean = {
@@ -51,7 +54,7 @@ private[cloud] class CuratorZKClient(
     }
   }
 
-  override def mkdir(path: String) {
+  override def mkdir(path: String) = started {
     if (client.checkExists().forPath(path) == null) {
       try {
         client.create().creatingParentsIfNeeded().forPath(path)
@@ -63,7 +66,7 @@ private[cloud] class CuratorZKClient(
     }
   }
 
-  override def deleteRecursive(path: String) {
+  override def deleteRecursive(path: String) = started {
     if (client.checkExists().forPath(path) != null) {
       for (child <- client.getChildren.forPath(path).asScala) {
         client.delete().forPath(path + "/" + child)
@@ -72,24 +75,38 @@ private[cloud] class CuratorZKClient(
     }
   }
 
+
+  override def delete(path: String): Unit = started {
+    client.delete().guaranteed().deletingChildrenIfNeeded().forPath(path)
+    logInfo(s"Successfully ${path} deleted!")
+  }
+
   /**
     * Defines how the object is serialized and persisted.
     */
-  override def persist(path: String, obj: Object): Unit = {
-    serializeIntoFile(path, obj)
+  override def persist(path: String, obj: Object): Unit = started {
+    val isExists = client.checkExists().forPath(path)
+    if (isExists == null) serializeIntoFile(path, obj)
+    else {
+      val bytes = Utils.serializeIntoToBytes(conf.serializer, obj)
+      client.setData().forPath(path, bytes)
+    }
+  }
+
+
+  private def started(block: => Unit) = {
+    if (isStarted) block
   }
 
   /**
     * Defines how the object referred by its name is removed from the store.
     */
-  override def unpersist(path: String): Unit = {
+  override def unpersist(path: String): Unit = started {
     client.delete().forPath(path)
   }
 
   private def serializeIntoFile(path: String, value: AnyRef) {
-    val serialized = conf.serializer.newInstance().serialize(value)
-    val bytes = new Array[Byte](serialized.remaining())
-    serialized.get(bytes)
+    val bytes = Utils.serializeIntoToBytes(conf.serializer, value)
     client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, bytes)
   }
 

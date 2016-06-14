@@ -3,6 +3,7 @@ package com.chinascope.cloud.deploy.master
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.election.LeaderCandidate
 import com.chinascope.cloud.deploy.node.{Node, NodeInfo}
+import com.chinascope.cloud.resource.{ResMonitorInfo, ResourceManager}
 import com.chinascope.cloud.util.{Constant, Logging}
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache._
@@ -98,15 +99,15 @@ private[cloud] class Master(
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
-          whenNodeDeleted(event.getData.getPath)
+          onNodeDeleted(event.getData.getPath)
         case PathChildrenCacheEvent.Type.CHILD_ADDED =>
-          whenNodeAdded(event.getData.getPath)
+          onNodeAdded(event.getData.getPath)
         case _ =>
       }
     }
   }
 
-  private def whenNodeAdded(path: String): Unit = {
+  private def onNodeAdded(path: String): Unit = {
     val nodeInfo = conf.zkClient.read[NodeInfo](path)
     nodeInfo match {
       case Some(node) =>
@@ -118,27 +119,26 @@ private[cloud] class Master(
     }
   }
 
-  private def whenNodeDeleted(path: String) = {
-
+  private def onNodeDeleted(path: String) = {
+    logInfo(s"Node $path down!")
+    //Unload data from /root/resource/worker-xxx
+    val resourcePath = Constant.RESOURCE_DIR + path.replace(Constant.WORKER_DIR, "")
+    conf.zkClient.delete(resourcePath)
+    logInfo(s"Down node resource $resourcePath deleted successfully!")
+    //Delete NodeId->counter eg:Worker-1 -> 1
     println(s"worker${path} is lost")
   }
 
   private[cloud] val resourceCacheListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
       event.getType match {
-        case PathChildrenCacheEvent.Type.CHILD_UPDATED => try {
-          println(s"have resource updated: ${event.getData.getPath}")
-        }
-        catch {
-          case e: Exception => {
-            log.error("Exception while get resources in '%s'".format(event.getData.getPath), e)
-          }
-        }
+        case PathChildrenCacheEvent.Type.CHILD_UPDATED => ResourceManager.onResourceChildUpdated(conf, event.getData.getPath)
+        case PathChildrenCacheEvent.Type.CHILD_ADDED => ResourceManager.onResourceChildUpdated(conf, event.getData.getPath)
         case _ =>
       }
-
     }
   }
+
 
   private[cloud] val workersJobsCacheListener = new TreeCacheListener {
     override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {

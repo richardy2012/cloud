@@ -3,8 +3,10 @@ package com.chinascope.cloud.deploy.node
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
+import com.chinascope.cloud.clock.CloudTimerWorker
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.entity.Job
+import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
@@ -33,6 +35,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
       boostrapTmpNodeToZk
       logInfo(s"Node $WORKER_PREFIX${Node.nodeId} Started.")
       watchs()
+      sendHeartbeat()
     }
   })
 
@@ -46,7 +49,20 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   }
 
   def stop() = {
-    zk.close()
+    this.conf.zkNodeClient.close()
+  }
+
+  /**
+    * Send heartbeat to leader
+    * Report node's resource,eg: cpu usage ratio, memory usage ratio
+    */
+  private def sendHeartbeat() = {
+    new CloudTimerWorker(name = "timerPeriodHeartbeat", interval = 500, callback = () => sendHeartbeatToZK()).startUp()
+  }
+
+  private def sendHeartbeatToZK(): Long = {
+    conf.zkNodeClient.persist(Constant.RESOURCE_TEMPLE + Node.nodeId, ResourseTool.getResMonitorInfo)
+    -1
   }
 
   private def watchs() = {
@@ -66,7 +82,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   }
 
   private def startZK() = {
-    zk.start()
+    this.conf.zkNodeClient.start()
   }
 
   private def workerId(): Long = {

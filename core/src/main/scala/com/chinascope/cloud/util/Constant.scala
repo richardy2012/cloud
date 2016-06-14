@@ -21,6 +21,8 @@ private[cloud] object Constant extends ZookeeperConfiguration {
 
   //zk dir for watch resource of workers
   final val RESOURCE_DIR = "/resource"
+  final val RESOURCE_TEMPLE = "/resource/worker-"
+
   //zk dir for watch jobs of every worker
   final val JOBS_DIR = "/jobs"
   final val JOB_TIMER_TRIGGER_TEMPLE = "/jobs/worker-"

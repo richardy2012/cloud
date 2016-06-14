@@ -25,7 +25,7 @@ private[cloud] class CloudTimerWorker(name: String,
   val workerName: String = "TimerWorker-" + name
   val workerDaemonName: String = "TimerWorker-daemon-" + name
   private val checkInterval: Long = interval * 5
-  private val expiredTime: Long = interval * 20
+  private val expiredTime: Long = interval * Math.log(interval).toInt * 40
   private val clock = new SystemTimerClock()
   var workerThread: Timing = new Timing(clock, interval, doWork, workerName)
   var workerDaemonThread: Timing = new Timing(clock, checkInterval, monitorWorker, workerDaemonName)

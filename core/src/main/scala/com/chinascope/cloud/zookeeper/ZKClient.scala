@@ -26,6 +26,9 @@ abstract class ZKClient(conf: CloudConf) {
     */
   def persist(path: String, obj: Object): Unit
 
+
+  def delete(path: String): Unit
+
   /**
     * Defines how the object referred by its name is removed from the store.
     */
@@ -37,7 +40,7 @@ abstract class ZKClient(conf: CloudConf) {
     * Gives all objects, matching a prefix. This defines how objects are
     * read/deserialized back.
     */
-  def read[T: ClassTag](path: String,prefix: String): Seq[T]
+  def read[T: ClassTag](path: String, prefix: String): Seq[T]
 
   def read[T: ClassTag](path: String): Option[T]
 
