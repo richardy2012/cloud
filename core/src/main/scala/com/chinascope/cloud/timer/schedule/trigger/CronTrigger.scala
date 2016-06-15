@@ -58,7 +58,7 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
         val popCron = cronExpressionQueue.poll()
         popCron.setNextStartTime(popCron.getNextValidTimeAfter(new Date()))
         cronExpressionQueue.offer(popCron)
-        //TODO submit job to distribute queue
+        //submit job to distribute queue
         conf.queue.put(expToJob(popCron.getJobName))
       }
       val nextTime = cron.getNextStartTime
