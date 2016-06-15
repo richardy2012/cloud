@@ -1,5 +1,9 @@
 package com.chinascope.cloud.entity;
 
+import com.chinascope.cloud.partition.Partition;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 /**
  * Created by soledede.weng on 2016/6/2.
  */
@@ -7,14 +11,12 @@ public class Job {
     private Integer id;
     private String name; // must unique
     private Integer state; //JobState.READY RUNNING  FINISHED ERROR RUNNING_EXCEPTION STOPIPNG STOPPED
-    private Boolean needPartition;
-    private String partitioner;
+    private Boolean needPartition = true;
+    private Partition partition;
     private String schedule; //class for schedule,default: DefaultSchedule
     private String cron; //cron expression, like 30 10 1 20 * ?
     private String logical; // the subclass of logical class
     private String dependencyJobName;
-    private Integer dependencyJobId;
-    private String dependencyLogical;
     private Long startTime;
     private Long endTime;
     private Long startExecTime;
@@ -23,18 +25,16 @@ public class Job {
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, String partitioner, String schedule, String cron, String logical, String dependencyJobName, Integer dependencyJobId, String dependencyLogical, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
+    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, String dependencyJobName, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
         this.id = id;
         this.name = name;
         this.state = state;
         this.needPartition = needPartition;
-        this.partitioner = partitioner;
+        this.partition = partition;
         this.schedule = schedule;
         this.cron = cron;
         this.logical = logical;
         this.dependencyJobName = dependencyJobName;
-        this.dependencyJobId = dependencyJobId;
-        this.dependencyLogical = dependencyLogical;
         this.startTime = startTime;
         this.endTime = endTime;
         this.startExecTime = startExecTime;
@@ -73,12 +73,12 @@ public class Job {
         this.needPartition = needPartition;
     }
 
-    public String getPartitioner() {
-        return partitioner;
+    public Partition getPartition() {
+        return partition;
     }
 
-    public void setPartitioner(String partitioner) {
-        this.partitioner = partitioner;
+    public void setPartition(Partition partition) {
+        this.partition = partition;
     }
 
     public String getSchedule() {
@@ -113,21 +113,6 @@ public class Job {
         this.dependencyJobName = dependencyJobName;
     }
 
-    public Integer getDependencyJobId() {
-        return dependencyJobId;
-    }
-
-    public void setDependencyJobId(Integer dependencyJobId) {
-        this.dependencyJobId = dependencyJobId;
-    }
-
-    public String getDependencyLogical() {
-        return dependencyLogical;
-    }
-
-    public void setDependencyLogical(String dependencyLogical) {
-        this.dependencyLogical = dependencyLogical;
-    }
 
     public Long getStartTime() {
         return startTime;
@@ -172,15 +157,11 @@ public class Job {
         if (name != null ? !name.equals(job.name) : job.name != null) return false;
         if (state != null ? !state.equals(job.state) : job.state != null) return false;
         if (needPartition != null ? !needPartition.equals(job.needPartition) : job.needPartition != null) return false;
-        if (partitioner != null ? !partitioner.equals(job.partitioner) : job.partitioner != null) return false;
+        if (partition != null ? !partition.equals(job.partition) : job.partition != null) return false;
         if (schedule != null ? !schedule.equals(job.schedule) : job.schedule != null) return false;
         if (cron != null ? !cron.equals(job.cron) : job.cron != null) return false;
         if (logical != null ? !logical.equals(job.logical) : job.logical != null) return false;
         if (dependencyJobName != null ? !dependencyJobName.equals(job.dependencyJobName) : job.dependencyJobName != null)
-            return false;
-        if (dependencyJobId != null ? !dependencyJobId.equals(job.dependencyJobId) : job.dependencyJobId != null)
-            return false;
-        if (dependencyLogical != null ? !dependencyLogical.equals(job.dependencyLogical) : job.dependencyLogical != null)
             return false;
         if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
         if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
@@ -195,13 +176,11 @@ public class Job {
         result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (state != null ? state.hashCode() : 0);
         result = 31 * result + (needPartition != null ? needPartition.hashCode() : 0);
-        result = 31 * result + (partitioner != null ? partitioner.hashCode() : 0);
+        result = 31 * result + (partition != null ? partition.hashCode() : 0);
         result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
         result = 31 * result + (cron != null ? cron.hashCode() : 0);
         result = 31 * result + (logical != null ? logical.hashCode() : 0);
         result = 31 * result + (dependencyJobName != null ? dependencyJobName.hashCode() : 0);
-        result = 31 * result + (dependencyJobId != null ? dependencyJobId.hashCode() : 0);
-        result = 31 * result + (dependencyLogical != null ? dependencyLogical.hashCode() : 0);
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
@@ -211,22 +190,6 @@ public class Job {
 
     @Override
     public String toString() {
-        return "Job{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", state=" + state +
-                ", needPartition=" + needPartition +
-                ", partitioner='" + partitioner + '\'' +
-                ", schedule='" + schedule + '\'' +
-                ", cron='" + cron + '\'' +
-                ", logical='" + logical + '\'' +
-                ", dependencyJobName='" + dependencyJobName + '\'' +
-                ", dependencyJobId=" + dependencyJobId +
-                ", dependencyLogical='" + dependencyLogical + '\'' +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", startExecTime=" + startExecTime +
-                ", entExecTime=" + entExecTime +
-                '}';
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

@@ -19,6 +19,8 @@ private[cloud] object Constant extends ZookeeperConfiguration {
 
   final val WORKER_TMP_TEMPLE = "/workers/worker-"
 
+  final val NODE_ID_PATH_TEMPLE = "/worker-"
+
   //zk dir for watch resource of workers
   final val RESOURCE_DIR = "/resource"
   final val RESOURCE_TEMPLE = "/resource/worker-"
@@ -43,6 +45,8 @@ private[cloud] object Constant extends ZookeeperConfiguration {
 
   final val WORKER_CODE_COUNTER_DIR = "/counter"
 
+  //counter of dead node
+  final val DEAD_COUNTER_ID = "/dead"
 
   //queue
   final val LINKEDQUEUE_CAPACITY_KEY = "cloud.linked.block.queue.block.size"

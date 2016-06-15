@@ -1,6 +1,7 @@
 package com.chinascope.cloud.resource
 
 import com.chinascope.cloud.config.CloudConf
+import com.chinascope.cloud.deploy.master.Master
 import com.chinascope.cloud.util.Logging
 
 
@@ -20,11 +21,18 @@ private[cloud] object ResourceManager extends Logging {
       val resMonitorInfo = conf.zkClient.read[ResMonitorInfo](path)
       resMonitorInfo match {
         case Some(res) =>
-          val nodeId = res.nodeId
-          val memUsageRatio = res.memUsageRatio
-          val cpuUsageRatio = res.cpuUsageRatio
-          println("memUsageRatio: '%f'\n cpuUsageRatio: '%f'".format(memUsageRatio, cpuUsageRatio))
-          logInfo(s"node $nodeId registered! path: ${path}")
+          this.synchronized {
+            val nodeId = res.nodeId
+            val memUsageRatio = res.memUsageRatio
+            val cpuUsageRatio = res.cpuUsageRatio
+            logInfo("memUsageRatio: '%f'\n cpuUsageRatio: '%f'".format(memUsageRatio, cpuUsageRatio))
+            logInfo(s"node $nodeId registered! path: ${path}")
+            val nodeInfo = conf.master.idToNodes(nodeId)
+            nodeInfo.memUsageRatio = memUsageRatio
+            nodeInfo.cpuUsageRatio = cpuUsageRatio
+            val cores = nodeInfo.cores
+            var availableCores: Int = (cores - Math.round(cores * cpuUsageRatio)).toInt
+          }
         case None => logWarning(s"Can't get resource for node $path!")
       }
     }

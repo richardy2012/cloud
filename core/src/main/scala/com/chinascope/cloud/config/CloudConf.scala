@@ -2,6 +2,8 @@ package com.chinascope.cloud.config
 
 import java.util.concurrent.ConcurrentHashMap
 
+import com.chinascope.cloud.deploy.master.Master
+import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.queue.Queue
 import com.chinascope.cloud.queue.impl.ZookeeperDistributeQueue
@@ -25,6 +27,9 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   /** Create a CloudConf that loads defaults from system properties and the classpath */
   def this() = this(true)
+
+  private[cloud] var master: Master = _
+  private[cloud] var node: Node = _
 
   private val settings = new ConcurrentHashMap[String, String]()
 

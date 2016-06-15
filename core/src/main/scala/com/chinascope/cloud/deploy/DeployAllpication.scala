@@ -24,14 +24,16 @@ object DeployAllpication {
 
     //leader election
     val master = new Master(conf)
+    conf.master = master
     Factory.leaderElection(conf).createLeaderElectonAgent(master)
 
     //Thread.sleep(1000*30)
     //start node
     val node = new Node(conf)
     node.start()
-    Thread.sleep(60 * 1000)
-    node.stop()
+    conf.node = node
+    //Thread.sleep(60 * 1000)
+    // node.stop()
     Thread.currentThread().suspend()
   }
 

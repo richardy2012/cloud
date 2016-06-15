@@ -29,7 +29,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
-      logInfo(s"node status:${newState.name()}")
       while (!newState.isConnected) Thread.sleep(100)
       init
       boostrapTmpNodeToZk
@@ -86,20 +85,31 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   }
 
   private def workerId(): Long = {
-    val count = new DistributedAtomicLong(zk, Constant.WORKER_CODE_COUNTER_DIR, new RetryNTimes(10, 10))
-    var countValue = count.increment()
-    while (!countValue.succeeded()) {
-      countValue = count.increment()
+    //get nodeId from /cloud/dead/worker-xxx if has
+    val pathList = conf.zkNodeClient.getChildren(Constant.DEAD_COUNTER_ID)
+    if (pathList != null && pathList.size > 0 && !pathList.isEmpty) {
+      val (workIdPath, nodeId) = pathList.map { p =>
+        val nodeId = p.replace(WORKER_PREFIX, "").toLong
+        val workIdPath = Constant.DEAD_COUNTER_ID + Constant.NODE_ID_PATH_TEMPLE + nodeId
+        (workIdPath, nodeId)
+      }.sortBy(_._2).head
+      conf.zkNodeClient.delete(workIdPath)
+      nodeId
+    } else {
+      val count = new DistributedAtomicLong(zk, Constant.WORKER_CODE_COUNTER_DIR, new RetryNTimes(10, 10))
+      var countValue = count.increment()
+      while (!countValue.succeeded()) {
+        countValue = count.increment()
+      }
+      countValue.postValue()
     }
-    countValue.postValue()
   }
 
   private def boostrapTmpNodeToZk() = {
     Node.nodeId = workerId
     workerNode = new PersistentNode(zk, CreateMode.EPHEMERAL, false, Constant.WORKER_TMP_TEMPLE + Node.nodeId,
-      Utils.serializeIntoToBytes(conf.serializer, new NodeInfo(WORKER_PREFIX + Node.nodeId)))
+      Utils.serializeIntoToBytes(conf.serializer, new NodeInfo(Node.nodeId)))
     workerNode.start()
-
   }
 
 
@@ -168,7 +178,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
 }
 
-private[cloud] object Node {
+private[cloud] object Node extends Logging {
   //check if this node is a leader
   var isLeader = new AtomicBoolean(false)
   var nodeId: Long = _
@@ -186,6 +196,35 @@ private[cloud] object Node {
     zk.mkdir(Constant.STATUS)
     zk.mkdir(Constant.CLUSTER_STATUS)
 
+    zk.mkdir(Constant.DEAD_COUNTER_ID)
+
+  }
+
+  private[cloud] def onNodeAdded(conf: CloudConf, path: String): Unit = {
+    val nodeInfo = conf.zkClient.read[NodeInfo](path)
+    nodeInfo match {
+      case Some(node) =>
+        val nodeId = node.id
+        conf.master.nodes += node
+        conf.master.idToNodes(nodeId) = node
+        logInfo(s"node $nodeId registered! path: ${path}")
+      case None => logWarning("Are you sure this is your node!")
+    }
+  }
+
+  private[cloud] def onNodeDeleted(conf: CloudConf, path: String) = {
+    logInfo(s"Node $path down!")
+    //Unload data from /root/resource/worker-xxx
+    val nodeIdPath = path.replace(Constant.WORKER_DIR, "")
+    val resourcePath = Constant.RESOURCE_DIR + nodeIdPath
+    conf.zkClient.delete(resourcePath)
+    logInfo(s"Down node resource $resourcePath deleted successfully!")
+    //Delete NodeId->counter eg:Worker-1 -> 1
+
+    //Move count(worker-xxx) to /root/dead/xxx
+    conf.zkClient.persist(Constant.DEAD_COUNTER_ID + nodeIdPath, "dead")
+
+    println(s"worker${path} is lost")
   }
 
 }

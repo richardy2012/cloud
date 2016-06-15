@@ -10,7 +10,7 @@ import com.chinascope.cloud.util.Utils
   * No Center point
   */
 private[cloud] case class NodeInfo(
-                                    var id: String,
+                                    var id: Long,
                                     var host: String,
                                     var cores: Int,
                                     var memory: Int
@@ -20,5 +20,5 @@ private[cloud] case class NodeInfo(
   var memUsageRatio: Double = monitorInfo.memUsageRatio
   var availableCores: Int = (cores - Math.round(cores * cpuUsageRatio)).toInt
 
-  def this(id: String) = this(id, Utils.localHostName, Utils.inferDefaultCores, Utils.inferDefaultMemory)
+  def this(id: Long) = this(id, Utils.localHostName, Utils.inferDefaultCores, Utils.inferDefaultMemory)
 }
