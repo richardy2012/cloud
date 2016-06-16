@@ -19,7 +19,32 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
   }
 
   override def addJobName(jobName: String): Unit = {
-    jobNames + jobName
+    jobNames += jobName
+  }
+
+
+  /**
+    * remove jobName from zk  /cloud/jobname/jobname
+    * remore job from zk  /cloud/jobs/worker-xxx/jobname
+    *
+    * @param job
+    */
+  override def removeJob(job: Job) = {
+    // remove jobName from zk
+    conf.zkNodeClient.delete(Constant.JOB_UNIQUE_NAME + "/" + job.getName)
+    //remove job form zk
+    val workers = conf.zkNodeClient.getChildren(Constant.JOBS_DIR)
+    val path = workers.flatMap { case workerId =>
+      val jobNames = conf.zkNodeClient.getChildren(Constant.JOBS_DIR + "/" + workerId)
+      jobNames.map(Constant.JOBS_DIR + "/" + workerId + "/" + _)
+    }.filter(_.contains(job.getName))
+    if (path != null & path.size > 0) {
+      conf.zkNodeClient.delete(path.head)
+    }
+  }
+
+  override def removeJobName(jobName: String): Unit = {
+    jobNames -= jobName
   }
 
   override def submitJob(job: Job): Msg = {
@@ -36,10 +61,16 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
 
   }
 
+  /**
+    * add jobname to zk  /cloud/jobname/jobname
+    * add job to /cloud/jobs/worker-xxx/jobname need blance it
+    *
+    * @param job
+    */
   private def submitToZk(job: Job) = {
     //  add jobname to zk
     zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
-    // /cloud/jobs/worker-xxx/jobnamexxx
-    zk.persist(zk.getChildren(Constant.JOBS_DIR).map(p => (zk.getChildren(p).size, p)).sortBy(_._1).take(0)(0)._2 + "/" + job.getName, job)
+    // /cloud/jobs/worker-xxx/jobname
+    zk.persist(zk.getChildren(Constant.JOBS_DIR).map(w => (zk.getChildren(w).size, w)).sortBy(_._1).head._2 + "/" + job.getName, job)
   }
 }

@@ -13,7 +13,7 @@ private[cloud]
 class NodeWebUI(conf: CloudConf, requestedPort: Int)
   extends WebUI(requestedPort, conf, name = "NodeUI") with Logging {
 
-
+  NodeWebUI.setConf(conf)
   val nodePage = new NodePage(this)
 
   initialize()
@@ -30,4 +30,6 @@ class NodeWebUI(conf: CloudConf, requestedPort: Int)
 
 private[cloud] object NodeWebUI {
   private val STATIC_RESOURCE_DIR = "com/chinascope/cloud/ui/static"
+  var _conf: CloudConf = _
+  val setConf = (conf: CloudConf) => _conf = conf
 }

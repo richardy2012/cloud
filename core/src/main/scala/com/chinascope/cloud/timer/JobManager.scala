@@ -7,6 +7,8 @@ import com.chinascope.cloud.entity.{Job, Msg}
   */
 private[cloud] trait JobManager {
   def submitJob(job: Job):Msg
+  def removeJob(job: Job)
   def schedule(job: Job): Unit
   def addJobName(jobName: String)
+  def removeJobName(jobName: String)
 }

@@ -3,6 +3,7 @@ package com.chinascope.cloud.web.pages
 import javax.servlet.http.HttpServletRequest
 
 import com.chinascope.cloud.deploy.node.NodeInfo
+import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.web.{JsonProtocol, NodeWebUI, WebUIPage, WebUIUtils}
 import org.json4s.JValue
 
@@ -26,7 +27,8 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val id = request.getParameter("id")
 
     val content =
-      <div>
+      <div class="row-fluid">
+
 
       </div>;
 

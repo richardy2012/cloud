@@ -151,7 +151,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
           }
         }
         case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
-          println(s"new jobname ${event.getData.getPath} removed!")
+          val path = event.getData.getPath
+          logInfo(s"new jobname ${path} removed!")
+          conf.jobManager.removeJobName(path.replace(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR + Constant.JOB_UNIQUE_NAME + "/", ""))
         case _ =>
       }
     }

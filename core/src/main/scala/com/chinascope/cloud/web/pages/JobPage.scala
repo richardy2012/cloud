@@ -3,6 +3,8 @@ package com.chinascope.cloud.web.pages
 import javax.servlet.http.HttpServletRequest
 
 import com.chinascope.cloud.deploy.node.NodeInfo
+import com.chinascope.cloud.entity.{Job, Msg}
+import com.chinascope.cloud.partition.{DBRangePartition, Partition}
 import com.chinascope.cloud.web.{JsonProtocol, NodeWebUI, WebUIPage, WebUIUtils}
 import org.json4s.JValue
 
@@ -23,25 +25,51 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
   /** Index view listing applications and executors */
   def render(request: HttpServletRequest): Seq[Node] = {
     val name = request.getParameter("name")
-    val id = request.getParameter("id")
-    val selects = request.getParameter("example")
+    val cron = request.getParameter("cron")
+    val logical = request.getParameter("logical")
+    val partitionField = request.getParameter("partitionField")
+    val partitionNum = request.getParameter("partitionNum")
+    val parents = request.getParameter("parents")
+    var msg: Msg = null
+
+    if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
+      val job = new Job()
+      job.setName(name)
+      job.setCron(cron)
+      job.setLogical(logical)
+      if (partitionField == null || partitionField.trim.equalsIgnoreCase("")) job.setNeedPartition(false)
+      else {
+        val partition = new DBRangePartition()
+        partition.setPartitionField(partitionField)
+        partition.setPartitionField(partitionNum)
+        job.setPartition(partition)
+      }
+      msg = NodeWebUI._conf.jobManager.submitJob(job)
+    }
+
 
     val content =
       <div class="row-fluid">
         <div class="span12">
-          <ul class="unstyled">
-            <li>
-              <strong>Name:</strong>{name}
-            </li>
-            <li>
-              <strong>ID:</strong>{id}<span class="rest-uri">(cluster mode)</span>
-            </li>
-          </ul>
+          {if (msg != null && msg.getCode == 0) {
+          <span>
+            Job
+            <strong>
+              <font color="green">
+                {name}
+              </font>
+            </strong>
+            submit successfully!
+          </span>
+        } else {
+          <span>Job submit failed!</span>
+        }}
+
         </div>
 
 
 
-        <form action="/job" method="POST">
+        <form action="job" method="post">
           <div class="input-group input-group-lg text_form_input">
             <span class="input-group-addon">Name:</span>
             <input type="text" name="name" class="form-control" placeholder="Name" aria-describedby="sizing-addon1"/>
@@ -73,7 +101,7 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
               <input type="text" class="form-control" id="partitionNum" name="partitionNum" placeholder="10" aria-describedby="sizing-addon1"/>
             </div>
 
-            <input type="text" name="parents" id="job_parents"/>
+            <input type="hidden" name="parents" id="job_parents"/>
 
           </div>
           <br/>
@@ -89,11 +117,6 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
         <div class="container">
-          <form class="form-horizontal" role="form">
-            <div class="form-group">
-              <label for="bs3Select" class="col-lg-2"/>
-            </div>
-          </form>
         </div>
       </div>;
 
