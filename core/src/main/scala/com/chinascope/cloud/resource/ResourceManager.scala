@@ -23,15 +23,19 @@ private[cloud] object ResourceManager extends Logging {
         case Some(res) =>
           this.synchronized {
             val nodeId = res.nodeId
-            val memUsageRatio = res.memUsageRatio
-            val cpuUsageRatio = res.cpuUsageRatio
-            logInfo("memUsageRatio: '%f'\n cpuUsageRatio: '%f'".format(memUsageRatio, cpuUsageRatio))
-            logInfo(s"node $nodeId registered! path: ${path}")
-            val nodeInfo = conf.master.idToNodes(nodeId)
-            nodeInfo.memUsageRatio = memUsageRatio
-            nodeInfo.cpuUsageRatio = cpuUsageRatio
-            val cores = nodeInfo.cores
-            var availableCores: Int = (cores - Math.round(cores * cpuUsageRatio)).toInt
+            if(conf.master.idToNodes.contains(nodeId)){
+              val nodeInfo = conf.master.idToNodes(nodeId)
+              val memUsageRatio = res.memUsageRatio
+              val cpuUsageRatio = res.cpuUsageRatio
+              logInfo("memUsageRatio: '%f'\n cpuUsageRatio: '%f'".format(memUsageRatio, cpuUsageRatio))
+              logInfo(s"node $nodeId registered! path: ${path}")
+
+              nodeInfo.memUsageRatio = memUsageRatio
+              nodeInfo.cpuUsageRatio = cpuUsageRatio
+              val cores = nodeInfo.cores
+              var availableCores: Int = (cores - Math.round(cores * cpuUsageRatio)).toInt
+              nodeInfo.availableCores = availableCores
+            }
           }
         case None => logWarning(s"Can't get resource for node $path!")
       }

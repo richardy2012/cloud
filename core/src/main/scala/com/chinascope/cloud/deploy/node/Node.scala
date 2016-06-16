@@ -8,6 +8,7 @@ import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.{Constant, Logging, Utils}
+import com.chinascope.cloud.web.NodeWebUI
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.atomic.{DistributedAtomicInteger, DistributedAtomicLong}
@@ -25,6 +26,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   var workerNode: PersistentNode = _
 
   final val WORKER_PREFIX = "worker-"
+  private var webUi: NodeWebUI = null
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
@@ -40,6 +42,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
   private def init() = {
     conf.initQueue()
+    //init web ui
+    webUi = new NodeWebUI(conf, 8888)
+    webUi.bind()
   }
 
   def start() = {

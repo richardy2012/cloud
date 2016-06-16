@@ -4,6 +4,8 @@ import com.chinascope.cloud.partition.Partition;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.util.List;
+
 /**
  * Created by soledede.weng on 2016/6/2.
  */
@@ -16,7 +18,7 @@ public class Job {
     private String schedule; //class for schedule,default: DefaultSchedule
     private String cron; //cron expression, like 30 10 1 20 * ?
     private String logical; // the subclass of logical class
-    private String dependencyJobName;
+    private List<String> dependencyJobNames;
     private Long startTime;
     private Long endTime;
     private Long startExecTime;
@@ -25,7 +27,7 @@ public class Job {
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, String dependencyJobName, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
+    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> dependencyJobNames, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
         this.id = id;
         this.name = name;
         this.state = state;
@@ -34,7 +36,7 @@ public class Job {
         this.schedule = schedule;
         this.cron = cron;
         this.logical = logical;
-        this.dependencyJobName = dependencyJobName;
+        this.dependencyJobNames = dependencyJobNames;
         this.startTime = startTime;
         this.endTime = endTime;
         this.startExecTime = startExecTime;
@@ -105,14 +107,13 @@ public class Job {
         this.logical = logical;
     }
 
-    public String getDependencyJobName() {
-        return dependencyJobName;
+    public List<String> getDependencyJobNames() {
+        return dependencyJobNames;
     }
 
-    public void setDependencyJobName(String dependencyJobName) {
-        this.dependencyJobName = dependencyJobName;
+    public void setDependencyJobNames(List<String> dependencyJobNames) {
+        this.dependencyJobNames = dependencyJobNames;
     }
-
 
     public Long getStartTime() {
         return startTime;
@@ -161,7 +162,7 @@ public class Job {
         if (schedule != null ? !schedule.equals(job.schedule) : job.schedule != null) return false;
         if (cron != null ? !cron.equals(job.cron) : job.cron != null) return false;
         if (logical != null ? !logical.equals(job.logical) : job.logical != null) return false;
-        if (dependencyJobName != null ? !dependencyJobName.equals(job.dependencyJobName) : job.dependencyJobName != null)
+        if (dependencyJobNames != null ? !dependencyJobNames.equals(job.dependencyJobNames) : job.dependencyJobNames != null)
             return false;
         if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
         if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
@@ -180,7 +181,7 @@ public class Job {
         result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
         result = 31 * result + (cron != null ? cron.hashCode() : 0);
         result = 31 * result + (logical != null ? logical.hashCode() : 0);
-        result = 31 * result + (dependencyJobName != null ? dependencyJobName.hashCode() : 0);
+        result = 31 * result + (dependencyJobNames != null ? dependencyJobNames.hashCode() : 0);
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
