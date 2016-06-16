@@ -1,7 +1,7 @@
-$(function() {
-    $("span.expand-additional-metrics").click(function(){
+$(function () {
+    $("span.expand-additional-metrics").click(function () {
         var status = window.localStorage.getItem("expand-additional-metrics") == "true";
-        if(status == false){
+        if (status == false) {
             $("#partitionField").val("");
             $("#partitionNum").val("");
         }
@@ -13,4 +13,10 @@ $(function() {
         $(this).find('.expand-additional-metrics-arrow').toggleClass('arrow-closed');
         window.localStorage.setItem("expand-additional-metrics", "" + status);
     });
+
+    $(".selectpicker").selectpicker({
+        "selectedText": "cat"
+    });
+
+
 });

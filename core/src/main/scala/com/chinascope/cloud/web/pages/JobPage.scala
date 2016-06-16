@@ -24,6 +24,7 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
   def render(request: HttpServletRequest): Seq[Node] = {
     val name = request.getParameter("name")
     val id = request.getParameter("id")
+    val selects = request.getParameter("example")
 
     val content =
       <div class="row-fluid">
@@ -38,32 +39,62 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
           </ul>
         </div>
 
+
+
         <form action="/job" method="POST">
-          <span class="text_label ">Name:</span>
-          <input type="text" name="name" class="form-control" placeholder="stock market"/>
-          <br/>
-          <span class="text_label">Cron:</span>
-          <input type="text" name="cron"  class="form-control" placeholder="* 23-7/1 * * *"/>
-          <br/>
-          <span class="text_label">LogicalClass:</span>
-          <input type="text" class="form-control" name="logical" placeholder="logical.Test"/>
-          <br/>
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">Name:</span>
+            <input type="text" name="name" class="form-control" placeholder="Name" aria-describedby="sizing-addon1"/>
+          </div>
+
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">Cron:</span>
+            <input type="text" class="form-control" name="cron" placeholder="* 23-7/1 * * *" aria-describedby="sizing-addon1"/>
+          </div>
+
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">LogicalClass:</span>
+            <input type="text" class="form-control" name="logical" placeholder="logical.Test" aria-describedby="sizing-addon1"/>
+          </div>
+
           <span class="expand-additional-metrics">
             <span class="expand-additional-metrics-arrow arrow-closed"></span>
             <a>NeedPartition</a>
           </span>
           <br/>
           <div class="additional-metrics collapsed">
-            <span class="text_label">PartitionField:</span>
-            <input id="partitionField" class="form-control" type="text" name="partitionField" placeholder="time"/>
-            <br/>
-            <span class="text_label">PartitionNum:</span>
-            <input id="partitionNum" class="form-control" type="text" name="partitionNum" placeholder="10"/>
-            <br/>
+            <div class="input-group input-group-lg text_form_input">
+              <span class="input-group-addon">PartitionField:</span>
+              <input type="text" class="form-control" id="partitionField" name="partitionField" placeholder="time" aria-describedby="sizing-addon1"/>
+            </div>
+
+            <div class="input-group input-group-lg text_form_input">
+              <span class="input-group-addon">PartitionNum:</span>
+              <input type="text" class="form-control" id="partitionNum" name="partitionNum" placeholder="10" aria-describedby="sizing-addon1"/>
+            </div>
+
+            <input type="text" name="parents" id="job_parents"/>
+
           </div>
+          <br/>
+          <label for="id_select"></label>
+          <select id="id_select" class="selectpicker bla bla bli" multiple="true" data-live-search="true">
+            <option selected="true">cow</option>
+            <option>bull</option>
+            <option>ASD</option>
+            <option>Bla</option>
+            <option>Ble</option>
+          </select>
           <br/>
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
+        <div class="container">
+          <form class="form-horizontal" role="form">
+            <div class="form-group">
+              <label for="bs3Select" class="col-lg-2"/>
+            </div>
+          </form>
+        </div>
       </div>;
 
     WebUIUtils.basicPage(content, "")

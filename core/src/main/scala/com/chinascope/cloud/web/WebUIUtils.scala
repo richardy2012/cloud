@@ -141,19 +141,25 @@ private[cloud] object WebUIUtils extends Logging {
   def commonHeaderNodes: Seq[Node] = {
       <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
         <link rel="stylesheet" href={prependBaseUri("/static/bootstrap.min.css")} type="text/css"/>
+        <link rel="stylesheet" href={prependBaseUri("/static/bootstrap.min_3.0.css")} type="text/css"/>
         <link rel="stylesheet" href={prependBaseUri("/static/vis.min.css")} type="text/css"/>
+        <link rel="stylesheet" href={prependBaseUri("/static/bootstrap-multiselect.css")} type="text/css"/>
         <link rel="stylesheet" href={prependBaseUri("/static/webui.css")} type="text/css"/>
         <link rel="stylesheet" href={prependBaseUri("/static/timeline-view.css")} type="text/css"/>
-        <link rel="stylesheet" href={prependBaseUri("/static/bootstrap-multiselect.css")} type="text/css"/>
+        <link rel="stylesheet" href={prependBaseUri("/static/bootstrap-select.css")} type="text/css"/>
+
       <script src={prependBaseUri("/static/sorttable.js")}></script>
       <script src={prependBaseUri("/static/jquery-1.11.1.min.js")}></script>
+      <script src={prependBaseUri("/static/bootstrap.min_3.0.js")}></script>
       <script src={prependBaseUri("/static/vis.min.js")}></script>
       <script src={prependBaseUri("/static/bootstrap-tooltip.js")}></script>
+      <script src={prependBaseUri("/static/bootstrap-multiselect.js")}></script>
       <script src={prependBaseUri("/static/initialize-tooltips.js")}></script>
       <script src={prependBaseUri("/static/table.js")}></script>
       <script src={prependBaseUri("/static/additional-metrics.js")}></script>
       <script src={prependBaseUri("/static/timeline-view.js")}></script>
-      <script src={prependBaseUri("/static/bootstrap-multiselect.js")}></script>
+      <script src={prependBaseUri("/static/bootstrap-select.js")}></script>
+
 
   }
 

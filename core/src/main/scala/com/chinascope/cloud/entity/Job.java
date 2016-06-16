@@ -18,7 +18,7 @@ public class Job {
     private String schedule; //class for schedule,default: DefaultSchedule
     private String cron; //cron expression, like 30 10 1 20 * ?
     private String logical; // the subclass of logical class
-    private List<String> dependencyJobNames;
+    private List<String> parents;
     private Long startTime;
     private Long endTime;
     private Long startExecTime;
@@ -27,7 +27,7 @@ public class Job {
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> dependencyJobNames, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
+    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
         this.id = id;
         this.name = name;
         this.state = state;
@@ -36,7 +36,7 @@ public class Job {
         this.schedule = schedule;
         this.cron = cron;
         this.logical = logical;
-        this.dependencyJobNames = dependencyJobNames;
+        this.parents = parents;
         this.startTime = startTime;
         this.endTime = endTime;
         this.startExecTime = startExecTime;
@@ -107,12 +107,12 @@ public class Job {
         this.logical = logical;
     }
 
-    public List<String> getDependencyJobNames() {
-        return dependencyJobNames;
+    public List<String> getParents() {
+        return parents;
     }
 
-    public void setDependencyJobNames(List<String> dependencyJobNames) {
-        this.dependencyJobNames = dependencyJobNames;
+    public void setParents(List<String> parents) {
+        this.parents = parents;
     }
 
     public Long getStartTime() {
@@ -162,8 +162,7 @@ public class Job {
         if (schedule != null ? !schedule.equals(job.schedule) : job.schedule != null) return false;
         if (cron != null ? !cron.equals(job.cron) : job.cron != null) return false;
         if (logical != null ? !logical.equals(job.logical) : job.logical != null) return false;
-        if (dependencyJobNames != null ? !dependencyJobNames.equals(job.dependencyJobNames) : job.dependencyJobNames != null)
-            return false;
+        if (parents != null ? !parents.equals(job.parents) : job.parents != null) return false;
         if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
         if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
         if (startExecTime != null ? !startExecTime.equals(job.startExecTime) : job.startExecTime != null) return false;
@@ -181,7 +180,7 @@ public class Job {
         result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
         result = 31 * result + (cron != null ? cron.hashCode() : 0);
         result = 31 * result + (logical != null ? logical.hashCode() : 0);
-        result = 31 * result + (dependencyJobNames != null ? dependencyJobNames.hashCode() : 0);
+        result = 31 * result + (parents != null ? parents.hashCode() : 0);
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
