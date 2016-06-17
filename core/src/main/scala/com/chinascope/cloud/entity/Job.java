@@ -4,12 +4,13 @@ import com.chinascope.cloud.partition.Partition;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by soledede.weng on 2016/6/2.
  */
-public class Job {
+public class Job implements Serializable{
     private Integer id;
     private String name; // must unique
     private Integer state; //JobState.READY RUNNING  FINISHED ERROR RUNNING_EXCEPTION STOPIPNG STOPPED

@@ -12,6 +12,7 @@ private[cloud] class DefaultSchedule(conf: CloudConf) extends Schedule with Logg
   val trigger = conf.cronTrigger
 
   override def schedule(job: Job): Unit = {
+    logInfo(s"Receive Job ${job.getName} for cron timer schedule!")
     if (job.getCron != null && job.getCron.trim.equalsIgnoreCase(""))
       trigger.trigger(job)
   }

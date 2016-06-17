@@ -1,6 +1,7 @@
 package com.chinascope.cloud.timer
 
 import com.chinascope.cloud.config.CloudConf
+import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.{Job, Msg}
 import com.chinascope.cloud.util.{Constant, Logging}
 
@@ -68,9 +69,22 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
     * @param job
     */
   private def submitToZk(job: Job) = {
-    //  add jobname to zk
-    zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
-    // /cloud/jobs/worker-xxx/jobname
-    zk.persist(zk.getChildren(Constant.JOBS_DIR).map(w => (zk.getChildren(w).size, w)).sortBy(_._1).head._2 + "/" + job.getName, job)
+    val activeWorkerPaths = zk.getChildren(Constant.WORKER_DIR)
+    if (activeWorkerPaths.size > 0) {
+      //  add jobname to zk
+      zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
+      // /cloud/jobs/worker-xxx/jobname
+      var path: String = null
+      val jobPaths = zk.getChildren(Constant.JOBS_DIR)
+
+      if (activeWorkerPaths.size - jobPaths.size > 0) {
+        val worker = activeWorkerPaths.filter(!jobPaths.contains(_)).head
+        path = Constant.JOBS_DIR + "/" + worker + "/" + job.getName
+      } else {
+        path = jobPaths.map(w => (zk.getChildren(Constant.JOBS_DIR + "/" + w).size, Constant.JOBS_DIR + "/" + w)).sortBy(_._1).head._2 + "/" + job.getName
+      }
+      println(activeWorkerPaths + "\n" + jobPaths)
+      zk.persist(path, job)
+    }
   }
 }

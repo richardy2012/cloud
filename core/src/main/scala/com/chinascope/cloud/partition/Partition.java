@@ -1,10 +1,12 @@
 package com.chinascope.cloud.partition;
 
 
+import java.io.Serializable;
+
 /**
  * Created by soledede.weng on 2016/6/15.
  */
-public abstract class Partition {
+public abstract class Partition implements Serializable {
     private Integer state;
     private Integer partitionNum;
     private String workerPartitionNum;

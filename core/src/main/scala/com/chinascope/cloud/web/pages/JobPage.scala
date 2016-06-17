@@ -24,52 +24,12 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
 
   /** Index view listing applications and executors */
   def render(request: HttpServletRequest): Seq[Node] = {
-    val name = request.getParameter("name")
-    val cron = request.getParameter("cron")
-    val logical = request.getParameter("logical")
-    val partitionField = request.getParameter("partitionField")
-    val partitionNum = request.getParameter("partitionNum")
-    val parents = request.getParameter("parents")
-    var msg: Msg = null
 
-    if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
-      val job = new Job()
-      job.setName(name)
-      job.setCron(cron)
-      job.setLogical(logical)
-      if (partitionField == null || partitionField.trim.equalsIgnoreCase("")) job.setNeedPartition(false)
-      else {
-        val partition = new DBRangePartition()
-        partition.setPartitionField(partitionField)
-        partition.setPartitionField(partitionNum)
-        job.setPartition(partition)
-      }
-      msg = NodeWebUI._conf.jobManager.submitJob(job)
-    }
 
 
     val content =
-      <div class="row-fluid">
-        <div class="span12">
-          {if (msg != null && msg.getCode == 0) {
-          <span>
-            Job
-            <strong>
-              <font color="green">
-                {name}
-              </font>
-            </strong>
-            submit successfully!
-          </span>
-        } else {
-          <span>Job submit failed!</span>
-        }}
-
-        </div>
-
-
-
-        <form action="job" method="post">
+      <div>
+        <form action="/" method="post">
           <div class="input-group input-group-lg text_form_input">
             <span class="input-group-addon">Name:</span>
             <input type="text" name="name" class="form-control" placeholder="Name" aria-describedby="sizing-addon1"/>
