@@ -91,6 +91,7 @@ private[cloud] class Master(
   private def checkAndAssginJob() = {
     while (true) {
       val job = conf.queue.take()
+      logInfo(s"Master get job ${job.getName}successfully!")
       schedule(job)
     }
   }

@@ -73,15 +73,17 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
     val assginsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.ASSIGN_TEMPLE + Node.nodeId, true)
     //watch assgin task for local worker
     assginsCache.getListenable.addListener(assginsCacheListener)
+    assginsCache.start()
 
     // Watch list of jobname
     val jobnameCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOB_UNIQUE_NAME, true)
-
-    assginsCache.getListenable.addListener(jobUniqueNameListener)
+    jobnameCache.getListenable.addListener(jobUniqueNameListener)
+    jobnameCache.start()
 
     val timmerJobCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JOB_TIMER_TRIGGER_TEMPLE + Node.nodeId, true)
     //watch jobs by local workers for timer schedule
-    assginsCache.getListenable.addListener(timmerJobScheduleListener)
+    timmerJobCache.getListenable.addListener(timmerJobScheduleListener)
+    timmerJobCache.start()
   }
 
   private def startZK() = {
@@ -165,7 +167,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
           logInfo(s"add  job ${path} for timer schedule!")
-          conf.schedule.schedule(conf.zkNodeClient.read(Constant.JOB_TIMER_TRIGGER_TEMPLE + Node.nodeId + "/" + path).getOrElse(null.asInstanceOf[Job]))
+          conf.schedule.schedule(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
         }
         catch {
           case e: Exception => {

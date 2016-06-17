@@ -18,8 +18,12 @@ private[cloud] class DistributedQueueProducer[T: ClassTag](conf: CloudConf, path
 
   private val builder = QueueBuilder.builder(zk, null, TDistributedQueue.createQueueSerializer[T](conf), path)
   val queue = builder.buildQueue()
+  start()
 
-  def put(item: T) = queue.put(item)
+  def put(item: T) = {
+    queue.put(item)
+    logInfo("put item to queue successfully!")
+  }
 
   override def start(): Unit = queue.start()
 

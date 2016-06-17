@@ -57,8 +57,7 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
                 <font color="green">
                   {name}
                 </font>
-              </strong>
-              submit successfully!
+              </strong>{msg.getMessage}
             </span>
           } else {
             <span>Job submit failed

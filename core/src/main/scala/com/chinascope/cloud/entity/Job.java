@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by soledede.weng on 2016/6/2.
  */
-public class Job implements Serializable{
+public class Job implements Serializable {
     private Integer id;
     private String name; // must unique
     private Integer state; //JobState.READY RUNNING  FINISHED ERROR RUNNING_EXCEPTION STOPIPNG STOPPED
@@ -42,6 +42,17 @@ public class Job implements Serializable{
         this.endTime = endTime;
         this.startExecTime = startExecTime;
         this.entExecTime = entExecTime;
+    }
+
+    public static Msg valiateNull(Job job) {
+        if (!checkString(job.getName()) || !checkString(job.getCron()) || !checkString(job.getLogical()))
+            return new Msg(-1, "jobName or cron or logical can't be null");
+        return new Msg(0, "ok");
+    }
+
+    private static Boolean checkString(String content) {
+        if (content == null || content.trim().equalsIgnoreCase("")) return false;
+        return true;
     }
 
     public Integer getId() {

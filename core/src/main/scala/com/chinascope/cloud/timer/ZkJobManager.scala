@@ -49,17 +49,18 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
   }
 
   override def submitJob(job: Job): Msg = {
+    val msg = Job.valiateNull(job)
+    if (msg.getCode() == -1) return msg
     if (jobNames.contains(job.getName)) {
       logWarning("jobname must unique!")
-      new Msg(-1, "jobname must unique!", jobNames)
-    }
-    else {
+      msg.setCode(-1)
+      msg.setMessage("jobname must unique!")
+    } else {
       submitToZk(job)
-      logInfo("job submited!")
-      new Msg(0, "submited!")
+      msg.setCode(0)
+      msg.setMessage("submited!")
     }
-
-
+    msg
   }
 
   /**
@@ -85,6 +86,7 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
       }
       println(activeWorkerPaths + "\n" + jobPaths)
       zk.persist(path, job)
+      logInfo("job submited!")
     }
   }
 }

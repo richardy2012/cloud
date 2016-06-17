@@ -15,9 +15,7 @@ import scala.reflect.ClassTag
 private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf, path: String = Constant.JOB_QUEUE) extends Queue[T](conf) {
 
   val producter = new DistributedQueueProducer[T](conf, path)
-  producter.start()
   val consumer = new DistributedQueueConsumer[T](conf, path)
-  consumer.start()
 
 
   override def put(item: T) = producter.put(item)

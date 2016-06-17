@@ -1,6 +1,7 @@
 package com.chinascope.cloud.zookeeper
 
 
+import com.alibaba.fastjson.JSON
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.queue.impl.LinkedBlockingQueue
 import com.chinascope.cloud.util.{Logging, Utils}
@@ -23,6 +24,7 @@ private[cloud] class DistributedQueueConsumer[T: ClassTag](conf: CloudConf, path
 
   private val builder = QueueBuilder.builder(zk, createQueueConsumer, TDistributedQueue.createQueueSerializer[T](conf), path)
   val queue = builder.buildQueue()
+  start()
 
   def take(): T = {
     linkedQueue.take()
@@ -35,7 +37,7 @@ private[cloud] class DistributedQueueConsumer[T: ClassTag](conf: CloudConf, path
   private def createQueueConsumer(): QueueConsumer[T] = {
     new QueueConsumer[T] {
       override def consumeMessage(message: T): Unit = {
-        logInfo(s"zk consume message:${message.toString}")
+        logInfo(s"zk consume message:${JSON.toJSONString(message,true)}")
         linkedQueue.put(message)
       }
 
