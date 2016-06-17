@@ -144,7 +144,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
           val path = event.getData.getPath
           println(s"new jobname ${path} added!")
           //update jobnames for every node
-          conf.jobManager.addJobName(path.replace(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR + Constant.JOB_UNIQUE_NAME + "/", ""))
+          conf.jobManager.addJobName(path.replace(Constant.JOB_UNIQUE_NAME + "/", ""))
         }
         catch {
           case e: Exception => {

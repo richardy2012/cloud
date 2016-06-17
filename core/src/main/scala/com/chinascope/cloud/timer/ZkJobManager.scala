@@ -24,6 +24,8 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
   }
 
 
+  override def getJobNames(): Seq[String] = jobNames.toSeq
+
   /**
     * remove jobName from zk  /cloud/jobname/jobname
     * remore job from zk  /cloud/jobs/worker-xxx/jobname

@@ -11,4 +11,5 @@ private[cloud] trait JobManager {
   def schedule(job: Job): Unit
   def addJobName(jobName: String)
   def removeJobName(jobName: String)
+  def getJobNames():Seq[String]
 }

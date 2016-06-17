@@ -30,6 +30,7 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val partitionField = request.getParameter("partitionField")
     val partitionNum = request.getParameter("partitionNum")
     val parents = request.getParameter("parents")
+
     var msg: Msg = null
 
     if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
@@ -43,6 +44,11 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
         partition.setPartitionField(partitionField)
         partition.setPartitionField(partitionNum)
         job.setPartition(partition)
+      }
+      if (parents != null && !parents.equalsIgnoreCase("")) {
+        import scala.collection.JavaConversions._
+        val parentsSeq = parents.split(",").filter(!_.equalsIgnoreCase("Nothing selected")).toList
+        job.setParents(parentsSeq)
       }
       msg = NodeWebUI._conf.jobManager.submitJob(job)
     }

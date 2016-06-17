@@ -25,8 +25,7 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
   /** Index view listing applications and executors */
   def render(request: HttpServletRequest): Seq[Node] = {
 
-
-
+    val jobNames = NodeWebUI._conf.jobManager.getJobNames()
     val content =
       <div>
         <form action="/" method="post">
@@ -60,19 +59,17 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
               <span class="input-group-addon">PartitionNum:</span>
               <input type="text" class="form-control" id="partitionNum" name="partitionNum" placeholder="10" aria-describedby="sizing-addon1"/>
             </div>
-
-            <input type="hidden" name="parents" id="job_parents"/>
-
           </div>
-          <br/>
-          <label for="id_select"></label>
-          <select id="id_select" class="selectpicker bla bla bli" multiple="true" data-live-search="true">
-            <option selected="true">cow</option>
-            <option>bull</option>
-            <option>ASD</option>
-            <option>Bla</option>
-            <option>Ble</option>
-          </select>
+          <input type="hidden" name="parents" id="job_parents"/>
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">Parent Job Names:</span>
+            <label for="id_select"></label>
+            <select id="id_select" class="selectpicker bla bla bli form-control" multiple="true" data-live-search="true" aria-describedby="sizing-addon1">
+              {jobNames.map { name =>
+              <option>{name}</option>
+            }}
+            </select>
+          </div>
           <br/>
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
