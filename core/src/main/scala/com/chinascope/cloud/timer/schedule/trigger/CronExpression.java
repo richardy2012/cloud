@@ -177,9 +177,10 @@ public final class CronExpression implements Serializable, Cloneable {
 
     private String jobName;
 
-    private Date nextStartTime = getNextValidTimeAfter(new Date());
+    private Date nextStartTime = new Date();
 
     public Date getNextStartTime() {
+        getNextValidTimeAfter(new Date());
         return nextStartTime;
     }
 

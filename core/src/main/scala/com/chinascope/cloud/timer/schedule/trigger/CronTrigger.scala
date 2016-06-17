@@ -47,7 +47,9 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
       case parseException: ParseException =>
         logError(s"cron expression for job $jobName is invalid!", parseException.getCause)
       //TODO need alarm
-      case e: Exception => logError("instance CronExpression failed!", e.getCause)
+      case e: Exception =>
+        e.printStackTrace()
+        logError("instance CronExpression failed!", e.getCause)
     }
   }
 
@@ -63,7 +65,7 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
         logInfo(s"Trigger  ${popCron.getCronExpression} of ${popCron.getJobName} Successfully! ")
       }
       val nextTime = cron.getNextStartTime
-      val period = System.currentTimeMillis() - nextTime.getTime
+      val period = nextTime.getTime - System.currentTimeMillis()
       if (period <= 0) checkAndSubmitJobToZK
       else period
     } else -1
