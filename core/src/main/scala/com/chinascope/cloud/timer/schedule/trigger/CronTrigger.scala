@@ -8,7 +8,7 @@ import com.chinascope.cloud.clock.CloudTimerWorker
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
-import com.chinascope.cloud.util.Logging
+import com.chinascope.cloud.util.{Logging, Utils}
 
 import scala.collection.mutable
 
@@ -42,7 +42,9 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
   private def addCronExpression(jobName: String, expression: String): Unit = {
 
     try {
-      cronExpressionQueue.offer(new CronExpression(expression, jobName))
+      val cron = new CronExpression(expression, jobName)
+      cron.setNextStartTime(cron.getNextValidTimeAfter(new Date()))
+      cronExpressionQueue.offer(cron)
     } catch {
       case parseException: ParseException =>
         logError(s"cron expression for job $jobName is invalid!", parseException.getCause)
@@ -54,20 +56,23 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
   }
 
   def checkAndSubmitJobToZK(): Long = {
-    val cron = cronExpressionQueue.peek()
+    var cron = cronExpressionQueue.peek()
     if (cron != null) {
+      // if ((nextStartTime.getTime - new Date().getTime) <= 0) {
       if (cron.isSatisfiedBy(new Date())) {
-        val popCron = cronExpressionQueue.poll()
-        popCron.setNextStartTime(popCron.getNextValidTimeAfter(new Date()))
-        cronExpressionQueue.offer(popCron)
+        cron = cronExpressionQueue.poll()
+        cronExpressionQueue.offer(cron)
         //submit job to distribute queue
-        conf.queue.put(expToJob(popCron.getJobName))
-        logInfo(s"Trigger  ${popCron.getCronExpression} of ${popCron.getJobName} Successfully! ")
+        conf.queue.put(expToJob(cron.getJobName))
+        logInfo(s"Trigger  ${cron.getCronExpression} of ${cron.getJobName} Successfully! ")
+        -1
+      } else {
+        val nextStartTime = cron.getNextValidTimeAfter(new Date())
+        cron.setNextStartTime(nextStartTime)
+        val period =cron.getNextStartTime.getTime- new Date().getTime
+        if (period <= 0) checkAndSubmitJobToZK
+        else period
       }
-      val nextTime = cron.getNextStartTime
-      val period = nextTime.getTime - System.currentTimeMillis()
-      if (period <= 0) checkAndSubmitJobToZK
-      else period
     } else -1
   }
 

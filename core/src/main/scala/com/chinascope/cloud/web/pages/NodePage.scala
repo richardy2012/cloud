@@ -7,6 +7,7 @@ import com.chinascope.cloud.entity.{Job, Msg}
 import com.chinascope.cloud.partition.DBRangePartition
 import com.chinascope.cloud.web.{JsonProtocol, NodeWebUI, WebUIPage, WebUIUtils}
 import org.json4s.JValue
+import com.chinascope.cloud
 
 import scala.xml.Node
 
@@ -33,6 +34,8 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
 
     var msg: Msg = null
 
+
+
     if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
       val job = new Job()
       job.setName(name)
@@ -50,7 +53,11 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
         val parentsSeq = parents.split(",").filter(!_.equalsIgnoreCase("Nothing selected")).toList
         job.setParents(parentsSeq)
       }
-      msg = NodeWebUI._conf.jobManager.submitJob(job)
+      if (!cloud.deploy.node.Node.nodeStarted.get()) {
+        msg.setCode(-1)
+        msg.setMessage("Please hold on ,Cluster is starting...")
+      } else msg = NodeWebUI._conf.jobManager.submitJob(job)
+
     }
     val content =
       <div class="row-fluid">

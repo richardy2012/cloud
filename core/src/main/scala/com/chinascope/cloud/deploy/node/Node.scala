@@ -31,7 +31,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
-      while (!newState.isConnected) Thread.sleep(100)
+      while (!newState.isConnected) {
+        Node.nodeStarted.compareAndSet(true, false)
+        Thread.sleep(100)
+      }
+      Node.nodeStarted.compareAndSet(false, true)
       init
       boostrapTmpNodeToZk
       logInfo(s"Node $WORKER_PREFIX${Node.nodeId} Started.")
@@ -189,6 +193,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
 private[cloud] object Node extends Logging {
   //check if this node is a leader
   var isLeader = new AtomicBoolean(false)
+  var nodeStarted = new AtomicBoolean(false)
   var nodeId: Long = _
 
   def bootstrap(zk: ZKClient) = {
