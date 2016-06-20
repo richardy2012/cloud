@@ -4,8 +4,9 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.chinascope.cloud.clock.CloudTimerWorker
-import com.chinascope.cloud.config.CloudConf
+import com.chinascope.cloud.config.{CloudConf, DefaultConfiguration}
 import com.chinascope.cloud.entity.Job
+import com.chinascope.cloud.excute.runner.ExcutorRunner
 import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import com.chinascope.cloud.web.NodeWebUI
@@ -21,12 +22,21 @@ import org.apache.zookeeper.CreateMode
 /**
   * Created by soledede.weng on 2016/6/3.
   */
-private[cloud] class Node(conf: CloudConf) extends Logging {
+private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfiguration {
   private val zk: CuratorFramework = this.conf.zkNodeClient.zk[CuratorFramework]
   var workerNode: PersistentNode = _
 
   final val WORKER_PREFIX = "worker-"
   private var webUi: NodeWebUI = null
+
+  var coreThreadsNumber = consumerCoreThreadsNum
+
+
+  var currentThreadsNum = Utils.inferDefaultCores() * coreThreadsNumber
+
+
+  if (consumerThreadsNum > 0) currentThreadsNum = consumerThreadsNum
+  val consumerManageThreadPool = Utils.newDaemonFixedThreadPool(currentThreadsNum, "task_thread_excutor")
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
@@ -47,7 +57,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
   private def init() = {
     conf.initQueue()
     //init web ui
-    webUi = new NodeWebUI(conf, 8888)
+    webUi = new NodeWebUI(conf, conf.getInt("webui.port", webUiPort))
     webUi.bind()
   }
 
@@ -129,8 +139,14 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
           val path = event.getData.getPath
-          println(s"UPDATED assign worker$path some partition task")
-          println(conf.zkNodeClient.read(path))
+          val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)
+          jobOption match {
+            case Some(job) =>
+              logInfo(s"Node worker-${Node.nodeId} received job ${job.getName}:${job.toString}")
+              val runner = new ExcutorRunner(conf, job)
+              consumerManageThreadPool.submit(runner)
+            case None => logWarning(s"Can't receive job successfully!")
+          }
         case _ =>
       }
     }

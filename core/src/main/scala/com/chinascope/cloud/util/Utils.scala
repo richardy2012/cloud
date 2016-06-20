@@ -23,6 +23,7 @@ import scala.util.Try
 import scala.util.control.{ControlThrowable, NonFatal}
 import com.google.common.io.{ByteStreams, Files => GFiles}
 import com.google.common.net.InetAddresses
+import com.google.common.util.concurrent.ThreadFactoryBuilder
 import org.apache.commons.lang3.SystemUtils
 import org.apache.log4j.PropertyConfigurator
 import org.eclipse.jetty.util.MultiException
@@ -38,6 +39,8 @@ private[cloud] object Utils extends Logging {
   private val MAX_DIR_CREATION_ATTEMPTS: Int = 10
   @volatile private var localRootDirs: Array[String] = null
 
+  private val daemonThreadFactoryBuilder: ThreadFactoryBuilder =
+    new ThreadFactoryBuilder().setDaemon(true)
 
   /** Serialize an object using Java serialization */
   def serialize[T](o: T): Array[Byte] = {
@@ -118,6 +121,16 @@ private[cloud] object Utils extends Logging {
     // Leave out 1 GB for the operating system, but don't return a negative memory size
     math.max(totalMb - 1024, 512)
   }
+
+  def namedThreadFactory(prefix: String): ThreadFactory = {
+    daemonThreadFactoryBuilder.setNameFormat(prefix + "-%d").build()
+  }
+
+  def newDaemonFixedThreadPool(nThreads: Int, prefix: String): ThreadPoolExecutor = {
+    val threadFactory = namedThreadFactory(prefix)
+    Executors.newFixedThreadPool(nThreads, threadFactory).asInstanceOf[ThreadPoolExecutor]
+  }
+
 
   /** Serialize via nested stream using specific serializer */
   def serializeViaNestedStream(os: OutputStream, ser: SerializerInstance)(

@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import com.chinascope.cloud.deploy.master.Master
 import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
+import com.chinascope.cloud.excute.{DefaultExcutor, Excutor}
 import com.chinascope.cloud.queue.Queue
 import com.chinascope.cloud.queue.impl.ZookeeperDistributeQueue
 import com.chinascope.cloud.serializer.{JavaSerializer, Serializer}
@@ -53,7 +54,9 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   private[cloud] var schedule: Schedule = _
   private[cloud] var cronTrigger: Trigger = _
 
-  private[cloud] var queue: Queue[Job] = null
+  private[cloud] var queue: Queue[Job] = _
+
+  private[cloud] var excutor: Excutor = _
 
 
   private[cloud] def init() = {
@@ -66,7 +69,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.jobManager = new ZkJobManager(this)
     this.schedule = new DefaultSchedule(this)
     this.cronTrigger = new CronTrigger(this)
-
+    this.excutor = new DefaultExcutor(this)
 
   }
 
