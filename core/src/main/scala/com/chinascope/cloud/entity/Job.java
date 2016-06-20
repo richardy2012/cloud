@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by soledede.weng on 2016/6/2.
  */
-public class Job implements Serializable {
+public class Job implements Serializable, Cloneable {
     private Integer id;
     private String name; // must unique
     private Integer state; //JobState.READY RUNNING  FINISHED ERROR RUNNING_EXCEPTION STOPIPNG STOPPED
@@ -23,12 +23,12 @@ public class Job implements Serializable {
     private Long startTime;
     private Long endTime;
     private Long startExecTime;
-    private Long entExecTime;
+    private Long endExecTime;
 
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
+    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long endExecTime) {
         this.id = id;
         this.name = name;
         this.state = state;
@@ -41,7 +41,7 @@ public class Job implements Serializable {
         this.startTime = startTime;
         this.endTime = endTime;
         this.startExecTime = startExecTime;
-        this.entExecTime = entExecTime;
+        this.endExecTime = endExecTime;
     }
 
     public static Msg valiateNull(Job job) {
@@ -152,12 +152,12 @@ public class Job implements Serializable {
         this.startExecTime = startExecTime;
     }
 
-    public Long getEntExecTime() {
-        return entExecTime;
+    public Long getEndExecTime() {
+        return endExecTime;
     }
 
-    public void setEntExecTime(Long entExecTime) {
-        this.entExecTime = entExecTime;
+    public void setEndExecTime(Long endExecTime) {
+        this.endExecTime = endExecTime;
     }
 
     @Override
@@ -179,7 +179,7 @@ public class Job implements Serializable {
         if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
         if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
         if (startExecTime != null ? !startExecTime.equals(job.startExecTime) : job.startExecTime != null) return false;
-        return entExecTime != null ? entExecTime.equals(job.entExecTime) : job.entExecTime == null;
+        return endExecTime != null ? endExecTime.equals(job.endExecTime) : job.endExecTime == null;
 
     }
 
@@ -197,8 +197,21 @@ public class Job implements Serializable {
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
-        result = 31 * result + (entExecTime != null ? entExecTime.hashCode() : 0);
+        result = 31 * result + (endExecTime != null ? endExecTime.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        Job job = new Job();
+        job.setId(this.getId());
+        job.setName(this.getName());
+        job.setCron(this.getCron());
+        job.setStartTime(this.getStartTime());
+        job.setEndTime(this.getEndTime());
+        job.setEndExecTime(this.getEndExecTime());
+        job.setLogical(this.getLogical());
+        return job;
     }
 
     @Override

@@ -32,6 +32,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   private val zk: CuratorFramework = this.conf.zkNodeClient.zk[CuratorFramework]
   var workerNode: PersistentNode = _
 
+  val _jobs = new mutable.HashMap[String, Job]()
+  val completedJobs = new mutable.HashSet[Job]()
+
   val jobNameToTask = new mutable.HashMap[String, mutable.Set[Future[Task]]]()
 
   final val WORKER_PREFIX = "worker-"
@@ -229,11 +232,42 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
+
   private[cloud] val partitionStatusCacheListener = new TreeCacheListener {
     override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
       event.getType match {
         case TreeCacheEvent.Type.NODE_UPDATED => {
-          println(s"tree node partitions of jobs  status updated: ${event.getData.getPath}")
+          val path = event.getData.getPath
+          if (Node._jobPath.matches(path)) {
+            ///cloud/status/job1
+            //update jobs map
+            val jobOption = conf.zkNodeClient.read[Job](path)
+            jobOption match {
+              case Some(job) =>
+                if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
+                else {
+                  _jobs(job.getName).setState(job.getState)
+                }
+                println(_jobs)
+              case None =>
+            }
+
+          } else {
+            // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
+            val taskOption = conf.zkNodeClient.read[Task](path)
+            //update partition task
+            taskOption match {
+              case Some(task) =>
+                path match {
+                  case Node.jobNameMatch(jobName) =>
+                  case _ =>
+                }
+                _jobs
+              case None =>
+            }
+          }
+
+          println(s"tree node partitions of jobs  status updated: ${path}")
         }
         case _ =>
       }
@@ -277,6 +311,8 @@ private[cloud] object Node extends Logging {
   var nodeStarted = new AtomicBoolean(false)
   var nodeId: Long = _
 
+  val _jobPath = "^" + Constant.STATUS + "/([0-9|a-z]+)$".r
+  val jobNameMatch = "^" + Constant.STATUS + "/([0-9|a-z]+)/\\w+$".r
 
   def bootstrap(zk: ZKClient) = {
     zk.mkdir(Constant.JOBS_DIR)
