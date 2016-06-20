@@ -24,11 +24,12 @@ public class Job implements Serializable {
     private Long endTime;
     private Long startExecTime;
     private Long entExecTime;
+    private Long version;
 
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long entExecTime) {
+    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long entExecTime, Long version) {
         this.id = id;
         this.name = name;
         this.state = state;
@@ -42,6 +43,7 @@ public class Job implements Serializable {
         this.endTime = endTime;
         this.startExecTime = startExecTime;
         this.entExecTime = entExecTime;
+        this.version = version;
     }
 
     public static Msg valiateNull(Job job) {
@@ -53,6 +55,14 @@ public class Job implements Serializable {
     private static Boolean checkString(String content) {
         if (content == null || content.trim().equalsIgnoreCase("")) return false;
         return true;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public Integer getId() {
