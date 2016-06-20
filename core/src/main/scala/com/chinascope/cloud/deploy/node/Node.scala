@@ -16,7 +16,7 @@ import com.chinascope.cloud.web.NodeWebUI
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.atomic.{DistributedAtomicInteger, DistributedAtomicLong}
-import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheEvent, PathChildrenCacheListener}
+import org.apache.curator.framework.recipes.cache.{TreeCacheEvent, _}
 import org.apache.curator.framework.recipes.nodes.PersistentNode
 import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 import org.apache.curator.retry.RetryNTimes
@@ -45,6 +45,8 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   if (consumerThreadsNum > 0) currentThreadsNum = consumerThreadsNum
   val consumerManageThreadPool = Utils.newDaemonFixedThreadPool(currentThreadsNum, "task_thread_excutor")
+
+
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
@@ -135,6 +137,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     //watch jobs by local workers for timer schedule
     timmerJobCache.getListenable.addListener(timmerJobScheduleListener)
     timmerJobCache.start()
+
+    //Watch status of job task partition
+    val partitionJobsTreeNodeCache: TreeCache = new TreeCache(zk, Constant.STATUS)
+    partitionJobsTreeNodeCache.getListenable.addListener(partitionStatusCacheListener)
+    partitionJobsTreeNodeCache.start()
   }
 
   private def startZK() = {
@@ -228,6 +235,16 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
+  private[cloud] val partitionStatusCacheListener = new TreeCacheListener {
+    override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
+      event.getType match {
+        case TreeCacheEvent.Type.NODE_UPDATED => {
+          println(s"tree node partitions of jobs  status updated: ${event.getData.getPath}")
+        }
+        case _ =>
+      }
+    }
+  }
 
   private def processReceiveTask(path: String): Unit = {
     val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)

@@ -14,7 +14,7 @@ trait ListenerWaiter[L <: AnyRef, E] extends Logging {
 
   self =>
 
-  private[search] val listeners = new CopyOnWriteArrayList[L]
+  private[cloud] val listeners = new CopyOnWriteArrayList[L]
 
 
   private val EVENT_QUEUE_CAPACITY = 10000

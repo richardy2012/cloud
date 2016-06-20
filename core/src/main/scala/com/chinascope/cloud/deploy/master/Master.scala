@@ -38,8 +38,7 @@ private[cloud] class Master(
   private var resourcesWorkersCache: PathChildrenCache = _
   //Watch jobs in workers for tree
   private var workersJobsTreeNodeCache: TreeCache = _
-  //Watch status of job task partition
-  private var partitionJobsTreeNodeCache: TreeCache = _
+
 
   val idToNodes = new mutable.HashMap[Long, NodeInfo]()
   val nodes = new mutable.HashSet[NodeInfo]()
@@ -62,7 +61,7 @@ private[cloud] class Master(
     this.workersCache = new PathChildrenCache(zk, Constant.WORKER_DIR, true)
     this.resourcesWorkersCache = new PathChildrenCache(zk, Constant.RESOURCE_DIR, true)
     this.workersJobsTreeNodeCache = new TreeCache(zk, Constant.JOBS_DIR)
-    this.partitionJobsTreeNodeCache = new TreeCache(zk, Constant.STATUS)
+
 
   }
 
@@ -77,8 +76,7 @@ private[cloud] class Master(
     this.workersJobsTreeNodeCache.getListenable.addListener(workersJobsCacheListener)
     this.workersJobsTreeNodeCache.start()
 
-    this.partitionJobsTreeNodeCache.getListenable.addListener(partitionStatusCacheListener)
-    this.partitionJobsTreeNodeCache.start()
+
   }
 
 
@@ -161,7 +159,7 @@ private[cloud] class Master(
     CloseableUtils.closeQuietly(workersCache)
     CloseableUtils.closeQuietly(resourcesWorkersCache)
     CloseableUtils.closeQuietly(workersJobsTreeNodeCache)
-    CloseableUtils.closeQuietly(partitionJobsTreeNodeCache)
+
     CloseableUtils.closeQuietly(zk)
     System.exit(0)
   }
@@ -203,16 +201,7 @@ private[cloud] class Master(
       }
     }
   }
-  private[cloud] val partitionStatusCacheListener = new TreeCacheListener {
-    override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
-      event.getType match {
-        case TreeCacheEvent.Type.NODE_UPDATED => {
-          println(s"tree node partitions of jobs  status updated: ${event.getData.getPath}")
-        }
-        case _ =>
-      }
-    }
-  }
+
 
 }
 
