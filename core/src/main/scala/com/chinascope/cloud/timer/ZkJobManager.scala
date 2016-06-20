@@ -2,7 +2,8 @@ package com.chinascope.cloud.timer
 
 import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.node.Node
-import com.chinascope.cloud.entity.{Job, Msg}
+import com.chinascope.cloud.entity.{Job, JobState, Msg}
+import com.chinascope.cloud.listener.JobReady
 import com.chinascope.cloud.util.{Constant, Logging}
 
 import scala.collection.mutable
@@ -59,6 +60,10 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
       msg.setMessage("jobname must unique!")
     } else {
       submitToZk(job)
+      //job ready
+      job.setState(JobState.READY)
+      conf.listenerWaiter.post(JobReady(job))
+
       msg.setCode(0)
       msg.setMessage("submited!")
     }

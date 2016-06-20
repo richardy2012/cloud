@@ -6,6 +6,7 @@ import com.chinascope.cloud.deploy.master.Master
 import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.excute.{DefaultExcutor, Excutor}
+import com.chinascope.cloud.listener.ManagerListenerWaiter
 import com.chinascope.cloud.queue.Queue
 import com.chinascope.cloud.queue.impl.ZookeeperDistributeQueue
 import com.chinascope.cloud.serializer.{JavaSerializer, Serializer}
@@ -58,6 +59,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   private[cloud] var excutor: Excutor = _
 
+  private[cloud] var listenerWaiter: ManagerListenerWaiter = _
+
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
@@ -71,6 +74,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.cronTrigger = new CronTrigger(this)
     this.excutor = new DefaultExcutor(this)
 
+    this.listenerWaiter = ManagerListenerWaiter()
   }
 
   def initQueue() = {

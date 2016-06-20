@@ -1,9 +1,9 @@
 package com.chinascope.cloud.listener
 
 /**
- * Created by soledede.weng on 2016/6/2.
- */
-class ManagerListenerWaiter extends TraceListenerWaiter
+  * Created by soledede.weng on 2016/6/2.
+  */
+class ManagerListenerWaiter private extends TraceListenerWaiter
 
 object ManagerListenerWaiter {
   var w: ManagerListenerWaiter = null

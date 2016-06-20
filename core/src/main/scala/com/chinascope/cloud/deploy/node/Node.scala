@@ -7,6 +7,7 @@ import com.chinascope.cloud.clock.CloudTimerWorker
 import com.chinascope.cloud.config.{CloudConf, DefaultConfiguration}
 import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.excute.runner.ExcutorRunner
+import com.chinascope.cloud.listener.JobTaskTraceListener
 import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import com.chinascope.cloud.web.NodeWebUI
@@ -37,6 +38,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   if (consumerThreadsNum > 0) currentThreadsNum = consumerThreadsNum
   val consumerManageThreadPool = Utils.newDaemonFixedThreadPool(currentThreadsNum, "task_thread_excutor")
+
+  conf.listenerWaiter.addListener(new JobTaskTraceListener(conf))
+  conf.listenerWaiter.start()
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
