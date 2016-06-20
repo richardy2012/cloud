@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import com.chinascope.cloud.deploy.master.Master
 import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
-import com.chinascope.cloud.excute.{DefaultExcutor, Excutor}
+import com.chinascope.cloud.excute.{DefaultExcutor, Excutor, ExcutorManager}
 import com.chinascope.cloud.listener.ManagerListenerWaiter
 import com.chinascope.cloud.queue.Queue
 import com.chinascope.cloud.queue.impl.ZookeeperDistributeQueue
@@ -57,7 +57,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   private[cloud] var queue: Queue[Job] = _
 
-  private[cloud] var excutor: Excutor = _
+  private[cloud] var excutorManager: ExcutorManager = _
 
   private[cloud] var listenerWaiter: ManagerListenerWaiter = _
 
@@ -72,7 +72,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.jobManager = new ZkJobManager(this)
     this.schedule = new DefaultSchedule(this)
     this.cronTrigger = new CronTrigger(this)
-    this.excutor = new DefaultExcutor(this)
+    this.excutorManager = new ExcutorManager(this)
 
     this.listenerWaiter = ManagerListenerWaiter()
   }

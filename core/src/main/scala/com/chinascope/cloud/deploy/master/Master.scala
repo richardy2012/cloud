@@ -8,6 +8,7 @@ import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.election.LeaderCandidate
 import com.chinascope.cloud.deploy.node.{Node, NodeInfo}
 import com.chinascope.cloud.entity.{Job, JobState}
+import com.chinascope.cloud.listener.{JobStarted, JobTaskTraceListener}
 import com.chinascope.cloud.resource.{ResMonitorInfo, ResourceManager}
 import com.chinascope.cloud.util.{Constant, Logging}
 import org.apache.curator.framework.CuratorFramework
@@ -26,6 +27,9 @@ private[cloud] class Master(
                              conf: CloudConf
                            ) extends LeaderCandidate with Logging {
   private val zk: CuratorFramework = this.conf.zkClient.zk[CuratorFramework]
+
+  conf.listenerWaiter.addListener(new JobTaskTraceListener(conf))
+  conf.listenerWaiter.start()
 
   // Watch list of workers
   // conf.get(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY, Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR)
@@ -94,6 +98,7 @@ private[cloud] class Master(
       val job = conf.queue.take()
       logInfo(s"Master get job ${job.getName}successfully!")
       schedule(job)
+      conf.listenerWaiter.post(JobStarted(job))
     }
   }
 

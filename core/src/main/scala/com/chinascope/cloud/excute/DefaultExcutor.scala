@@ -12,7 +12,7 @@ private[cloud] class DefaultExcutor(conf: CloudConf) extends Excutor {
   }
 
   override def start(job: Job): Job = {
-    println("come in....START")
+
     null
   }
 }

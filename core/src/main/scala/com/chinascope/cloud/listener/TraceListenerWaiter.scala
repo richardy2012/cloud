@@ -26,6 +26,16 @@ trait TraceListenerWaiter extends ListenerWaiter[TraceListener, TraceListenerEve
     event match {
       case jobReady: JobReady =>
         listener.onJobReady(jobReady)
+      case jobStarted: JobStarted =>
+        listener.onJobStarted(jobStarted)
+      case jobRunning: JobRunning =>
+        listener.onJobRunning(jobRunning)
+      case jobFinished: JobFinished =>
+        listener.onJobFinished(jobFinished)
+      case taskStarted: TaskStarted =>
+        listener.onTaskStarted(taskStarted)
+      case taskFinished: TaskFinished =>
+        listener.onTaskFinished(taskFinished)
     }
   }
 }

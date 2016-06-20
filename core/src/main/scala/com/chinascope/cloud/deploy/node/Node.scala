@@ -1,13 +1,15 @@
 package com.chinascope.cloud.deploy.node
 
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicBoolean
 
+import com.alibaba.fastjson.JSON
 import com.chinascope.cloud.clock.CloudTimerWorker
 import com.chinascope.cloud.config.{CloudConf, DefaultConfiguration}
-import com.chinascope.cloud.entity.Job
+import com.chinascope.cloud.entity.{Job, JobState}
 import com.chinascope.cloud.excute.runner.ExcutorRunner
-import com.chinascope.cloud.listener.JobTaskTraceListener
+import com.chinascope.cloud.listener.{JobRunning, JobTaskTraceListener, TaskFinished}
+import com.chinascope.cloud.partition.Task
 import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import com.chinascope.cloud.web.NodeWebUI
@@ -15,10 +17,13 @@ import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.atomic.{DistributedAtomicInteger, DistributedAtomicLong}
 import org.apache.curator.framework.recipes.cache.{PathChildrenCache, PathChildrenCacheEvent, PathChildrenCacheListener}
-import org.apache.curator.framework.recipes.nodes.{PersistentEphemeralNode, PersistentNode}
+import org.apache.curator.framework.recipes.nodes.PersistentNode
 import org.apache.curator.framework.state.{ConnectionState, ConnectionStateListener}
 import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
+
+import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
   * Created by soledede.weng on 2016/6/3.
@@ -26,6 +31,8 @@ import org.apache.zookeeper.CreateMode
 private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfiguration {
   private val zk: CuratorFramework = this.conf.zkNodeClient.zk[CuratorFramework]
   var workerNode: PersistentNode = _
+
+  val jobNameToTask = new mutable.HashMap[String, mutable.Set[Future[Task]]]()
 
   final val WORKER_PREFIX = "worker-"
   private var webUi: NodeWebUI = null
@@ -38,9 +45,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   if (consumerThreadsNum > 0) currentThreadsNum = consumerThreadsNum
   val consumerManageThreadPool = Utils.newDaemonFixedThreadPool(currentThreadsNum, "task_thread_excutor")
-
-  conf.listenerWaiter.addListener(new JobTaskTraceListener(conf))
-  conf.listenerWaiter.start()
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
@@ -64,6 +68,35 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     webUi = new NodeWebUI(conf, conf.getInt("webui.port", webUiPort))
     webUi.bind()
   }
+
+
+  def checkTaskStatus(): Unit = {
+    while (true) {
+      val finishedTasks = jobNameToTask.filter(_._2.filter(_.isDone).size > 0)
+      finishedTasks.foreach {
+        case (jobName, tasks) =>
+          tasks.foreach { t =>
+            val task = t.get()
+            conf.listenerWaiter.post(TaskFinished(jobName, task))
+            jobNameToTask(jobName) -= t
+            if (jobNameToTask(jobName).size == 0) jobNameToTask -= jobName
+          }
+        case _ =>
+      }
+      if (jobNameToTask.isEmpty) Thread.sleep(10 * 1000)
+      else Thread.sleep(1000)
+    }
+
+  }
+
+
+  val thread = new Thread("chek whether task have finished") {
+    setDaemon(true)
+
+    override def run(): Unit = {
+      checkTaskStatus()
+    }
+  }.start()
 
   def start() = {
     logInfo("Starting Worker Node")
@@ -139,22 +172,14 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   private[cloud] val assginsCacheListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
-
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
-          val path = event.getData.getPath
-          val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)
-          jobOption match {
-            case Some(job) =>
-              logInfo(s"Node worker-${Node.nodeId} received job ${job.getName}:${job.toString}")
-              val runner = new ExcutorRunner(conf, job)
-              consumerManageThreadPool.submit(runner)
-            case None => logWarning(s"Can't receive job successfully!")
-          }
+          processReceiveTask(event.getData.getPath)
         case _ =>
       }
     }
   }
+
 
   private[cloud] val jobUniqueNameListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
@@ -204,6 +229,35 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 
 
+  private def processReceiveTask(path: String): Unit = {
+    val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)
+    jobOption match {
+      case Some(job) =>
+        logInfo(s"Node worker-${Node.nodeId} received job ${job.getName}:${job.toString}")
+        val workerPartitionNum = JSON.parseObject(job.getPartition.getWorkerPartitionNum)
+        val partitionNum = workerPartitionNum.getInteger(s"${Node.nodeId}")
+        for (i <- 1 to partitionNum) {
+          job.getPartition.setPartitionNum(i)
+          job.setState(JobState.RUNNING)
+          val task = new Task()
+          val startTime = System.currentTimeMillis()
+          task.setId(s"${Node.nodeId}_${job.getPartition.getVersion}")
+          task.setStartTime(startTime)
+          val runner = new ExcutorRunner(conf, job, task)
+          val taskFuture = consumerManageThreadPool.submit(runner)
+          if (!jobNameToTask.contains(job.getName)) {
+            val taskFutureSet = new mutable.HashSet[Future[Task]]()
+            taskFutureSet += taskFuture
+            jobNameToTask(job.getName) = taskFutureSet
+          } else {
+            jobNameToTask(job.getName) += taskFuture
+          }
+        }
+        conf.listenerWaiter.post(JobRunning(job))
+      case None => logWarning(s"Can't receive job successfully!")
+    }
+  }
+
 }
 
 private[cloud] object Node extends Logging {
@@ -211,6 +265,7 @@ private[cloud] object Node extends Logging {
   var isLeader = new AtomicBoolean(false)
   var nodeStarted = new AtomicBoolean(false)
   var nodeId: Long = _
+
 
   def bootstrap(zk: ZKClient) = {
     zk.mkdir(Constant.JOBS_DIR)
