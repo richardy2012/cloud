@@ -1,6 +1,7 @@
 package com.chinascope.cloud.deploy.master
 
 import java.util
+import java.util.Date
 
 import com.alibaba.fastjson.JSON
 import com.chinascope.cloud.config.CloudConf
@@ -84,7 +85,7 @@ private[cloud] class Master(
       override def run(): Unit = {
         checkAndAssginJob
       }
-    }
+    }.start()
 
   }
 
@@ -99,7 +100,7 @@ private[cloud] class Master(
   private def schedule(job: Job) = {
     if (Node.isLeader.get()) {
       if (idToNodes != null && !idToNodes.isEmpty) {
-        val availableNodes = idToNodes.map(_._2).filter(n => n.cpuUsageRatio < 0.05 && n.memUsageRatio < 0.05).toArray
+        val availableNodes = idToNodes.map(_._2).filter(n => n.cpuUsageRatio >= 0.05 && n.memUsageRatio >= 0.05).toArray
         if (availableNodes != null && availableNodes.length > 0) {
           val workerUsable = availableNodes.length
           val availableCores = availableNodes.map(n => (n.id, n.availableCores)).sortBy(_._2).reverse
@@ -121,13 +122,13 @@ private[cloud] class Master(
             point = (point + 1) % workerUsable
           }
           val workerToPartitionNumMap = new java.util.HashMap[Long, Int]()
-          for (i <- 0 to assigned.length) {
+          for (i <- 0 until assigned.length) {
             workerToPartitionNumMap(availableCores(i)._1) = assigned(i)
           }
           val workerPartitionNum = JSON.toJSONString(workerToPartitionNumMap, true)
           job.getPartition.setWorkerPartitionNum(workerPartitionNum)
           //Allocate to worker by zookeeper /root/assgin/worker-xxx/jobname[1-n]
-
+          logInfo(s"Master assign task,Worker partition number:$workerPartitionNum")
           job.setState(JobState.STARTED)
           workerToPartitionNumMap.foreach { w =>
             val path = Constant.ASSIGN_TEMPLE + w._1 + "/" + job.getName
@@ -142,9 +143,10 @@ private[cloud] class Master(
   }
 
   private def returnJobToQueue(job: Job): Unit = {
-    //No Node ,sleep 1 second
+    //No Node ,sleep 10 second
+    Thread.sleep(10 * 1000)
     conf.queue.put(job)
-    Thread.sleep(1000)
+
     logWarning("No Node hava enough resource to allocate job!")
   }
 
@@ -176,8 +178,10 @@ private[cloud] class Master(
   private[cloud] val resourceCacheListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
       event.getType match {
-        case PathChildrenCacheEvent.Type.CHILD_UPDATED => ResourceManager.onResourceChildUpdated(conf, event.getData.getPath)
-        case PathChildrenCacheEvent.Type.CHILD_ADDED => ResourceManager.onResourceChildUpdated(conf, event.getData.getPath)
+        case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
+          ResourceManager.onResourceChildUpdated(conf, event.getData.getPath)
+        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+          ResourceManager.onResourceChildUpdated(conf, event.getData.getPath)
         case _ =>
       }
     }

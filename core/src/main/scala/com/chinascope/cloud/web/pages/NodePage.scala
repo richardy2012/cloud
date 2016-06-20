@@ -41,13 +41,14 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
       job.setName(name)
       job.setCron(cron)
       job.setLogical(logical)
-      if (partitionField == null || partitionField.trim.equalsIgnoreCase("")) job.setNeedPartition(false)
-      else {
-        val partition = new DBRangePartition()
+      val partition = new DBRangePartition()
+      if (partitionField == null || partitionField.trim.equalsIgnoreCase("")) {
+        job.setNeedPartition(false)
+      } else {
         partition.setPartitionField(partitionField)
         partition.setPartitionField(partitionNum)
-        job.setPartition(partition)
       }
+      job.setPartition(partition)
       if (parents != null && !parents.equalsIgnoreCase("")) {
         import scala.collection.JavaConversions._
         val parentsSeq = parents.split(",").filter(!_.equalsIgnoreCase("Nothing selected")).toList

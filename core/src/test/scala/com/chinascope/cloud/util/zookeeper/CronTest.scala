@@ -20,7 +20,7 @@ private[cloud] object CronTest {
   }
 
   def testNextExecTime() = {
-    var c: CronExpression = new CronExpression("*/10 * * * * ?", "testJob")
+    var c: CronExpression = new CronExpression("* */2 * * * ?", "testJob")
     while(true){
       if(c.isSatisfiedBy(new Date())){
 

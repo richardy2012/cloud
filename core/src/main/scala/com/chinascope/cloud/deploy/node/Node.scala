@@ -127,14 +127,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
 
       event.getType match {
-        case PathChildrenCacheEvent.Type.CHILD_UPDATED => try {
-          println(s"assign worker${event.getData.getPath} some partition task")
-        }
-        catch {
-          case e: Exception => {
-            log.error("Exception while trying to re-assign tasks", e)
-          }
-        }
+        case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
+          val path = event.getData.getPath
+          println(s"UPDATED assign worker$path some partition task")
+          println(conf.zkNodeClient.read(path))
         case _ =>
       }
     }

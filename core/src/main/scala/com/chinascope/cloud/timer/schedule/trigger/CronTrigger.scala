@@ -67,11 +67,13 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
         logInfo(s"Trigger  ${cron.getCronExpression} of ${cron.getJobName} Successfully! ")
         -1
       } else {
+        Thread.sleep(100)
         val nextStartTime = cron.getNextValidTimeAfter(new Date())
         cron.setNextStartTime(nextStartTime)
-        val period =cron.getNextStartTime.getTime- new Date().getTime
+        /*val period = cron.getNextStartTime.getTime - new Date().getTime
         if (period <= 0) checkAndSubmitJobToZK
-        else period
+        else period*/
+        -1
       }
     } else -1
   }
