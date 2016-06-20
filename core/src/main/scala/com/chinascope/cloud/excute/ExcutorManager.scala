@@ -15,6 +15,6 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
   def start(job: Job, task: Task): Task = {
     println("come in....START")
     conf.listenerWaiter.post(TaskStarted(job.getName, task))
-    null
+    task
   }
 }

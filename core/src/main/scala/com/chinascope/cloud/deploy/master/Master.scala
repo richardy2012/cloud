@@ -130,6 +130,7 @@ private[cloud] class Master(
           }
           val workerPartitionNum = JSON.toJSONString(workerToPartitionNumMap, true)
           job.getPartition.setWorkerPartitionNum(workerPartitionNum)
+          job.getPartition.setVersion(System.currentTimeMillis())
           //Allocate to worker by zookeeper /root/assgin/worker-xxx/jobname[1-n]
           logInfo(s"Master assign task,Worker partition number:$workerPartitionNum")
           job.setState(JobState.STARTED)

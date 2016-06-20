@@ -17,7 +17,6 @@ private[cloud] object ResourceManager extends Logging {
 
   private[cloud] def onResourceChildUpdated(conf: CloudConf, path: String) = {
     try {
-      println(s"have resource updated: ${path}")
       val resMonitorInfo = conf.zkClient.read[ResMonitorInfo](path)
       resMonitorInfo match {
         case Some(res) =>

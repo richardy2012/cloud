@@ -47,8 +47,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   val consumerManageThreadPool = Utils.newDaemonFixedThreadPool(currentThreadsNum, "task_thread_excutor")
 
 
-
-
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
       while (!newState.isConnected) {
@@ -71,7 +69,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     webUi.bind()
   }
 
-
   def checkTaskStatus(): Unit = {
     while (true) {
       val finishedTasks = jobNameToTask.filter(_._2.filter(_.isDone).size > 0)
@@ -88,9 +85,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       if (jobNameToTask.isEmpty) Thread.sleep(10 * 1000)
       else Thread.sleep(1000)
     }
-
   }
-
 
   val thread = new Thread("chek whether task have finished") {
     setDaemon(true)
@@ -194,7 +189,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
-          println(s"new jobname ${path} added!")
           //update jobnames for every node
           conf.jobManager.addJobName(path.replace(Constant.JOB_UNIQUE_NAME + "/", ""))
         }
@@ -258,7 +252,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
           job.setState(JobState.RUNNING)
           val task = new Task()
           val startTime = System.currentTimeMillis()
-          task.setId(s"${Node.nodeId}_${job.getPartition.getVersion}")
+          task.setId(s"${Node.nodeId}_${i}_${job.getPartition.getVersion}")
           task.setStartTime(startTime)
           val runner = new ExcutorRunner(conf, job, task)
           val taskFuture = consumerManageThreadPool.submit(runner)
