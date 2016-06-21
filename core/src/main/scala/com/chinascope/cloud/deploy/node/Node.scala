@@ -296,40 +296,46 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
 
   def stateChanges(path: String): Unit = {
-    path match {
-      case Node._jobPath(jobName) =>
-        ///cloud/status/job1
-        //update jobs map
-        val jobOption = conf.zkNodeClient.read[Job](path)
-        jobOption match {
-          case Some(job) =>
-            if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
-            else {
-              _jobs(job.getName).setState(job.getState)
-              _jobs(job.getName).setPartition(job.getPartition)
-              _jobs(job.getName).setPartition(job.getPartition)
-            }
-          case None =>
-        }
-      case _ =>
-        // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
-        val taskOption = conf.zkNodeClient.read[Task](path)
-        //update partition task
-        taskOption match {
-          case Some(task) =>
-            path match {
-              case Node.jobNameMatch(jobName) =>
-                var taskSet = _jobs(jobName).getPartition.getTasks
-                if (taskSet == null) {
-                  taskSet = new mutable.HashSet[Task]()
-                  taskSet += task
-                  _jobs(jobName).getPartition.setTasks(taskSet)
-                } else _jobs(jobName).getPartition.getTasks += task
-                checkJobFinishedMove(_jobs(jobName))
-              case _ =>
-            }
-          case None =>
-        }
+
+    try {
+      path match {
+        case Node._jobPath(jobName) =>
+          ///cloud/status/job1
+          //update jobs map
+          val jobOption = conf.zkNodeClient.read[Job](path)
+          jobOption match {
+            case Some(job) =>
+              if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
+              else {
+                _jobs(job.getName).setState(job.getState)
+                _jobs(job.getName).setPartition(job.getPartition)
+                _jobs(job.getName).setPartition(job.getPartition)
+              }
+            case None =>
+          }
+        case _ =>
+          // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
+          val taskOption = conf.zkNodeClient.read[Task](path)
+          //update partition task
+          taskOption match {
+            case Some(task) =>
+              path match {
+                case Node.jobNameMatch(jobName) =>
+                  var taskSet = _jobs(jobName).getPartition.getTasks
+                  if (taskSet == null) {
+                    taskSet = new mutable.HashSet[Task]()
+                    taskSet += task
+                    _jobs(jobName).getPartition.setTasks(taskSet)
+                  } else _jobs(jobName).getPartition.getTasks += task
+                  checkJobFinishedMove(_jobs(jobName))
+                case _ =>
+              }
+            case None =>
+          }
+      }
+    } catch {
+      case el: java.util.NoSuchElementException =>
+      case e: Exception => logError("watch status failed!", e.getCause)
     }
   }
 

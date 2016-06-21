@@ -34,7 +34,8 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
 
     var msg: Msg = null
 
-
+    val jobs = NodeWebUI._conf.node._jobs.map(_._2)
+    val jobStatus = Array("READY", "STARTED", "RUNNING", "FINISHED", "ERROR", "RUNNING_EXCEPTION", "STOPIPNG", "STOPPED")
 
     if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
       val job = new Job()
@@ -63,7 +64,14 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val content =
       <div class="row-fluid">
         <div class="span12">
-          {if (msg != null) {
+          <ul class="nav nav-pills">
+            <li role="presentation">
+              <a href="/">Home</a>
+            </li>
+            <li role="presentation">
+              <a href="/job">New Job</a>
+            </li>
+          </ul>{if (msg != null) {
           if (msg.getCode == 0) {
             <span>
               Job
@@ -78,7 +86,18 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
               {msg.getMessage}
               !</span>
           }
-        }}
+        }}<ul class="unstyled">
+          {jobs.map { job =>
+            <li>
+              <strong>Job Name:</strong>{job.getName}
+            </li>
+              <li>
+                <strong>Job State:</strong>{jobStatus(job.getState)}
+              </li>
+
+          }}
+        </ul>
+
         </div>
       </div>;
 

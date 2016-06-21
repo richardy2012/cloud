@@ -28,6 +28,10 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
     val jobNames = NodeWebUI._conf.jobManager.getJobNames()
     val content =
       <div>
+        <ul class="nav nav-pills">
+          <li role="presentation"><a href="/">Home</a></li>
+          <li role="presentation"><a href="/job">New Job</a></li>
+        </ul>
         <form action="/" method="post">
           <div class="input-group input-group-lg text_form_input">
             <span class="input-group-addon">Name:</span>
