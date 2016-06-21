@@ -1,19 +1,20 @@
 package com.chinascope.cloud.deploy.node
 
-import java.util.concurrent.Future
+import java.util.concurrent.{Future, TimeUnit}
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.alibaba.fastjson.JSON
 import com.chinascope.cloud.clock.CloudTimerWorker
 import com.chinascope.cloud.config.{CloudConf, DefaultConfiguration}
-import com.chinascope.cloud.entity.{Job, JobState}
+import com.chinascope.cloud.entity.{Job, JobState, TaskState}
 import com.chinascope.cloud.excute.runner.ExcutorRunner
-import com.chinascope.cloud.listener.{JobRunning, JobTaskTraceListener, TaskFinished}
+import com.chinascope.cloud.listener.{JobFinished, JobRunning, JobTaskTraceListener, TaskFinished}
 import com.chinascope.cloud.partition.Task
 import com.chinascope.cloud.resource.ResourseTool
 import com.chinascope.cloud.util.{Constant, Logging, Utils}
 import com.chinascope.cloud.web.NodeWebUI
 import com.chinascope.cloud.zookeeper.ZKClient
+import com.google.common.cache.{CacheBuilder, CacheLoader, LoadingCache}
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.atomic.{DistributedAtomicInteger, DistributedAtomicLong}
 import org.apache.curator.framework.recipes.cache.{TreeCacheEvent, _}
@@ -33,7 +34,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   var workerNode: PersistentNode = _
 
   val _jobs = new mutable.HashMap[String, Job]()
-  val completedJobs = new mutable.HashSet[Job]()
+  var completedJobNames = Node.initCache("completedJobNames", 10 * 1000)
 
   val jobNameToTask = new mutable.HashMap[String, mutable.Set[Future[Task]]]()
 
@@ -72,29 +73,77 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     webUi.bind()
   }
 
+  //In local worker by future
   def checkTaskStatus(): Unit = {
-    while (true) {
-      val finishedTasks = jobNameToTask.filter(_._2.filter(_.isDone).size > 0)
-      finishedTasks.foreach {
-        case (jobName, tasks) =>
-          tasks.foreach { t =>
-            val task = t.get()
-            conf.listenerWaiter.post(TaskFinished(jobName, task))
-            jobNameToTask(jobName) -= t
-            if (jobNameToTask(jobName).size == 0) jobNameToTask -= jobName
-          }
-        case _ =>
-      }
-      if (jobNameToTask.isEmpty) Thread.sleep(10 * 1000)
-      else Thread.sleep(1000)
+
+    val finishedTasks = jobNameToTask.filter(_._2.filter(_.isDone).size > 0)
+    finishedTasks.foreach {
+      case (jobName, tasks) =>
+        tasks.foreach { t =>
+          val task = t.get()
+          task.setState(TaskState.FINISHED)
+          conf.listenerWaiter.post(TaskFinished(jobName, task))
+          jobNameToTask(jobName) -= t
+          if (jobNameToTask(jobName).size == 0) jobNameToTask -= jobName
+        }
+      case _ =>
+    }
+    if (jobNameToTask.isEmpty) Thread.sleep(10 * 1000)
+
+  }
+
+  /**
+    * If job finished,Move to Map which just host finished jobs and save it 10 minutes,Then clear All Jobs in Node Cache and Zookeeper
+    */
+  def watchJobFinishedByZk(): Unit = {
+    /*val notFinishedJob = this._jobs.filter(_._2.getState != JobState.FINISHED)
+    notFinishedJob.foreach {
+      case (name, job) =>
+        checkJobFinishedMove(job)
+      case _ =>
+    }*/
+    val finishedJob = this._jobs.filter(_._2.getState == JobState.FINISHED)
+    logDebug("Finished Job Size:" + finishedJob.size)
+    val needDeleteJobs = finishedJob.filter { n =>
+      completedJobNames.getIfPresent(n._1) == null
+    }
+    logDebug("needDeleteJobs Size:" + needDeleteJobs.size)
+    needDeleteJobs.foreach {
+      case (k, v) =>
+        //delete local cache
+        _jobs.remove(k)
+        //delete cache in zk
+        conf.listenerWaiter.post(JobFinished(v))
+      case _ =>
+    }
+
+  }
+
+  def checkJobFinishedMove(job: Job): Unit = {
+    val partition = job.getPartition
+    val workerToPartitionNum = JSON.parseObject(partition.getWorkerPartitionNum).toArray
+    val allTasks = workerToPartitionNum.map(_._2.toString.trim.toInt).sum
+    val tasks = partition.getTasks
+    val finshedTasks = tasks.filter(_.getState == TaskState.FINISHED)
+    if (allTasks == finshedTasks.size) {
+      //job finished,Move to local cach completedJobNames with 10 minutes
+      completedJobNames.put(job.getName, 1L)
+      _jobs(job.getName).setState(JobState.FINISHED)
+      _jobs(job.getName).setEndTime(System.currentTimeMillis())
+
     }
   }
 
-  val thread = new Thread("chek whether task have finished") {
+  val thread = new Thread("chek whether task have finished by future and watch job by zk") {
     setDaemon(true)
 
+
     override def run(): Unit = {
-      checkTaskStatus()
+      while (true) {
+        checkTaskStatus()
+        watchJobFinishedByZk()
+        Thread.sleep(1000)
+      }
     }
   }.start()
 
@@ -238,39 +287,49 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       event.getType match {
         case TreeCacheEvent.Type.NODE_UPDATED => {
           val path = event.getData.getPath
-          if (Node._jobPath.matches(path)) {
-            ///cloud/status/job1
-            //update jobs map
-            val jobOption = conf.zkNodeClient.read[Job](path)
-            jobOption match {
-              case Some(job) =>
-                if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
-                else {
-                  _jobs(job.getName).setState(job.getState)
-                }
-                println(_jobs)
-              case None =>
-            }
-
-          } else {
-            // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
-            val taskOption = conf.zkNodeClient.read[Task](path)
-            //update partition task
-            taskOption match {
-              case Some(task) =>
-                path match {
-                  case Node.jobNameMatch(jobName) =>
-                  case _ =>
-                }
-                _jobs
-              case None =>
-            }
-          }
-
-          println(s"tree node partitions of jobs  status updated: ${path}")
+          stateChanges(path)
         }
         case _ =>
       }
+    }
+  }
+
+
+  def stateChanges(path: String): Unit = {
+    path match {
+      case Node._jobPath(jobName) =>
+        ///cloud/status/job1
+        //update jobs map
+        val jobOption = conf.zkNodeClient.read[Job](path)
+        jobOption match {
+          case Some(job) =>
+            if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
+            else {
+              _jobs(job.getName).setState(job.getState)
+              _jobs(job.getName).setPartition(job.getPartition)
+              _jobs(job.getName).setPartition(job.getPartition)
+            }
+          case None =>
+        }
+      case _ =>
+        // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
+        val taskOption = conf.zkNodeClient.read[Task](path)
+        //update partition task
+        taskOption match {
+          case Some(task) =>
+            path match {
+              case Node.jobNameMatch(jobName) =>
+                var taskSet = _jobs(jobName).getPartition.getTasks
+                if (taskSet == null) {
+                  taskSet = new mutable.HashSet[Task]()
+                  taskSet += task
+                  _jobs(jobName).getPartition.setTasks(taskSet)
+                } else _jobs(jobName).getPartition.getTasks += task
+                checkJobFinishedMove(_jobs(jobName))
+              case _ =>
+            }
+          case None =>
+        }
     }
   }
 
@@ -286,7 +345,8 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
           job.setState(JobState.RUNNING)
           val task = new Task()
           val startTime = System.currentTimeMillis()
-          task.setId(s"${Node.nodeId}_${i}_${job.getPartition.getVersion}")
+          //  task.setId(s"${Node.nodeId}_${i}_${job.getPartition.getVersion}")
+          task.setId(s"${Node.nodeId}_${i}")
           task.setStartTime(startTime)
           val runner = new ExcutorRunner(conf, job, task)
           val taskFuture = consumerManageThreadPool.submit(runner)
@@ -311,8 +371,8 @@ private[cloud] object Node extends Logging {
   var nodeStarted = new AtomicBoolean(false)
   var nodeId: Long = _
 
-  val _jobPath = "^" + Constant.STATUS + "/([0-9|a-z]+)$".r
-  val jobNameMatch = "^" + Constant.STATUS + "/([0-9|a-z]+)/\\w+$".r
+  val _jobPath = "^/status/([0-9|a-z]+)$".r
+  val jobNameMatch = "^/status/([0-9|a-z]+)/\\w+$".r
 
   def bootstrap(zk: ZKClient) = {
     zk.mkdir(Constant.JOBS_DIR)
@@ -329,6 +389,19 @@ private[cloud] object Node extends Logging {
 
     zk.mkdir(Constant.DEAD_COUNTER_ID)
 
+  }
+
+  def initCache(cacheName: String, expiredTime: Long): LoadingCache[java.lang.String, java.lang.Long] = {
+    val cacheLoader: CacheLoader[java.lang.String, java.lang.Long] =
+      new CacheLoader[java.lang.String, java.lang.Long]() {
+        def load(key: java.lang.String): java.lang.Long = {
+          long2Long(System.currentTimeMillis())
+        }
+      }
+    var cacheManager = CacheBuilder.newBuilder()
+      .expireAfterWrite(expiredTime, TimeUnit.MILLISECONDS).build(cacheLoader)
+    cacheManager.apply(cacheName)
+    cacheManager
   }
 
   private[cloud] def onNodeAdded(conf: CloudConf, path: String): Unit = {
@@ -355,7 +428,7 @@ private[cloud] object Node extends Logging {
     //Move count(worker-xxx) to /root/dead/xxx
     conf.zkClient.persist(Constant.DEAD_COUNTER_ID + nodeIdPath, "dead")
 
-    println(s"worker${path} is lost")
+    logWarning(s"worker${path} is lost")
   }
 
 }

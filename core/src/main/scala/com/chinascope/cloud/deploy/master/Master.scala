@@ -214,7 +214,6 @@ private[cloud] object Master {
     map.put(4, 5)
 
     val s = JSON.toJSONString(map, true)
-    println(s)
     val p = JSON.parseObject(s)
     p.toArray.map(_._1.toLong).sorted.reverse.map(println(_))
     print(p)

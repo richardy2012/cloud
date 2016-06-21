@@ -29,7 +29,7 @@ class JobTaskTraceListener(conf: CloudConf) extends TraceListener {
   override def onJobFinished(jobFinished: JobFinished): Unit = {
     val job = jobFinished.job
     if (job != null)
-      conf.zkNodeClient.persist(Constant.STATUS + "/" + job.getName, job)
+      conf.zkNodeClient.delete(Constant.STATUS + "/" + job.getName)
   }
 
   override def onTaskStarted(taskStarted: TaskStarted): Unit = {

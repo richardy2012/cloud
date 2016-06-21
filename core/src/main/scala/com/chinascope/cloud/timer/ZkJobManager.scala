@@ -91,7 +91,7 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
       } else {
         path = jobPaths.map(w => (zk.getChildren(Constant.JOBS_DIR + "/" + w).size, Constant.JOBS_DIR + "/" + w)).sortBy(_._1).head._2 + "/" + job.getName
       }
-      println(activeWorkerPaths + "\n" + jobPaths)
+      logInfo(activeWorkerPaths + "\n" + jobPaths)
       zk.persist(path, job)
       logInfo("job submited!")
     }

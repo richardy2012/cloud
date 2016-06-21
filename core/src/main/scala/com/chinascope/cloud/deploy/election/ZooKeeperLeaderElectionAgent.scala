@@ -39,7 +39,7 @@ private[cloud] class ZooKeeperLeaderElectionAgent(
     zk.getConnectionStateListenable().addListener(new ConnectionStateListener() {
       @Override
       def stateChanged(client: CuratorFramework, newState: ConnectionState) {
-        println("connect status:" + newState.name())
+        logInfo("connect status:" + newState.name())
       }
     })
     zk.start()

@@ -1,7 +1,7 @@
 package com.chinascope.cloud.excute
 
 import com.chinascope.cloud.config.CloudConf
-import com.chinascope.cloud.entity.Job
+import com.chinascope.cloud.entity.{Job, TaskState}
 import com.chinascope.cloud.listener.TaskStarted
 import com.chinascope.cloud.partition.Task
 import com.chinascope.cloud.util.Logging
@@ -14,7 +14,9 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
 
   def start(job: Job, task: Task): Task = {
     println("come in....START")
+    task.setState(TaskState.STARTED)
     conf.listenerWaiter.post(TaskStarted(job.getName, task))
+
     task
   }
 }

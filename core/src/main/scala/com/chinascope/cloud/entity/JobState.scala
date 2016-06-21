@@ -13,3 +13,10 @@ private[cloud] object JobState {
   final val STOPIPNG = 6
   final val STOPPED = 7
 }
+private[cloud] object TaskState {
+  final val STARTED = 1
+  final val FINISHED = 2
+  final val ERROR = 3
+  final val RUNNING_EXCEPTION = 4
+  final val STOPPED = 5
+}

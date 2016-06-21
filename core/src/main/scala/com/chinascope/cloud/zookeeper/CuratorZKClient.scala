@@ -77,8 +77,10 @@ private[cloud] class CuratorZKClient(
 
 
   override def delete(path: String): Unit = started {
-    client.delete().guaranteed().deletingChildrenIfNeeded().forPath(path)
-    logInfo(s"Successfully ${path} deleted!")
+    if (client.checkExists().forPath(path) != null) {
+      client.delete().guaranteed().deletingChildrenIfNeeded().forPath(path)
+      logInfo(s"Successfully ${path} deleted!")
+    }
   }
 
   /**
