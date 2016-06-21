@@ -7,5 +7,8 @@ import com.chinascope.cloud.entity.Job
   */
 private[cloud] trait Schedule {
   def schedule(job: Job)
+
   def deleteJob(job: Job)
+
+  def addJob(job: Job): Unit = {}
 }

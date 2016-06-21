@@ -35,8 +35,8 @@
         <scala.macros.version>2.0.1</scala.macros.version>
         <slf4j.version>1.7.5</slf4j.version>
         <log4j.version>1.2.17</log4j.version>
-         <zookeeper.version>3.4.5</zookeeper.version>
-       <!-- <zookeeper.version>3.5.1-alpha</zookeeper.version>-->
+        <zookeeper.version>3.4.5</zookeeper.version>
+        <!-- <zookeeper.version>3.5.1-alpha</zookeeper.version>-->
         <chill.version>0.5.0</chill.version>
         <jetty.version>8.1.14.v20131031</jetty.version>
         <scala.version>2.10.4</scala.version>
@@ -64,6 +64,7 @@
         <commons-collections.version>3.2.1</commons-collections.version>
         <mmseg4j.version>1.8.6</mmseg4j.version>
         <jackson.version>2.5.4</jackson.version>
+        <jgrapht.version>0.9.1</jgrapht.version>
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
@@ -529,6 +530,17 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <!--jgrapht for graph-->
+            <dependency>
+                <groupId>org.javabits.jgrapht</groupId>
+                <artifactId>jgrapht-core</artifactId>
+                <version>${jgrapht.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.javabits.jgrapht</groupId>
+                <artifactId>jgrapht-ext</artifactId>
+                <version>${jgrapht.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

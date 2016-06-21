@@ -119,7 +119,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   }
 
-  def checkJobFinishedMove(job: Job): Unit = {
+  def checkJobFinishedMoveAndTriggerDependency(job: Job): Unit = {
     val partition = job.getPartition
     val workerToPartitionNum = JSON.parseObject(partition.getWorkerPartitionNum).toArray
     val allTasks = workerToPartitionNum.map(_._2.toString.trim.toInt).sum
@@ -130,7 +130,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       completedJobNames.put(job.getName, 1L)
       _jobs(job.getName).setState(JobState.FINISHED)
       _jobs(job.getName).setEndTime(System.currentTimeMillis())
-
+      if (Node.isLeader.get()) {
+        conf.dagSchedule.schedule(job)
+      }
     }
   }
 
@@ -199,10 +201,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     //get nodeId from /cloud/dead/worker-xxx if has
     val pathList = conf.zkNodeClient.getChildren(Constant.DEAD_COUNTER_ID)
     if (pathList != null && pathList.size > 0 && !pathList.isEmpty) {
-      val (workIdPath, nodeId) = pathList.map { p =>
-        val nodeId = p.replace(WORKER_PREFIX, "").toLong
-        val workIdPath = Constant.DEAD_COUNTER_ID + Constant.NODE_ID_PATH_TEMPLE + nodeId
-        (workIdPath, nodeId)
+      val (workIdPath, nodeId) = pathList.map {
+        p =>
+          val nodeId = p.replace(WORKER_PREFIX, "").toLong
+          val workIdPath = Constant.DEAD_COUNTER_ID + Constant.NODE_ID_PATH_TEMPLE + nodeId
+          (workIdPath, nodeId)
       }.sortBy(_._2).head
       conf.zkNodeClient.delete(workIdPath)
       nodeId
@@ -251,7 +254,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         }
         case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
           val path = event.getData.getPath
-          logInfo(s"new jobname ${path} removed!")
+          logInfo(s"new jobname ${
+            path
+          } removed!")
           conf.jobManager.removeJobName(path.replace(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR + Constant.JOB_UNIQUE_NAME + "/", ""))
         case _ =>
       }
@@ -264,7 +269,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
-          logInfo(s"add  job ${path} for timer schedule!")
+          logInfo(s"add  job ${
+            path
+          } for timer schedule!")
           conf.schedule.schedule(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
         }
         catch {
@@ -274,7 +281,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         }
         case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
           val path = event.getData.getPath
-          logInfo(s"delete  job ${path} for timer schedule!")
+          logInfo(s"delete  job ${
+            path
+          } for timer schedule!")
           conf.schedule.deleteJob(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
         case _ =>
       }
@@ -294,44 +303,18 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
-
+  /**
+    *
+    * @param path
+    */
   def stateChanges(path: String): Unit = {
 
     try {
       path match {
         case Node._jobPath(jobName) =>
-          ///cloud/status/job1
-          //update jobs map
-          val jobOption = conf.zkNodeClient.read[Job](path)
-          jobOption match {
-            case Some(job) =>
-              if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
-              else {
-                _jobs(job.getName).setState(job.getState)
-                _jobs(job.getName).setPartition(job.getPartition)
-                _jobs(job.getName).setPartition(job.getPartition)
-              }
-            case None =>
-          }
+          changeForJob(path)
         case _ =>
-          // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
-          val taskOption = conf.zkNodeClient.read[Task](path)
-          //update partition task
-          taskOption match {
-            case Some(task) =>
-              path match {
-                case Node.jobNameMatch(jobName) =>
-                  var taskSet = _jobs(jobName).getPartition.getTasks
-                  if (taskSet == null) {
-                    taskSet = new mutable.HashSet[Task]()
-                    taskSet += task
-                    _jobs(jobName).getPartition.setTasks(taskSet)
-                  } else _jobs(jobName).getPartition.getTasks += task
-                  checkJobFinishedMove(_jobs(jobName))
-                case _ =>
-              }
-            case None =>
-          }
+          changeForTask(path)
       }
     } catch {
       case el: java.util.NoSuchElementException =>
@@ -339,20 +322,79 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
+  /**
+    * /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
+    *
+    * @param path
+    */
+  private def changeForTask(path: String): Unit = {
+    // /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
+    val taskOption = conf.zkNodeClient.read[Task](path)
+    //update partition task
+    taskOption match {
+      case Some(task) =>
+        path match {
+          case Node.jobNameMatch(jobName) =>
+            var taskSet = _jobs(jobName).getPartition.getTasks
+            if (taskSet == null) {
+              taskSet = new mutable.HashSet[Task]()
+              taskSet += task
+              _jobs(jobName).getPartition.setTasks(taskSet)
+            } else _jobs(jobName).getPartition.getTasks += task
+            checkJobFinishedMoveAndTriggerDependency(_jobs(jobName))
+          case _ =>
+        }
+      case None =>
+    }
+  }
+
+  /**
+    * /cloud/status/job1
+    *
+    * @param path
+    */
+  private def changeForJob(path: String): Unit = {
+    ///cloud/status/job1
+    //update jobs map
+    val jobOption = conf.zkNodeClient.read[Job](path)
+    jobOption match {
+      case Some(job) =>
+        if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
+        else {
+          _jobs(job.getName).setState(job.getState)
+          _jobs(job.getName).setPartition(job.getPartition)
+          _jobs(job.getName).setPartition(job.getPartition)
+        }
+      case None =>
+    }
+  }
+
   private def processReceiveTask(path: String): Unit = {
     val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)
     jobOption match {
       case Some(job) =>
-        logInfo(s"Node worker-${Node.nodeId} received job ${job.getName}:${job.toString}")
+        logInfo(s"Node worker-${
+          Node.nodeId
+        } received job ${
+          job.getName
+        }:${
+          job.toString
+        }")
         val workerPartitionNum = JSON.parseObject(job.getPartition.getWorkerPartitionNum)
-        val partitionNum = workerPartitionNum.getInteger(s"${Node.nodeId}")
+        val partitionNum = workerPartitionNum.getInteger(s"${
+          Node.nodeId
+        }")
         for (i <- 1 to partitionNum) {
           job.getPartition.setPartitionNum(i)
           job.setState(JobState.RUNNING)
           val task = new Task()
           val startTime = System.currentTimeMillis()
           //  task.setId(s"${Node.nodeId}_${i}_${job.getPartition.getVersion}")
-          task.setId(s"${Node.nodeId}_${i}")
+          task.setId(s"${
+            Node.nodeId
+          }_${
+            i
+          }")
           task.setStartTime(startTime)
           val runner = new ExcutorRunner(conf, job, task)
           val taskFuture = consumerManageThreadPool.submit(runner)

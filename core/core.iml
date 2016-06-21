@@ -137,5 +137,9 @@
     <orderEntry type="library" name="Maven: org.json4s:json4s-core_2.10:3.2.10" level="project" />
     <orderEntry type="library" name="Maven: org.json4s:json4s-ast_2.10:3.2.10" level="project" />
     <orderEntry type="library" name="Maven: com.thoughtworks.paranamer:paranamer:2.6" level="project" />
+    <orderEntry type="library" name="Maven: org.javabits.jgrapht:jgrapht-core:0.9.1" level="project" />
+    <orderEntry type="library" name="Maven: org.javabits.jgrapht:jgrapht-ext:0.9.1" level="project" />
+    <orderEntry type="library" name="Maven: org.tinyjee.jgraphx:jgraphx:2.0.0.1" level="project" />
+    <orderEntry type="library" name="Maven: jgraph:jgraph:5.13.0.0" level="project" />
   </component>
 </module>

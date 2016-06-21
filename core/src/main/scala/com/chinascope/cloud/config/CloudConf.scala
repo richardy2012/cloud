@@ -6,13 +6,14 @@ import com.chinascope.cloud.deploy.master.Master
 import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
 import com.chinascope.cloud.excute.{DefaultExcutor, Excutor, ExcutorManager}
+import com.chinascope.cloud.graph.JobGraph
 import com.chinascope.cloud.listener.ManagerListenerWaiter
 import com.chinascope.cloud.queue.Queue
 import com.chinascope.cloud.queue.impl.ZookeeperDistributeQueue
 import com.chinascope.cloud.serializer.{JavaSerializer, Serializer}
 import com.chinascope.cloud.timer.ZkJobManager
 import com.chinascope.cloud.timer.schedule.trigger.{CronTrigger, Trigger}
-import com.chinascope.cloud.timer.schedule.{DefaultSchedule, Schedule}
+import com.chinascope.cloud.timer.schedule.{DAGSchedule, DefaultSchedule, Schedule}
 import com.chinascope.cloud.util.{Logging, Utils}
 import com.chinascope.cloud.zookeeper.ZKClient
 import org.apache.curator.RetryPolicy
@@ -51,8 +52,11 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   private[cloud] var zkNodeClient: ZKClient = _
   private[cloud] var serializer: Serializer = _
 
+  private[cloud] var jobGraph: JobGraph = _
+
   private[cloud] var jobManager: ZkJobManager = _
   private[cloud] var schedule: Schedule = _
+  private[cloud] var dagSchedule: Schedule = _
   private[cloud] var cronTrigger: Trigger = _
 
   private[cloud] var queue: Queue[Job] = _
@@ -69,8 +73,11 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     //serializer
     this.serializer = new JavaSerializer(this)
 
+    this.jobGraph = new JobGraph(this)
+
     this.jobManager = new ZkJobManager(this)
     this.schedule = new DefaultSchedule(this)
+    this.dagSchedule = new DAGSchedule(this, this.jobGraph)
     this.cronTrigger = new CronTrigger(this)
     this.excutorManager = new ExcutorManager(this)
 

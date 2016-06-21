@@ -340,6 +340,14 @@
             <groupId>org.json4s</groupId>
             <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.javabits.jgrapht</groupId>
+            <artifactId>jgrapht-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.javabits.jgrapht</groupId>
+            <artifactId>jgrapht-ext</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

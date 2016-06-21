@@ -198,19 +198,52 @@ private[cloud] class Master(
   private[cloud] val workersJobsCacheListener = new TreeCacheListener {
     override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
       event.getType match {
-        case TreeCacheEvent.Type.NODE_UPDATED => {
-          println(s"tree node workers jobs updated: ${event.getData.getPath}")
-        }
-        case _ =>
+        case TreeCacheEvent.Type.NODE_ADDED =>
+          val path = event.getData.getPath
+          jobToGraph(path, "add")
+        case TreeCacheEvent.Type.NODE_REMOVED =>
+          val path = event.getData.getPath
+          jobToGraph(path, "del")
       }
     }
   }
 
 
+  def jobToGraph(path: String, source: String): Unit = {
+    val pathArray = path.split("/")
+    if (pathArray.size == 4) {
+      conf.zkClient.read[Job](path) match {
+        case Some(job) =>
+          source match {
+            case "del" =>
+              logInfo(s"tree node workers jobs removed: ${path}")
+              conf.dagSchedule.deleteJob(job)
+            case "add" =>
+              logInfo(s"tree node  workers jobs added: ${path}")
+              conf.dagSchedule.addJob(job)
+            case _ =>
+          }
+
+        case None =>
+      }
+    }
+  }
 }
 
 private[cloud] object Master {
+
+
   def main(args: Array[String]) {
+    testJobs
+  }
+
+  def testJobs = {
+    val path = "/jobs/worker-1/jobname2"
+    val pathArray = path.split("/")
+    println(pathArray.size)
+  }
+
+  def test() = {
     import scala.collection.JavaConversions._
     val map = new util.HashMap[Long, Int]()
     map.put(1, 2)
