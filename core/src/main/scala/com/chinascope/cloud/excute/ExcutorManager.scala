@@ -13,10 +13,17 @@ import com.chinascope.cloud.util.Logging
 private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
 
   def start(job: Job, task: Task): Task = {
-    println("come in....START")
-    task.setState(TaskState.STARTED)
-    conf.listenerWaiter.post(TaskStarted(job.getName, task))
+    if (job != null) {
 
+      task.setState(TaskState.STARTED)
+      conf.listenerWaiter.post(TaskStarted(job.getName, task))
+      val excutor = excutorInstanse(job, conf)
+      if (excutor != null) {
+        excutor.start(job, task)
+      }
+    }
     task
   }
+
+  private def excutorInstanse(job: Job, conf: CloudConf): Excutor = Excutor.getExcutor(job, conf)
 }

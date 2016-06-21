@@ -8,7 +8,7 @@ import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.deploy.election.LeaderCandidate
 import com.chinascope.cloud.deploy.node.{Node, NodeInfo}
 import com.chinascope.cloud.entity.{Job, JobState}
-import com.chinascope.cloud.listener.{JobStarted, JobTaskTraceListener}
+import com.chinascope.cloud.listener.{JobRunning, JobStarted, JobTaskTraceListener}
 import com.chinascope.cloud.resource.{ResMonitorInfo, ResourceManager}
 import com.chinascope.cloud.util.{Constant, Logging}
 import org.apache.curator.framework.CuratorFramework
@@ -94,9 +94,12 @@ private[cloud] class Master(
   private def checkAndAssginJob() = {
     while (true) {
       val job = conf.queue.take()
+      job.setState(JobState.STARTED)
+      conf.listenerWaiter.post(JobStarted(job))
       logInfo(s"Master get job ${job.getName}successfully!")
       schedule(job)
-      conf.listenerWaiter.post(JobStarted(job))
+      job.setState(JobState.RUNNING)
+      conf.listenerWaiter.post(JobRunning(job))
     }
   }
 
@@ -133,7 +136,7 @@ private[cloud] class Master(
           job.getPartition.setVersion(System.currentTimeMillis())
           //Allocate to worker by zookeeper /root/assgin/worker-xxx/jobname[1-n]
           logInfo(s"Master assign task,Worker partition number:$workerPartitionNum")
-          job.setState(JobState.STARTED)
+
           workerToPartitionNumMap.foreach { w =>
             val path = Constant.ASSIGN_TEMPLE + w._1 + "/" + job.getName
             conf.zkClient.persist(path, job)

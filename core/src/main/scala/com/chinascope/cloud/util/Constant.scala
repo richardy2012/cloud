@@ -54,4 +54,6 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   //env
   final val CLOUD_LOCAL_IP = "CLOUD_LOCAL_IP"
 
+  final val PREFFIX_CLASSNAME = "com.chinascope.cloud."
+
 }

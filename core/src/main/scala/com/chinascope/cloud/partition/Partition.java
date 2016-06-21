@@ -9,7 +9,7 @@ import java.util.Set;
  */
 public abstract class Partition implements Serializable {
     private Integer state;
-    private Integer partitionNum;
+    private Integer partitionNum = 1;
     private String workerPartitionNum;
     private Set<Task> tasks;
     private Long version;

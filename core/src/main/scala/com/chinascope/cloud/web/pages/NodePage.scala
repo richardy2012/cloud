@@ -47,7 +47,8 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
         job.setNeedPartition(false)
       } else {
         partition.setPartitionField(partitionField)
-        partition.setPartitionField(partitionNum)
+        if(partitionNum!=null && partitionNum.toInt>0)
+        partition.setPartitionNum(partitionNum.toInt)
       }
       job.setPartition(partition)
       if (parents != null && !parents.equalsIgnoreCase("")) {
