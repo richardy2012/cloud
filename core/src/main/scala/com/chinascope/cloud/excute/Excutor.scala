@@ -19,7 +19,7 @@ private[cloud] abstract class Excutor extends Logging {
 
   def start(job: Job, task: Task): Unit = {
     //pre process
-    println("come in....START")
+
     excute()
     //post process
   }

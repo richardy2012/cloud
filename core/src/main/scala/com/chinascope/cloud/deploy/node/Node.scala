@@ -34,7 +34,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   var workerNode: PersistentNode = _
 
   val _jobs = new mutable.HashMap[String, Job]()
-  var completedJobNames = Node.initCache("completedJobNames", 10 * 1000)
+  var completedJobNames = Node.initCache("completedJobNames", 10 * 60 * 1000)
 
   val jobNameToTask = new mutable.HashMap[String, mutable.Set[Future[Task]]]()
 

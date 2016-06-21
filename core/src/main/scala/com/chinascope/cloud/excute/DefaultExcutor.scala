@@ -8,11 +8,7 @@ import com.chinascope.cloud.entity.Job
   */
 private[cloud] class DefaultExcutor(conf: CloudConf) extends Excutor {
   override def excute(): Unit = {
-    println("come in....EXCUTE")
-  }
-
-  override def start(job: Job): Job = {
-
-    null
+    println("Excute ...come in....START,Thread 1s...")
+    Thread.sleep(1000)
   }
 }
