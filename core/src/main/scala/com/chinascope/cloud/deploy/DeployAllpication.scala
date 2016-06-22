@@ -11,7 +11,7 @@ import com.chinascope.cloud.deploy.node.Node
 object DeployAllpication {
 
   def main(args: Array[String]) {
-    val conf = new CloudConf()
+    val conf = CloudConf.get()
     //read config from zk and set it to conf
     conf.readConfigFromZookeeper()
     //init

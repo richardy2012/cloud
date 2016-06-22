@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat
 import java.util.concurrent._
 import javax.net.ssl.HttpsURLConnection
 
+import com.chinascope.cloud.config.CloudConf
 import com.chinascope.cloud.serializer.{DeserializationStream, SerializationStream, Serializer, SerializerInstance}
 
 import scala.annotation.tailrec
@@ -348,10 +349,77 @@ private[cloud] object Utils extends Logging {
   private var customHostname: Option[String] = sys.env.get("CLOUD_LOCAL_HOSTNAME")
 
 
+  val portMaxRetries: Int = {
+    if (sys.props.contains("cloud.testing")) {
+      // Set a higher number of retries for tests...
+      sys.props.get("cloud.port.maxRetries").map(_.toInt).getOrElse(100)
+    } else {
+      CloudConf.get.getInt("cloud.port.maxRetries", 16)
+    }
+  }
+
+  /**
+    * Attempt to start a service on the given port, or fail after a number of attempts.
+    * Each subsequent attempt uses 1 + the port used in the previous attempt (unless the port is 0).
+    *
+    * @param startPort    The initial port to start the service on.
+    * @param maxRetries   Maximum number of retries to attempt.
+    *                     A value of 3 means attempting ports n, n+1, n+2, and n+3, for example.
+    * @param startService Function to start service on a given port.
+    *                     This is expected to throw java.net.BindException on port collision.
+    */
+  def startServiceOnPort[T](
+                             startPort: Int,
+                             startService: Int => (T, Int),
+                             serviceName: String = "",
+                             maxRetries: Int = portMaxRetries): (T, Int) = {
+    val serviceString = if (serviceName.isEmpty) "" else s" '$serviceName'"
+    for (offset <- 0 to maxRetries) {
+      // Do not increment port if startPort is 0, which is treated as a special port
+      val tryPort = if (startPort == 0) {
+        startPort
+      } else {
+        // If the new port wraps around, do not try a privilege port
+        ((startPort + offset - 1024) % (65536 - 1024)) + 1024
+      }
+      try {
+        val (service, port) = startService(tryPort)
+        logInfo(s"Successfully started service$serviceString on port $port.")
+        return (service, port)
+      } catch {
+        case e: Exception if isBindCollision(e) =>
+          if (offset >= maxRetries) {
+            val exceptionMessage =
+              s"${e.getMessage}: Service$serviceString failed after $maxRetries retries!"
+            val exception = new BindException(exceptionMessage)
+            // restore original stack trace
+            exception.setStackTrace(e.getStackTrace)
+            throw exception
+          }
+          logWarning(s"Service$serviceString could not bind on port $tryPort. " +
+            s"Attempting port ${tryPort + 1}.")
+      }
+    }
+    // Should never happen
+    throw new CloudException(s"Failed to start service$serviceString on port $startPort")
+  }
+
   def setCustomHostname(hostname: String) {
     // DEBUG code
     Utils.checkHost(hostname)
     customHostname = Some(hostname)
+  }
+
+  def isBindCollision(exception: Throwable): Boolean = {
+    exception match {
+      case e: BindException =>
+        if (e.getMessage != null) {
+          return true
+        }
+        isBindCollision(e.getCause)
+      case e: Exception => isBindCollision(e.getCause)
+      case _ => false
+    }
   }
 
   /**

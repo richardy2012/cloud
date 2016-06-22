@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap
 import com.chinascope.cloud.deploy.master.Master
 import com.chinascope.cloud.deploy.node.Node
 import com.chinascope.cloud.entity.Job
-import com.chinascope.cloud.excute.{DefaultExcutor, Excutor, ExcutorManager}
+import com.chinascope.cloud.excute.ExcutorManager
 import com.chinascope.cloud.graph.JobGraph
 import com.chinascope.cloud.listener.ManagerListenerWaiter
 import com.chinascope.cloud.queue.Queue
@@ -27,6 +27,8 @@ import scala.collection.JavaConverters._
   * @param loadDefaults whether to also load values from Java system properties
   */
 private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Logging with ZookeeperConfiguration {
+
+  import CloudConf._
 
   /** Create a CloudConf that loads defaults from system properties and the classpath */
   def this() = this(true)
@@ -121,7 +123,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   /** Set JAR files to distribute to the cluster. */
   def setJars(jars: Seq[String]): CloudConf = {
     for (jar <- jars if (jar == null)) logWarning("null jar passed to CloudContext constructor")
-    set("spark.jars", jars.filter(_ != null).mkString(","))
+    set("cloud.jars", jars.filter(_ != null).mkString(","))
   }
 
   /** Set JAR files to distribute to the cluster. (Java-friendly version.) */
@@ -206,6 +208,16 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     */
   private[cloud] def getenv(name: String): String = System.getenv(name)
 
+  /** Get all akka conf variables set on this CloudConf */
+  def getAkkaConf: Seq[(String, String)] =
+  /* This is currently undocumented. If we want to make this public we should consider
+   * nesting options under the cloud namespace to avoid conflicts with user akka options.
+   * Otherwise users configuring their own akka code via system properties could mess up
+   * cloud's akka options.
+   *
+   *   E.g.cloud.akka.option.x.y.x = "value"
+   */
+    getAll.filter { case (k, _) => isAkkaConf(k) }
 
   /**
     * Return a string listing all keys and values, one per line. This is useful to print the
@@ -214,5 +226,23 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   def toDebugString: String = {
     getAll.sorted.map { case (k, v) => k + "=" + v }.mkString("\n")
   }
+
+}
+
+private[cloud] object CloudConf {
+  var _cloudConf: CloudConf = null
+
+  def get(): CloudConf = {
+    if (_cloudConf == null) {
+      this.synchronized {
+        if (_cloudConf == null)
+          _cloudConf = new CloudConf()
+      }
+    }
+    _cloudConf
+  }
+
+  def isAkkaConf(name: String): Boolean = name.startsWith("akka.")
+
 
 }
