@@ -9,6 +9,8 @@
     <modules>
         <module>core</module>
         <module>datashift</module>
+        <module>configuration</module>
+        <module>dbclient</module>
     </modules>
     <packaging>pom</packaging>
 
