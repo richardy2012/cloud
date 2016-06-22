@@ -204,6 +204,7 @@ private[cloud] class Master(
         case TreeCacheEvent.Type.NODE_REMOVED =>
           val path = event.getData.getPath
           jobToGraph(path, "del")
+        case _ =>
       }
     }
   }
