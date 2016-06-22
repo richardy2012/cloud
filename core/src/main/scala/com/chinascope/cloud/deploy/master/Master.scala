@@ -106,7 +106,7 @@ private[cloud] class Master(
   private def schedule(job: Job) = {
     if (Node.isLeader.get()) {
       if (idToNodes != null && !idToNodes.isEmpty) {
-        val availableNodes = idToNodes.map(_._2).filter(n => n.cpuUsageRatio >= 0.05 && n.memUsageRatio >= 0.05).toArray
+        val availableNodes = idToNodes.map(_._2).filter(n => n.cpuUsageRatio <= 0.95 && n.memUsageRatio <= 0.95).toArray
         if (availableNodes != null && availableNodes.length > 0) {
           val workerUsable = availableNodes.length
           val availableCores = availableNodes.map(n => (n.id, n.availableCores)).sortBy(_._2).reverse
