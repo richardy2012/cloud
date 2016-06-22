@@ -18,6 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.main.class>com.chinascope.cloud.deploy.DeployAllpication</project.main.class>
         <project.exec.jar.name>DistributedMaster</project.exec.jar.name>
+        <dbclient.version>1.1.6</dbclient.version>
     </properties>
 
     <dependencies>
@@ -25,7 +26,13 @@
             <groupId>com.chinascope.cloud</groupId>
             <artifactId>core</artifactId>
             <version>${project.version}</version>
-           <!-- <scope>provided</scope>-->
+            <!-- <scope>provided</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>com.aug3.storage</groupId>
+            <artifactId>dbclient</artifactId>
+            <version>${dbclient.version}</version>
         </dependency>
     </dependencies>
 
