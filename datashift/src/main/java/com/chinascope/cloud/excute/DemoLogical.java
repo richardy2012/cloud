@@ -17,5 +17,6 @@ public class DemoLogical extends DefaultExcutor {
         System.out.println("demoLogical Service " + job.getName());
         DemoService demoService = (DemoService) this.bizService();
         demoService.demoPartitionAnnotation();
+        log.info("This is demo Service.");
     }
 }
