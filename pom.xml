@@ -12,6 +12,7 @@
         <module>configuration</module>
         <module>dbclient</module>
         <module>mongoclient</module>
+        <module>jedisclient</module>
     </modules>
     <packaging>pom</packaging>
 
