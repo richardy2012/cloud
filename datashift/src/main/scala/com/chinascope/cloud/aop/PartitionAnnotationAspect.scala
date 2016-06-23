@@ -1,5 +1,7 @@
 package com.chinascope.cloud.aop
 
+import com.chinascope.cloud.aop.annotation.NeedPartition
+import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.{Aspect, Before}
 
 /**
@@ -7,8 +9,10 @@ import org.aspectj.lang.annotation.{Aspect, Before}
   */
 @Aspect
 private[cloud] class PartitionAnnotationAspect {
-  @Before("@annotation(com.chinascope.cloud.aop.annotation.NeedPartition)")
-  def partitionAdvice {
-    System.out.println("Executing partitionAdvice!")
+  @Before(value="@annotation(com.chinascope.cloud.aop.annotation.NeedPartition)")
+  def partitionAdvice(joinPoint: JoinPoint) {
+    println(joinPoint.getSignature.getName)
+    val obj = joinPoint.getTarget
+    println("Executing partitionAdvice!")
   }
 }

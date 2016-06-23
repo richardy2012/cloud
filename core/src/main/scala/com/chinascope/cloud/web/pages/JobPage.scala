@@ -48,6 +48,11 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
             <input type="text" class="form-control" name="logical" placeholder="logical.Test" aria-describedby="sizing-addon1"/>
           </div>
 
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">BizServiceBeanName:</span>
+            <input type="text" class="form-control" name="bizServiceBean" placeholder="demoService" aria-describedby="sizing-addon1"/>
+          </div>
+
           <span class="expand-additional-metrics">
             <span class="expand-additional-metrics-arrow arrow-closed"></span>
             <a>NeedPartition</a>

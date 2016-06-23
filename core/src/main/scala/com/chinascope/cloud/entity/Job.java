@@ -19,6 +19,7 @@ public class Job implements Serializable, Cloneable {
     private String schedule; //class for schedule,default: DefaultSchedule
     private String cron; //cron expression, like 30 10 1 20 * ?
     private String logical; // the subclass of logical class
+    private String bizServiceBean; //for get bean from Spring Context
     private List<String> parents;
     private Long startTime;
     private Long endTime;
@@ -28,7 +29,7 @@ public class Job implements Serializable, Cloneable {
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long endExecTime) {
+    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, String bizServiceBean, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long endExecTime) {
         this.id = id;
         this.name = name;
         this.state = state;
@@ -37,6 +38,7 @@ public class Job implements Serializable, Cloneable {
         this.schedule = schedule;
         this.cron = cron;
         this.logical = logical;
+        this.bizServiceBean = bizServiceBean;
         this.parents = parents;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -160,6 +162,14 @@ public class Job implements Serializable, Cloneable {
         this.endExecTime = endExecTime;
     }
 
+    public String getBizServiceBean() {
+        return bizServiceBean;
+    }
+
+    public void setBizServiceBean(String bizServiceBean) {
+        this.bizServiceBean = bizServiceBean;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -175,6 +185,8 @@ public class Job implements Serializable, Cloneable {
         if (schedule != null ? !schedule.equals(job.schedule) : job.schedule != null) return false;
         if (cron != null ? !cron.equals(job.cron) : job.cron != null) return false;
         if (logical != null ? !logical.equals(job.logical) : job.logical != null) return false;
+        if (bizServiceBean != null ? !bizServiceBean.equals(job.bizServiceBean) : job.bizServiceBean != null)
+            return false;
         if (parents != null ? !parents.equals(job.parents) : job.parents != null) return false;
         if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
         if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
@@ -193,25 +205,13 @@ public class Job implements Serializable, Cloneable {
         result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
         result = 31 * result + (cron != null ? cron.hashCode() : 0);
         result = 31 * result + (logical != null ? logical.hashCode() : 0);
+        result = 31 * result + (bizServiceBean != null ? bizServiceBean.hashCode() : 0);
         result = 31 * result + (parents != null ? parents.hashCode() : 0);
         result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
         result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
         result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
         result = 31 * result + (endExecTime != null ? endExecTime.hashCode() : 0);
         return result;
-    }
-
-    @Override
-    protected Object clone() throws CloneNotSupportedException {
-        Job job = new Job();
-        job.setId(this.getId());
-        job.setName(this.getName());
-        job.setCron(this.getCron());
-        job.setStartTime(this.getStartTime());
-        job.setEndTime(this.getEndTime());
-        job.setEndExecTime(this.getEndExecTime());
-        job.setLogical(this.getLogical());
-        return job;
     }
 
     @Override

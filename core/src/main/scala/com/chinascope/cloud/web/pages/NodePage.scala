@@ -28,6 +28,7 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val name = request.getParameter("name")
     val cron = request.getParameter("cron")
     val logical = request.getParameter("logical")
+    val bizServiceBean = request.getParameter("bizServiceBean")
     val partitionField = request.getParameter("partitionField")
     val partitionNum = request.getParameter("partitionNum")
     val parents = request.getParameter("parents")
@@ -42,13 +43,14 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
       job.setName(name)
       job.setCron(cron)
       job.setLogical(logical)
+      job.setBizServiceBean(bizServiceBean)
       val partition = new DBRangePartition()
       if (partitionField == null || partitionField.trim.equalsIgnoreCase("")) {
         job.setNeedPartition(false)
       } else {
         partition.setPartitionField(partitionField)
-        if(partitionNum!=null && partitionNum.toInt>0)
-        partition.setPartitionNum(partitionNum.toInt)
+        if (partitionNum != null && partitionNum.toInt > 0)
+          partition.setPartitionNum(partitionNum.toInt)
       }
       job.setPartition(partition)
       if (parents != null && !parents.equalsIgnoreCase("")) {

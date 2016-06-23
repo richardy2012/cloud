@@ -7,13 +7,13 @@ import com.chinascope.cloud.excute.Excutor;
  * Created by soledede.weng on 2016/6/23.
  */
 public abstract class Service {
-    private Excutor excutor;
+    private Job job;
 
-    public Excutor getExcutor() {
-        return excutor;
+    public Job getJob() {
+        return job;
     }
 
-    public void setExcutor(Excutor excutor) {
-        this.excutor = excutor;
+    public void setJob(Job job) {
+        this.job = job;
     }
 }

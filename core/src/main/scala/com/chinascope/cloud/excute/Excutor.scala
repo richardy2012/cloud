@@ -15,12 +15,12 @@ import scala.util.control.Breaks._
   */
 private[cloud] abstract class Excutor extends Logging {
   var conf: CloudConf = _
+  var job: Job = _
 
   def excute(): Unit
 
-  def start(job: Job, task: Task): Unit = {
+  def start(task: Task): Unit = {
     //pre process
-
     excute()
     //post process
   }
