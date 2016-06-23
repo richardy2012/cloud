@@ -682,11 +682,11 @@
 			</properties> -->
 		<resources>
 			<resource>
-				<directory>${project.parent.relativePath}/../src/main/resources/properties</directory>
+				<directory>src/main/resources/properties</directory>
 				<filtering>true</filtering>
 				<includes>
 					<include>environment.properties</include>
-					<include>${config.mongodb}</include>
+					<!--<include>${config.mongodb}</include>
 					<include>${config.services}</include>
 					<include>${config.db}</include>
 					<include>${config.jms}</include>
@@ -705,11 +705,11 @@
 					<include>${config.csdata}</include>
 					<include>${config.news}</include>
 					<include>${config.fund}</include>
-					<include>${config.newsanalysis}</include>
+					<include>${config.newsanalysis}</include>-->
 				</includes>
 			</resource>
 			<resource>
-				<directory>${project.parent.relativePath}/../src/main/resources/</directory>
+				<directory>src/main/resources/</directory>
 				<includes>
 					<include>lang/*.*</include>
 				</includes>

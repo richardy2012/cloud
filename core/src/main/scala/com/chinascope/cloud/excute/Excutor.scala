@@ -14,6 +14,7 @@ import scala.util.control.Breaks._
   * Created by soledede.weng on 2016/6/20.
   */
 private[cloud] abstract class Excutor extends Logging {
+  var conf: CloudConf = _
 
   def excute(): Unit
 

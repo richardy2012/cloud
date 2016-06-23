@@ -11,6 +11,7 @@
         <module>datashift</module>
         <module>configuration</module>
         <module>dbclient</module>
+        <module>mongoclient</module>
     </modules>
     <packaging>pom</packaging>
 

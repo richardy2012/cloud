@@ -18,6 +18,7 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
       task.setState(TaskState.STARTED)
       conf.listenerWaiter.post(TaskStarted(job.getName, task))
       val excutor = excutorInstanse(job, conf)
+      excutor.conf = conf
       if (excutor != null) {
         excutor.start(job, task)
       }
