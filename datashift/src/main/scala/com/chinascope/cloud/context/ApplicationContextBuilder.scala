@@ -22,7 +22,9 @@ private[cloud] object ApplicationContextBuilder {
   }
 
   def getSpringContextBean(beanName: String): Object = {
-    ApplicationContextBuilder.getApplicationContext
+   // ApplicationContextBuilder.getApplicationContext
     return springContext.getBean(beanName)
   }
+
+  ApplicationContextBuilder.getApplicationContext
 }
