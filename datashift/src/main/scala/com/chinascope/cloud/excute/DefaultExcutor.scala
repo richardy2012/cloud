@@ -15,9 +15,7 @@ private[cloud] abstract class DefaultExcutor extends Excutor {
 
   protected val bizService: Service = ApplicationContextBuilder.getSpringContextBean(testService).asInstanceOf[Service]
 
-
   override def excute(): Unit = {
-    println("Excute ...come in....START,Thread 1s...")
     if (bizService.getJob == null) {
       lock.synchronized {
         if (bizService.getJob == null) {
@@ -26,7 +24,6 @@ private[cloud] abstract class DefaultExcutor extends Excutor {
       }
     }
     service()
-    Thread.sleep(1000)
   }
 
   def service(): Unit

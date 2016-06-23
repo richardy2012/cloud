@@ -9,6 +9,7 @@ public class DemoService extends Service {
 
     @NeedPartition
     public String demoPartitionAnnotation() {
+        System.out.println("Come in method demoPartitionAnnotation");
         return "haha";
     }
 
