@@ -8,8 +8,8 @@ import com.chinascope.cloud.aop.annotation.NeedPartition;
 public class DemoService extends Service {
 
     @NeedPartition
-    public String demoPartitionAnnotation() {
-        System.out.println("Come in method demoPartitionAnnotation");
+    public String demoPartitionAnnotation(String partition) {
+        System.out.println("Come in method demoPartitionAnnotation:partition" + partition);
         return "haha";
     }
 

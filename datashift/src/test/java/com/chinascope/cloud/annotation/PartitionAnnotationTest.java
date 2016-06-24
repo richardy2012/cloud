@@ -9,7 +9,7 @@ import com.chinascope.cloud.service.DemoService;
 public class PartitionAnnotationTest {
     public static void main(String[] args) {
         DemoService demoService = (DemoService) ApplicationContextBuilder.getSpringContextBean("demoService");
-        System.out.println(demoService.demoPartitionAnnotation());
+        System.out.println(demoService.demoPartitionAnnotation("test"));
     }
 
 }
