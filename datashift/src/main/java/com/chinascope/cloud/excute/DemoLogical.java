@@ -13,6 +13,9 @@ import java.util.Date;
 public class DemoLogical extends DefaultExcutor {
     private static Logger log = JavaLogging.log();
 
+    public DemoLogical() {
+    }
+
     @Override
     public void service() {
         Job job = this.bizService().getJob();

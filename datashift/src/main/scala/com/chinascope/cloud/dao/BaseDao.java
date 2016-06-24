@@ -7,7 +7,7 @@ import com.chinascope.cloud.service.Service;
  * Created by soledede.weng on 2016/6/23.
  */
 public abstract class BaseDao {
-    private Job job;
+    protected Job job;
 
     public Job getJob() {
         return job;

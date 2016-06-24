@@ -76,7 +76,10 @@ private[cloud] object Excutor extends Logging {
             }
           }
         }
-      } else excutor = Class.forName(className).newInstance().asInstanceOf[Excutor]
+      } else {
+        excutor = Class.forName(className).newInstance().asInstanceOf[Excutor]
+      }
+
       //excutor = .newInstance().asInstanceOf[Excutor]
       logInfo(s" create excutor [$className] instance success")
     } catch {
