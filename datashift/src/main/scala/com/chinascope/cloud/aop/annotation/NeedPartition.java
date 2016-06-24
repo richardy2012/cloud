@@ -1,15 +1,25 @@
 package com.chinascope.cloud.aop.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Created by soledede.weng on 2016/6/23.
  */
 @Target(ElementType.METHOD)
+@Inherited
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NeedPartition {
     String value() default "none";
+
+    String from();
+
+    String to();
+
+    Op leftOp();
+
+    Op rightOp();
+
+    String comments() default "none";
 }
+
+

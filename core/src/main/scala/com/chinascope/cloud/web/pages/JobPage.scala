@@ -29,8 +29,12 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
     val content =
       <div>
         <ul class="nav nav-pills">
-          <li role="presentation"><a href="/">Home</a></li>
-          <li role="presentation"><a href="/job">New Job</a></li>
+          <li role="presentation">
+            <a href="/">Home</a>
+          </li>
+          <li role="presentation">
+            <a href="/job">New Job</a>
+          </li>
         </ul>
         <form action="/" method="post">
           <div class="input-group input-group-lg text_form_input">
@@ -52,6 +56,11 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
             <span class="input-group-addon">BizServiceBeanName:</span>
             <input type="text" class="form-control" name="bizServiceBean" placeholder="demoService" aria-describedby="sizing-addon1"/>
           </div>
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">BizDaoBeanName:</span>
+            <input type="text" class="form-control" name="bizDaoBean" placeholder="demoDao" aria-describedby="sizing-addon1"/>
+          </div>
+
 
           <span class="expand-additional-metrics">
             <span class="expand-additional-metrics-arrow arrow-closed"></span>
@@ -75,7 +84,9 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
             <label for="id_select"></label>
             <select id="id_select" class="selectpicker bla bla bli form-control" multiple="true" data-live-search="true" aria-describedby="sizing-addon1">
               {jobNames.map { name =>
-              <option>{name}</option>
+              <option>
+                {name}
+              </option>
             }}
             </select>
           </div>

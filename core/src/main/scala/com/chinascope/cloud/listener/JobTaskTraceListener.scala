@@ -37,6 +37,16 @@ class JobTaskTraceListener(conf: CloudConf) extends TraceListener {
     conf.zkNodeClient.persist(Constant.STATUS + "/" + taskStarted.task._1 + "/" + task.getId, task)
   }
 
+  override def onTaskBizException(taskBizException: TaskBizException): Unit = {
+    val task = taskBizException.task._2
+    conf.zkNodeClient.persist(Constant.STATUS + "/" + taskBizException.task._1 + "/" + task.getId, task)
+  }
+
+  override def onTaskError(taskError: TaskError): Unit = {
+    val task = taskError.task._2
+    conf.zkNodeClient.persist(Constant.STATUS + "/" + taskError.task._1 + "/" + task.getId, task)
+  }
+
   override def onTaskFinished(taskFinished: TaskFinished): Unit = {
     val task = taskFinished.task._2
     conf.zkNodeClient.persist(Constant.STATUS + "/" + taskFinished.task._1 + "/" + task.getId, task)

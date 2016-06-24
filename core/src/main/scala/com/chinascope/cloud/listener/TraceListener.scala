@@ -17,6 +17,10 @@ trait TraceListener extends Logging {
 
   def onTaskFinished(taskFinished: TaskFinished)
 
+  def onTaskBizException(taskBizException: TaskBizException)
+
+  def onTaskError(taskError: TaskError)
+
   def onJobFinished(jobFinished: JobFinished)
 
 

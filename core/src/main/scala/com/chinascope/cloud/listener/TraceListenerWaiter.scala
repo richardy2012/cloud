@@ -36,6 +36,10 @@ trait TraceListenerWaiter extends ListenerWaiter[TraceListener, TraceListenerEve
         listener.onTaskStarted(taskStarted)
       case taskFinished: TaskFinished =>
         listener.onTaskFinished(taskFinished)
+      case taskBizException: TaskBizException =>
+        listener.onTaskBizException(taskBizException)
+      case taskError: TaskError =>
+        listener.onTaskError(taskError)
     }
   }
 }

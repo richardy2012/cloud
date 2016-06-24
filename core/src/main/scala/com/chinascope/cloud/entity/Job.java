@@ -10,40 +10,19 @@ import java.util.List;
 /**
  * Created by soledede.weng on 2016/6/2.
  */
-public class Job implements Serializable, Cloneable {
-    private Integer id;
-    private String name; // must unique
-    private Integer state; //JobState.READY RUNNING  FINISHED ERROR RUNNING_EXCEPTION STOPIPNG STOPPED
-    private Boolean needPartition = true;
-    private Partition partition;
-    private String schedule; //class for schedule,default: DefaultSchedule
-    private String cron; //cron expression, like 30 10 1 20 * ?
-    private String logical; // the subclass of logical class
-    private String bizServiceBean; //for get bean from Spring Context
-    private List<String> parents;
-    private Long startTime;
-    private Long endTime;
-    private Long startExecTime;
-    private Long endExecTime;
+public class Job extends BaseJob {
+
+    private String bizService; //for get bean from Spring Context
+    private String bizDao; //for get bean from Spring Context
+
 
     public Job() {
     }
 
-    public Job(Integer id, String name, Integer state, Boolean needPartition, Partition partition, String schedule, String cron, String logical, String bizServiceBean, List<String> parents, Long startTime, Long endTime, Long startExecTime, Long endExecTime) {
-        this.id = id;
-        this.name = name;
-        this.state = state;
-        this.needPartition = needPartition;
-        this.partition = partition;
-        this.schedule = schedule;
-        this.cron = cron;
-        this.logical = logical;
-        this.bizServiceBean = bizServiceBean;
-        this.parents = parents;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.startExecTime = startExecTime;
-        this.endExecTime = endExecTime;
+
+    public Job(String bizService, String bizDao) {
+        this.bizService = bizService;
+        this.bizDao = bizDao;
     }
 
     public static Msg valiateNull(Job job) {
@@ -162,12 +141,20 @@ public class Job implements Serializable, Cloneable {
         this.endExecTime = endExecTime;
     }
 
-    public String getBizServiceBean() {
-        return bizServiceBean;
+    public String getBizService() {
+        return bizService;
     }
 
-    public void setBizServiceBean(String bizServiceBean) {
-        this.bizServiceBean = bizServiceBean;
+    public void setBizService(String bizService) {
+        this.bizService = bizService;
+    }
+
+    public String getBizDao() {
+        return bizDao;
+    }
+
+    public void setBizDao(String bizDao) {
+        this.bizDao = bizDao;
     }
 
     @Override
@@ -177,40 +164,15 @@ public class Job implements Serializable, Cloneable {
 
         Job job = (Job) o;
 
-        if (id != null ? !id.equals(job.id) : job.id != null) return false;
-        if (name != null ? !name.equals(job.name) : job.name != null) return false;
-        if (state != null ? !state.equals(job.state) : job.state != null) return false;
-        if (needPartition != null ? !needPartition.equals(job.needPartition) : job.needPartition != null) return false;
-        if (partition != null ? !partition.equals(job.partition) : job.partition != null) return false;
-        if (schedule != null ? !schedule.equals(job.schedule) : job.schedule != null) return false;
-        if (cron != null ? !cron.equals(job.cron) : job.cron != null) return false;
-        if (logical != null ? !logical.equals(job.logical) : job.logical != null) return false;
-        if (bizServiceBean != null ? !bizServiceBean.equals(job.bizServiceBean) : job.bizServiceBean != null)
-            return false;
-        if (parents != null ? !parents.equals(job.parents) : job.parents != null) return false;
-        if (startTime != null ? !startTime.equals(job.startTime) : job.startTime != null) return false;
-        if (endTime != null ? !endTime.equals(job.endTime) : job.endTime != null) return false;
-        if (startExecTime != null ? !startExecTime.equals(job.startExecTime) : job.startExecTime != null) return false;
-        return endExecTime != null ? endExecTime.equals(job.endExecTime) : job.endExecTime == null;
+        if (bizService != null ? !bizService.equals(job.bizService) : job.bizService != null) return false;
+        return bizDao != null ? bizDao.equals(job.bizDao) : job.bizDao == null;
 
     }
 
     @Override
     public int hashCode() {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (state != null ? state.hashCode() : 0);
-        result = 31 * result + (needPartition != null ? needPartition.hashCode() : 0);
-        result = 31 * result + (partition != null ? partition.hashCode() : 0);
-        result = 31 * result + (schedule != null ? schedule.hashCode() : 0);
-        result = 31 * result + (cron != null ? cron.hashCode() : 0);
-        result = 31 * result + (logical != null ? logical.hashCode() : 0);
-        result = 31 * result + (bizServiceBean != null ? bizServiceBean.hashCode() : 0);
-        result = 31 * result + (parents != null ? parents.hashCode() : 0);
-        result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
-        result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
-        result = 31 * result + (startExecTime != null ? startExecTime.hashCode() : 0);
-        result = 31 * result + (endExecTime != null ? endExecTime.hashCode() : 0);
+        int result = bizService != null ? bizService.hashCode() : 0;
+        result = 31 * result + (bizDao != null ? bizDao.hashCode() : 0);
         return result;
     }
 

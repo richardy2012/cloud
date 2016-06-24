@@ -20,5 +20,9 @@ case class TaskStarted(task: (String, Task)) extends TraceListenerEvent
 
 case class TaskFinished(task: (String, Task)) extends TraceListenerEvent
 
+case class TaskBizException(task: (String, Task)) extends TraceListenerEvent
+
+case class TaskError(task: (String, Task)) extends TraceListenerEvent
+
 
 
