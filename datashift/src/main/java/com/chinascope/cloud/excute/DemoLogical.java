@@ -5,6 +5,7 @@ import com.chinascope.cloud.service.DemoService;
 import com.chinascope.cloud.util.JavaLogging;
 import org.slf4j.Logger;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -21,7 +22,12 @@ public class DemoLogical extends DefaultExcutor {
         Job job = this.bizService().getJob();
         System.out.println("demoLogical Service " + job.getName());
         DemoService demoService = (DemoService) this.bizService();
-        demoService.demoPartitionAnnotation(new Date(), new Date());
+        Calendar c = Calendar.getInstance();
+        c.setTime(new Date());
+        c.set(Calendar.HOUR, c.get(Calendar.HOUR - 10));
+        Date currentDate = new Date();
+        System.out.println("last time:" + c.getTime() + "\t current Time" + currentDate);
+        demoService.demoPartitionAnnotation(c.getTime(), currentDate);
         log.info("This is demo Service.");
     }
 }

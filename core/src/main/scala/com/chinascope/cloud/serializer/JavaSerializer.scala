@@ -130,12 +130,12 @@ class JavaSerializer(conf: CloudConf) extends Serializer with Externalizable {
     new JavaSerializerInstance(counterReset, extraDebugInfo, classLoader)
   }
 
-  override def writeExternal(out: ObjectOutput): Unit = Utils.tryOrIOException {
+  override def writeExternal(out: ObjectOutput): Unit = Utils.tryOrException {
     out.writeInt(counterReset)
     out.writeBoolean(extraDebugInfo)
   }
 
-  override def readExternal(in: ObjectInput): Unit = Utils.tryOrIOException {
+  override def readExternal(in: ObjectInput): Unit = Utils.tryOrException {
     counterReset = in.readInt()
     extraDebugInfo = in.readBoolean()
   }

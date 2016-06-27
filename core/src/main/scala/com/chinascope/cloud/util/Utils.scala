@@ -493,7 +493,7 @@ private[cloud] object Utils extends Logging {
   }
 
 
-  def tryOrIOException[T](block: => T): T = {
+  def tryOrException[T](block: => T): T = {
     try {
       block
     } catch {

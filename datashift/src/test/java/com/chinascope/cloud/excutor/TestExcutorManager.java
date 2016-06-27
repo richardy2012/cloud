@@ -26,6 +26,7 @@ public class TestExcutorManager {
         Map<Long, Integer> workerToPartitionNumMap = new java.util.HashMap<Long, Integer>();
         workerToPartitionNumMap.put(1L, 2);
         workerToPartitionNumMap.put(2L, 1);
+        workerToPartitionNumMap.put(3L, 3);
         String workerPartitionNum = JSON.toJSONString(workerToPartitionNumMap, true);
         job.getPartition().setWorkerPartitionNum(workerPartitionNum);
         job.getPartition().setPartitionNum(1);

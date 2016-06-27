@@ -13,9 +13,9 @@ import java.util.Date;
 public class DemoService extends Service {
 
 
-    @NeedPartition(from = "from", to = "to", leftOp = Op.GT, rightOp = Op.LTE)
+    @NeedPartition(from = "fromDate", to = "toDate", leftOp = Op.GTE, rightOp = Op.LTE)
     public String demoPartitionAnnotation(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate) {
-        System.out.println("Come in method demoPartitionAnnotation:partition" + fromDate);
+        System.out.println("Come in method demoPartitionAnnotation \nfromDate:" + fromDate + "\n toDateL" + toDate);
         return "haha";
     }
 
