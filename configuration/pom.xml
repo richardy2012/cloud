@@ -92,6 +92,7 @@
 				<artifactId>redisclient</artifactId>
 				<version>${redisclient.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>com.aug3</groupId>
 				<artifactId>jmsclient</artifactId>
