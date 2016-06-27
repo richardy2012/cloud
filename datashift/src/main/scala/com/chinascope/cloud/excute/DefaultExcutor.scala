@@ -5,22 +5,26 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import com.chinascope.cloud.context.ApplicationContextBuilder
 import com.chinascope.cloud.dao.BaseDao
-import com.chinascope.cloud.service.{DemoService, Service}
+import com.chinascope.cloud.service.Service
 
 /**
   * Created by soledede.weng on 2016/6/20.
   */
-private[cloud] abstract class DefaultExcutor extends Excutor {
+private[cloud] abstract class DefaultExcutor[T] extends Excutor {
 
 
   private var bizServiceBean: String = _
   private var bizDaoBean: String = _
-  protected var bizService: Service = _
+  protected var bizService: T = _
   protected var bizDao: BaseDao = _
   var preffixLogicalName: String = _
 
   val flag = new AtomicBoolean(false)
 
+
+  def setBizService(bizService: Any) = {
+    this.bizService = bizService.asInstanceOf[T]
+  }
 
   private val lock = new Object
 
@@ -48,7 +52,7 @@ private[cloud] abstract class DefaultExcutor extends Excutor {
           } catch {
             case e =>
           }
-          if (bizObj != null) bizService = bizObj.asInstanceOf[Service]
+          if (bizObj != null) this.setBizService(bizObj)
         } else logWarning("logicalClassName is null or ''")
       }
       bizDaoBean = this.job.getBizDao
@@ -63,6 +67,8 @@ private[cloud] abstract class DefaultExcutor extends Excutor {
         case e =>
       }
       if (daoObj != null) bizDao = daoObj.asInstanceOf[BaseDao]
+
+      if (bizService != null && bizDao != null) bizService.asInstanceOf[Service[T]].setDao(bizDao)
     }
 
 
@@ -70,10 +76,10 @@ private[cloud] abstract class DefaultExcutor extends Excutor {
 
     //DJ job to Service and Dao
     if (bizService != null) {
-      if (bizService.getJob == null) {
+      if (bizService.asInstanceOf[Service[T]].getJob == null) {
         lock.synchronized {
-          if (bizService.getJob == null) {
-            bizService.setJob(this.job)
+          if (bizService.asInstanceOf[Service[T]].getJob == null) {
+            bizService.asInstanceOf[Service[T]].setJob(this.job)
           }
         }
       }

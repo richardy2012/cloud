@@ -13,7 +13,7 @@ private[cloud] object ApplicationContextBuilder {
     if (springContext == null) {
       this.synchronized {
         if (springContext == null) {
-          val contex = new ClassPathXmlApplicationContext("config\\applicationContext-aop.xml")
+          val contex = new ClassPathXmlApplicationContext("config\\applicationContext_aop.xml")
           springContext = contex
         }
       }
@@ -22,7 +22,7 @@ private[cloud] object ApplicationContextBuilder {
   }
 
   def getSpringContextBean(beanName: String): Object = {
-   // ApplicationContextBuilder.getApplicationContext
+   //ApplicationContextBuilder.getApplicationContext
     return springContext.getBean(beanName)
   }
 

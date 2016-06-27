@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.chinascope.cloud.dao.juchao.ITbJuchaoTestSDao">
+
+    <select id="fetchJuchaoData" resultType="com.csf.ada.datashift.refactor.entity.juchao.fund.TbFund0056">
+        <![CDATA[
+        select  t.id as  id,
+			    t.name as name,
+			    t.little_date as  littleDate,
+		from TB_JUCHAO_TEST_S t
+	    where t.little_date >= #{fromDate} and t.little_date < #{toDate}
+        ]]>
+    </select>
+</mapper>

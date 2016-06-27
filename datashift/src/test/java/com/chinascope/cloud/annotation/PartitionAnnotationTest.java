@@ -1,7 +1,7 @@
 package com.chinascope.cloud.annotation;
 
 import com.chinascope.cloud.context.ApplicationContextBuilder;
-import com.chinascope.cloud.service.DemoService;
+import com.chinascope.cloud.service.demo.DemoService;
 
 import java.util.Date;
 
