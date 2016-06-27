@@ -45,7 +45,8 @@ private[cloud] abstract class DefaultExcutor[T] extends Excutor {
         val logicalClassName = this.job.getLogical
         if (logicalClassName != null && !logicalClassName.trim.equalsIgnoreCase("")) {
           val logicalName = logicalClassName.substring(logicalClassName.lastIndexOf(".") + 1)
-          preffixLogicalName = logicalName.substring(0, logicalName.indexOf("Logical")).toLowerCase()
+          preffixLogicalName = logicalName.substring(0, logicalName.indexOf("Logical"))
+          preffixLogicalName = preffixLogicalName.charAt(0).toLower + preffixLogicalName.substring(1)
           bizServiceBean = preffixLogicalName + "Service"
           val bizObj = try {
             ApplicationContextBuilder.getSpringContextBean(bizServiceBean)

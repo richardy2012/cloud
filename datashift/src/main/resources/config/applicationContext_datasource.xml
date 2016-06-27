@@ -29,32 +29,33 @@
         </property>
     </bean>
 
+    <bean id="datasourceFactory" class="com.aug3.storage.dbclient.DataSourceFactory"/>
 
     <bean id="juchaoDataSource" factory-bean="datasourceFactory" factory-method="getDataSource">
         <constructor-arg ref="juchaocontext"/>
     </bean>
 
     <bean id="sessionFactory_juchao" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="configLocation" value="classpath:mybatis/SqlMapperConfig_juchao.xml"/>
+        <property name="configLocation" value="classpath:mybatis/juchao/SqlMapperConfig_juchao.xml"/>
         <property name="dataSource" ref="juchaoDataSource"/>
     </bean>
 
 
     <!-- mongo factory -->
-    <bean id="mongoFactory_ada" class="com.aug3.storage.mongoclient.MongoFactory">
-        <constructor-arg value="ada"/>
+    <bean id="mongoFactory_stest" class="com.aug3.storage.mongoclient.MongoFactory">
+        <constructor-arg value="stest"/>
     </bean>
 
     <!-- mongo -->
-    <bean id="mongo_ada" factory-bean="mongoFactory_ada" factory-method="newMongoInstance"/>
+    <bean id="mongo_stest" factory-bean="mongoFactory_stest" factory-method="newMongoInstance"/>
 
 
     <bean id="morphia" class="org.mongodb.morphia.Morphia"/>
 
-    <bean id="dataStore_ada" class="com.chinascope.cloud.ds.mongo.MongoDatastore">
+    <bean id="dataStore_stest" class="com.chinascope.cloud.ds.mongo.MongoDatastore">
         <constructor-arg ref="morphia"></constructor-arg>
-        <constructor-arg ref="mongo_ada"></constructor-arg>
-        <constructor-arg value="${ada.mongo.db.name}"></constructor-arg>
+        <constructor-arg ref="mongo_stest"></constructor-arg>
+        <constructor-arg value="testdb"></constructor-arg>
     </bean>
 
 </beans>

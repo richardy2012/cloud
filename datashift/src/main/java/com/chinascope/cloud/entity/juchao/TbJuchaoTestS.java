@@ -42,4 +42,13 @@ public class TbJuchaoTestS {
     public void setLittleDate(Date littleDate) {
         this.littleDate = littleDate;
     }
+
+    @Override
+    public String toString() {
+        return "TbJuchaoTestS{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", littleDate=" + littleDate +
+                '}';
+    }
 }

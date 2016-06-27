@@ -19,7 +19,11 @@ public class TbJuchaoTestSService extends Service<TbJuchaoTestSDao> {
 
     public void fetchJuchaoDataService(Date fromDate, Date toDate) {
         //Some Logical
-        this.getDao().fetchJuchaoData(fromDate, toDate);
+        log.debug("TbJuchaoTestSService:\nBefore paritition fromDate:"+fromDate+"\ttoDate:"+toDate);
+        List<TbJuchaoTestS> tbJuchaoTestS = this.getDao().fetchJuchaoData(fromDate, toDate);
+        for (TbJuchaoTestS test : tbJuchaoTestS) {
+            System.out.println(test.toString());
+        }
         //Some Logical
     }
 
