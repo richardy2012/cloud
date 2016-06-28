@@ -17,6 +17,6 @@
     <bean id="dogDao" class="com.csf.cloud.dao.mongo.DogDao">
         <constructor-arg ref="mongo_stest"/>
         <constructor-arg ref="morphia"/>
-        <constructor-arg value="testdb"/>
+        <constructor-arg value="test_juchao"/>
     </bean>
 </beans>

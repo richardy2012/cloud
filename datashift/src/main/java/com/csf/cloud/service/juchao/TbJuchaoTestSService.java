@@ -2,6 +2,7 @@ package com.csf.cloud.service.juchao;
 
 import com.csf.cloud.dao.juchao.TbJuchaoTestSDao;
 import com.csf.cloud.entity.juchao.TbJuchaoTestS;
+import com.csf.cloud.entity.test.Dog;
 import com.csf.cloud.service.Service;
 import com.csf.cloud.util.JavaLogging;
 import org.slf4j.Logger;
@@ -18,12 +19,17 @@ public class TbJuchaoTestSService extends Service<TbJuchaoTestSDao> {
 
     public void fetchJuchaoDataService(Date fromDate, Date toDate) {
         //Some Logical
-        log.debug("TbJuchaoTestSService:\nBefore paritition fromDate:"+fromDate+"\ttoDate:"+toDate);
+        log.debug("TbJuchaoTestSService:\nBefore paritition fromDate:" + fromDate + "\ttoDate:" + toDate);
         List<TbJuchaoTestS> tbJuchaoTestS = this.getDao().fetchJuchaoData(fromDate, toDate);
         for (TbJuchaoTestS test : tbJuchaoTestS) {
             System.out.println(test.toString());
         }
         //Some Logical
+    }
+
+    public void saveDog(Dog dog) {
+        this.getDao().saveDog(dog);
+        System.out.println("save dog successfully");
     }
 
 }
