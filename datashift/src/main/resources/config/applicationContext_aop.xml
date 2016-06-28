@@ -15,11 +15,11 @@
     <!--<aop:aspectj-autoproxy proxy-target-class="true"/>-->
 
 
-    <bean name="demoService" class="com.chinascope.cloud.service.demo.DemoService"/>
-    <bean name="demoDao" class="com.chinascope.cloud.dao.demo.DemoDao"/>
+    <bean name="demoService" class="com.csf.cloud.service.demo.DemoService"/>
+    <bean name="demoDao" class="com.csf.cloud.dao.demo.DemoDao"/>
 
     <!-- Configure Aspect Beans, without this Aspects advices wont execute -->
-    <bean name="partitionAnnotationAspect" class="com.chinascope.cloud.aop.PartitionAnnotationAspect"/>
+    <bean name="partitionAnnotationAspect" class="com.csf.cloud.aop.PartitionAnnotationAspect"/>
 
     <import resource="applicationContext_datasource.xml"/>
     <import resource="applicationContext_service.xml"/>

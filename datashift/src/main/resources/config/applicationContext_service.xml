@@ -4,5 +4,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <bean id="tbJuchaoTestSService" class="com.chinascope.cloud.service.juchao.TbJuchaoTestSService"/>
+    <bean id="tbJuchaoTestSService" class="com.csf.cloud.service.juchao.TbJuchaoTestSService"/>
 </beans>

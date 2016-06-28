@@ -9,9 +9,9 @@
         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
         http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd">
 
-    <context:component-scan base-package="com.chinascope.cloud"/>
+    <context:component-scan base-package="com.csf.cloud"/>
 
-    <bean class="com.chinascope.cloud.util.PropertyConfigurer">
+    <bean class="com.csf.cloud.util.PropertyConfigurer">
         <property name="locations">
             <list>
                 <value>classpath:/common-mongodb.properties</value>
@@ -52,7 +52,7 @@
 
     <bean id="morphia" class="org.mongodb.morphia.Morphia"/>
 
-    <bean id="dataStore_stest" class="com.chinascope.cloud.ds.mongo.MongoDatastore">
+    <bean id="dataStore_stest" class="com.csf.cloud.ds.mongo.MongoDatastore">
         <constructor-arg ref="morphia"></constructor-arg>
         <constructor-arg ref="mongo_stest"></constructor-arg>
         <constructor-arg value="testdb"></constructor-arg>

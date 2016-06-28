@@ -6,15 +6,15 @@
 
     <!-- ++++++++++++++++++++++++++++++++ juchao dao start ++++++++++++++++++++++++++++++++ -->
     <bean id="iTbJuchaoTestSDao" class="org.mybatis.spring.mapper.MapperFactoryBean">
-        <property name="mapperInterface" value="com.chinascope.cloud.dao.juchao.ITbJuchaoTestSDao"/>
+        <property name="mapperInterface" value="com.csf.cloud.dao.juchao.ITbJuchaoTestSDao"/>
         <property name="sqlSessionFactory" ref="sessionFactory_juchao"></property>
     </bean>
 
-    <bean id="tbJuchaoTestSDao" class="com.chinascope.cloud.dao.juchao.TbJuchaoTestSDao"/>
+    <bean id="tbJuchaoTestSDao" class="com.csf.cloud.dao.juchao.TbJuchaoTestSDao"/>
 
 
     <!-- mongo dao-->
-    <bean id="dogDao" class="com.chinascope.cloud.dao.mongo.DogDao">
+    <bean id="dogDao" class="com.csf.cloud.dao.mongo.DogDao">
         <constructor-arg ref="mongo_stest"/>
         <constructor-arg ref="morphia"/>
         <constructor-arg value="testdb"/>
