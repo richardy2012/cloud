@@ -1,11 +1,13 @@
 package com.csf.cloud.service.juchao;
 
+import com.csf.cloud.aop.annotation.Op;
 import com.csf.cloud.dao.juchao.TbJuchaoTestSDao;
 import com.csf.cloud.entity.juchao.TbJuchaoTestS;
 import com.csf.cloud.entity.test.Dog;
 import com.csf.cloud.service.Service;
 import com.csf.cloud.util.JavaLogging;
 import org.slf4j.Logger;
+import org.bson.types.ObjectId;
 
 import java.util.Date;
 import java.util.List;
@@ -30,6 +32,23 @@ public class TbJuchaoTestSService extends Service<TbJuchaoTestSDao> {
     public void saveDog(Dog dog) {
         this.getDao().saveDog(dog);
         System.out.println("save dog successfully");
+    }
+
+
+    public void updateDog(Dog dog) {
+        this.getDao().updateDog(dog);
+    }
+
+    public List<Dog> findDogs() {
+        return this.getDao().findDogs();
+    }
+
+    public Dog findDog() {
+        return getDao().findDog("_id", new ObjectId("57724f06d62b8a19e8e0e66c"));
+    }
+
+    public List<Dog> findDogsByHeight(Double height, Op op) {
+        return getDao().findDogsByHeight(100.2,Op.LTE);
     }
 
 }

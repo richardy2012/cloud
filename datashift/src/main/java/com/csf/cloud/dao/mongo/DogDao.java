@@ -6,6 +6,8 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 
+import java.util.List;
+
 /**
  * Created by soledede.weng on 2016/6/28.
  */
@@ -19,6 +21,8 @@ public class DogDao extends BasicDAO<Dog, String> {
     public DogDao(Datastore ds) {
         super(ds);
     }
+
+
 
 
 }

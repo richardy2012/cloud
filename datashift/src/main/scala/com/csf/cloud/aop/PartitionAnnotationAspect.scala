@@ -72,6 +72,7 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
         }
       }
 
+      logInfo(s"Before partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}")
 
       val targetObj = proceedingJoinPoint.getTarget
 
@@ -128,6 +129,7 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
         }
 
+        logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}")
         def doubleNewArgs: (Double, Double) = {
           val from = fromVal.asInstanceOf[Double]
           val to = toVal.asInstanceOf[Double]

@@ -7,8 +7,16 @@ import org.mongodb.morphia.annotations.Id;
 /**
  * Created by soledede.weng on 2016/6/27.
  */
-@Entity(noClassnameStored = true)
+
 public abstract class BaseEntity {
     @Id
-    private ObjectId id;
+    protected ObjectId id;
+
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
+    }
 }

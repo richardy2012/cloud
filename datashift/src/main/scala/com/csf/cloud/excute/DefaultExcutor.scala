@@ -65,7 +65,7 @@ private[cloud] abstract class DefaultExcutor[T] extends Excutor {
       val daoObj = try {
         ApplicationContextBuilder.getSpringContextBean(bizDaoBean)
       } catch {
-        case e =>
+        case e:Exception =>
       }
       if (daoObj != null) bizDao = daoObj.asInstanceOf[BaseDao]
 
