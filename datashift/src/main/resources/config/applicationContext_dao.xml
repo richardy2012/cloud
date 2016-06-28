@@ -14,5 +14,9 @@
 
 
     <!-- mongo dao-->
-    <bean id="tbJuchaoTestSDao" class="com.chinascope.cloud.dao.mongo.DogDao"/>
+    <bean id="dogDao" class="com.chinascope.cloud.dao.mongo.DogDao">
+        <constructor-arg ref="mongo_stest"/>
+        <constructor-arg ref="morphia"/>
+        <constructor-arg value="testdb"/>
+    </bean>
 </beans>

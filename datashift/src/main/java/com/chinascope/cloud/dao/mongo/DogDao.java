@@ -11,6 +11,7 @@ import org.mongodb.morphia.dao.BasicDAO;
  */
 public class DogDao extends BasicDAO<Dog, String> {
 
+
     public DogDao(MongoClient mongoClient, Morphia morphia, String dbName) {
         super(mongoClient, morphia, dbName);
     }
@@ -18,5 +19,6 @@ public class DogDao extends BasicDAO<Dog, String> {
     public DogDao(Datastore ds) {
         super(ds);
     }
+
 
 }
