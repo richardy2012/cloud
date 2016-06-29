@@ -274,7 +274,19 @@ private[cloud] object Utils extends Logging {
   }
 
 
+  def toLowerCaseFirstOne(s: String): String = {
+    if (Character.isLowerCase(s.charAt(0)))
+      return s;
+    else
+      return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
+  }
 
+  def toUpperCaseFirstOne(s: String): String = {
+    if (Character.isUpperCase(s.charAt(0)))
+      return s;
+    else
+      return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
+  }
 
 
   /**

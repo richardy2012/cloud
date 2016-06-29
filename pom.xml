@@ -70,7 +70,6 @@
         <mmseg4j.version>1.8.6</mmseg4j.version>
         <jackson.version>2.5.4</jackson.version>
         <jgrapht.version>0.9.1</jgrapht.version>
-        <redisclient.version>1.2.4</redisclient.version>
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
@@ -90,6 +89,10 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+            <repository>
+                <id>hengyunabc-maven-repo</id>
+                <url>https://raw.githubusercontent.com/hengyunabc/maven-repo/master/repository</url>
+            </repository>
         <repository>
             <id>apache-repo</id>
             <name>Apache Repository</name>
@@ -197,12 +200,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.aug3.storage</groupId>
-                <artifactId>redisclient</artifactId>
-                <version>${redisclient.version}</version>
-            </dependency>
-
             <dependency>
                 <groupId>com.etaty.rediscala</groupId>
                 <artifactId>rediscala_${scala.binary.version}</artifactId>
