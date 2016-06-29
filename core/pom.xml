@@ -17,9 +17,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.main.class>com.csf.cloud.deploy.DeployAllpication</project.main.class>
         <project.exec.jar.name>DistributedMaster</project.exec.jar.name>
+
     </properties>
 
+
     <dependencies>
+        <dependency>
+            <groupId>com.aug3.storage</groupId>
+            <artifactId>redisclient</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
