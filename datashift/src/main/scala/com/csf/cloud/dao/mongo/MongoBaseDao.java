@@ -7,6 +7,7 @@ import com.csf.cloud.config.JavaConfiguration;
 import com.csf.cloud.dao.BaseDao;
 import com.csf.cloud.storage.Storage;
 import com.csf.cloud.storage.Storage$;
+import com.csf.cloud.util.BizConstant;
 import com.csf.cloud.util.JavaLogging;
 import com.csf.cloud.util.Utils;
 import org.mongodb.morphia.Datastore;
@@ -55,16 +56,17 @@ public abstract class MongoBaseDao<T> extends BaseDao {
                     ds.save(entity);
                 } else {
                     //check some field ,whether is updated by some guys
-                    String fieldsForObjectId = storage.getStringBykey(objectId);
+                    String fieldsForObjectId = storage.getStringBykey(BizConstant.CHECK_PREFFIX() + objectId);
                     if (fieldsForObjectId == null || fieldsForObjectId.equalsIgnoreCase("")) {
                         //This is false positive of bloomFilter
                         ds.save(entity);
                     } else {
-                        String[] reDuplicateFieleds = fieldsForObjectId.split(JavaConfiguration.checkSeparator());
+                        String[] reDuplicateFieleds = fieldsForObjectId.split("\\" + JavaConfiguration.checkSeparator());
                         //set these filds for null
                         for (String dupFieldName : reDuplicateFieleds) {
-                            Method setField = clazz.getMethod(set(dupFieldName));
-                            setField.invoke(entity, null);
+                            Field field = clazz.getDeclaredField(dupFieldName);
+                            Method setField = clazz.getMethod(set(dupFieldName), field.getType());
+                            setField.invoke(entity, new Object[]{null});
                         }
                         ds.merge(entity);
                     }
@@ -75,10 +77,10 @@ public abstract class MongoBaseDao<T> extends BaseDao {
                 return false;
             }
         } catch (NoSuchMethodException e) {
-            log.error("no  method for reflect!", e.getCause());
+            log.error("no  method for reflect!", e.getStackTrace());
             return false;
         } catch (Exception e) {
-            log.error("faield!", e.getCause());
+            log.error("faield!", e.getStackTrace());
             return false;
         }
     }

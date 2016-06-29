@@ -18,7 +18,6 @@ import java.util.List;
 public class TbJuchaoTestSService extends Service<TbJuchaoTestSDao> {
     private static Logger log = JavaLogging.log();
 
-
     public void fetchJuchaoDataService(Date fromDate, Date toDate) {
         //Some Logical
         log.debug("TbJuchaoTestSService:\nBefore paritition fromDate:" + fromDate + "\ttoDate:" + toDate);
@@ -39,16 +38,20 @@ public class TbJuchaoTestSService extends Service<TbJuchaoTestSDao> {
         this.getDao().updateDog(dog);
     }
 
+    public Boolean saveOrupdateDog(Dog dog) {
+        return this.getDao().saveOrupdateDog(dog);
+    }
+
     public List<Dog> findDogs() {
         return this.getDao().findDogs();
     }
 
     public Dog findDog() {
-        return getDao().findDog("_id", new ObjectId("57724f06d62b8a19e8e0e66c"));
+        return getDao().findDog("_id", "test_id");
     }
 
     public List<Dog> findDogsByHeight(Double height, Op op) {
-        return getDao().findDogsByHeight(100.2,Op.LTE);
+        return getDao().findDogsByHeight(100.2, Op.LTE);
     }
 
 }

@@ -14,7 +14,10 @@ import static org.aspectj.org.eclipse.jdt.internal.compiler.parser.TheOriginalJD
  */
 @Entity(value = "dog_collection", noClassnameStored = true)
 @Indexes(@Index(value = "hair", fields = @Field("hair")))
-public class Dog extends BaseEntity {
+public class Dog {
+    @Id
+    private String id;
+
     private String name;
     private String hair;
     private Double height;
@@ -39,6 +42,13 @@ public class Dog extends BaseEntity {
 
 
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getName() {
         return name;
     }

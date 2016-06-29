@@ -8,6 +8,7 @@ import com.csf.cloud.dao.mongo.MongoBaseDao;
 import com.csf.cloud.entity.juchao.TbJuchaoTestS;
 import com.csf.cloud.entity.test.Dog;
 import com.csf.cloud.util.JavaLogging;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.mongodb.morphia.query.Query;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * Created by soledede.weng on 2016/6/27.
  */
-public class TbJuchaoTestSDao extends MongoBaseDao<DogDao> {
+public class TbJuchaoTestSDao extends MongoBaseDao<Dog> {
     private static Logger log = JavaLogging.log();
 
     @Autowired
@@ -70,4 +71,9 @@ public class TbJuchaoTestSDao extends MongoBaseDao<DogDao> {
         }
         return query.asList();
     }
+
+    public Boolean saveOrupdateDog(Dog dog) {
+        return this.saveOrUpdate(dog, dogDao.getDatastore());
+    }
+
 }

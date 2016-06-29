@@ -9,14 +9,5 @@ import org.mongodb.morphia.annotations.Id;
  */
 
 public abstract class BaseEntity {
-    @Id
-    protected ObjectId id;
 
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
 }

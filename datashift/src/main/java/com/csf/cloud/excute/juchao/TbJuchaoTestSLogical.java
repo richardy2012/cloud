@@ -4,6 +4,7 @@ import com.csf.cloud.entity.test.Dog;
 import com.csf.cloud.entity.test.Finger;
 import com.csf.cloud.excute.DefaultExcutor;
 import com.csf.cloud.service.juchao.TbJuchaoTestSService;
+import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,10 +31,12 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
         for (int i = 0; i < 10; i++) {
             figers.add(new Finger("finger" + i + 1));
         }
-        for (int i = 0; i < 3; i++) {
+       /* for (int i = 0; i < 3; i++) {
             this.bizService().saveDog(new Dog("zhuangzhuang" + i, "white", 14.4 + i, figers));
-        }
-
+        }*/
+        Dog saveDog = new Dog("zhuangzhuang", "white", 40.3, figers);
+        saveDog.setId("test_id");
+        this.bizService().saveDog(saveDog);
 
         this.bizService().findDogs().forEach(d -> System.out.println(d.toString()));
 
@@ -41,15 +44,25 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
         //test update
         Dog dog = this.bizService().findDog();
         System.out.println("Before updated:dog:" + dog.toString());
-        Dog dogNew = new Dog();
-        dogNew.setId(dog.getId());
-        dogNew.setName("bad guy");
-        this.bizService().updateDog(dogNew);
-        dog = this.bizService().findDog();
-        System.out.println("After updated:dog:" + dog.toString());
-
+        if (dog != null) {
+            Dog dogNew = new Dog();
+            dogNew.setId(dog.getId());
+            dogNew.setName("bad guy");
+            this.bizService().updateDog(dogNew);
+            dog = this.bizService().findDog();
+            System.out.println("After updated:dog:" + dog.toString());
+        }
         //test query by contition
 
+
+        //test save or update check unique
+
+        Dog dogUnique = new Dog();
+        dogUnique.setId(dog.getId());
+        dogUnique.setName("check unique dog");
+        dogUnique.setHair("long yellow");
+        dogUnique.setHeight(1.2);
+        this.bizService().saveOrupdateDog(dogUnique);
 
     }
 }

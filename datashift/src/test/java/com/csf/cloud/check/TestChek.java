@@ -18,12 +18,20 @@ public class TestChek {
     static Storage storage = Storage$.MODULE$.apply("redis");
 
     public static void main(String[] args) {
-        addPrimaryKeyToRedis();
+       addPrimaryKeyToRedis();
+        bloomFilter.add("height");
+        bloomFilter.add("hair");
+        if(bloomFilter.mightContain("hair")) {
+            System.out.println("true");
+        }else System.out.println("false");
+
+
+        bloomFilter.dispose();
     }
 
     public static void addPrimaryKeyToRedis() {
-        storage.setStringByKey(BizConstant.CHECK_PREFFIX() + "57724f06d62b8a19e8e0e66c", "height|hair");
-        System.out.println(storage.getStringBykey(BizConstant.CHECK_PREFFIX() + "57724f06d62b8a19e8e0e66c"));
+        storage.setStringByKey(BizConstant.CHECK_PREFFIX() + "test_id", "height|hair");
+        System.out.println(storage.getStringBykey(BizConstant.CHECK_PREFFIX() + "test_id"));
     }
 
 }

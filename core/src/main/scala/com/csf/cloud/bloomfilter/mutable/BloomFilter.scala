@@ -49,7 +49,7 @@ class BloomFilter[T](numberOfBits: Long, numberOfHashes: Int)
 }
 
 object BloomFilter {
-  private var instanceMap = new ConcurrentHashMap[String, AnyRef]()
+  private val instanceMap = new HashMap[String, AnyRef]()
 
   def apply[T](bizType: String, numberOfItems: Long, falsePositiveRate: Double)
                        (implicit canGenerateHash: CanGenerateHashFrom[T]): BloomFilter[T] = {
@@ -59,10 +59,10 @@ object BloomFilter {
     if (!instanceMap.contains(bizType)) {
       this.synchronized {
         if (!instanceMap.contains(bizType))
-          instanceMap.put(bizType, new BloomFilter[T](nb, nh))
+          instanceMap(bizType) = new BloomFilter[T](nb, nh)
       }
     }
-    instanceMap.get(bizType).asInstanceOf[BloomFilter[T]]
+    instanceMap(bizType).asInstanceOf[BloomFilter[T]]
   }
 
   def optimalNumberOfBits(numberOfItems: Long, falsePositiveRate: Double): Long = {
