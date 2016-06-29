@@ -3,6 +3,7 @@ package com.csf.cloud.dao.mongo;
 import com.csf.cloud.bloomfilter.CanGenerateHashFrom;
 import com.csf.cloud.bloomfilter.mutable.BloomFilter;
 import com.csf.cloud.config.DefaultConfiguration;
+import com.csf.cloud.config.JavaConfiguration;
 import com.csf.cloud.dao.BaseDao;
 import com.csf.cloud.storage.Storage;
 import com.csf.cloud.storage.Storage$;
@@ -20,10 +21,11 @@ import java.lang.reflect.Method;
 /**
  * Created by soledede.weng on 2016/6/28.
  */
-public abstract class MongoBaseDao<T> extends BaseDao implements DefaultConfiguration {
+public abstract class MongoBaseDao<T> extends BaseDao {
     private Logger log = JavaLogging.log();
-    BloomFilter<String> bloomFilter = BloomFilter.apply("unqiue_primary_key", expectedElements(),
-            falsePositiveRate(),
+
+    BloomFilter<String> bloomFilter = BloomFilter.apply("unqiue_primary_key", JavaConfiguration.expectedElements(),
+            JavaConfiguration.falsePositiveRate(),
             CanGenerateHashFrom.CanGenerateHashFromString$.MODULE$);
     Storage storage = Storage$.MODULE$.apply("redis");
 
@@ -58,7 +60,7 @@ public abstract class MongoBaseDao<T> extends BaseDao implements DefaultConfigur
                         //This is false positive of bloomFilter
                         ds.save(entity);
                     } else {
-                        String[] reDuplicateFieleds = fieldsForObjectId.split(checkSeparator());
+                        String[] reDuplicateFieleds = fieldsForObjectId.split(JavaConfiguration.checkSeparator());
                         //set these filds for null
                         for (String dupFieldName : reDuplicateFieleds) {
                             Method setField = clazz.getMethod(set(dupFieldName));

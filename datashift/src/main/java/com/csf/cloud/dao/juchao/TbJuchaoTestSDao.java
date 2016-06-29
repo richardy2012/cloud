@@ -28,14 +28,11 @@ public class TbJuchaoTestSDao extends MongoBaseDao<DogDao> {
     DogDao dogDao;
 
 
-
-
     @NeedPartition(from = "fromDate", to = "toDate", leftOp = Op.GTE, rightOp = Op.LTE)
     public List<TbJuchaoTestS> fetchJuchaoData(Date fromDate, Date toDate) {
         log.debug("TbJuchaoTestSDao\nHave Split by paritition fromDate:" + fromDate + "\ttoDate:" + toDate);
         return iTbJuchaoTestSDao.fetchJuchaoData(fromDate, toDate);
     }
-
 
 
     public void saveDog(Dog dog) {

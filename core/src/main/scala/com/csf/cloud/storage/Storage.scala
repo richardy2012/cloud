@@ -11,6 +11,8 @@ private[cloud] trait Storage {
   def getStringBykey(key: String): String
 
   def getAllByKeyPreffix[T: ClassTag](preffix: String): Seq[T]
+
+  def setStringByKey(key: String,value: String)
 }
 
 private[cloud] object Storage {
@@ -18,7 +20,7 @@ private[cloud] object Storage {
   def apply(sType: String): Storage = {
     sType match {
       case "redis" => RedisStorage()
-      case _ =>
+      case _ => null.asInstanceOf[Storage]
     }
   }
 
