@@ -5,6 +5,8 @@ import com.csf.cloud.bloomfilter.CanGenerateHashFrom;
 import com.csf.cloud.bloomfilter.mutable.BloomFilter;
 import com.csf.cloud.config.CloudConf;
 import com.csf.cloud.config.JavaConfiguration;
+import com.csf.cloud.deploy.node.Node;
+import com.csf.cloud.deploy.node.Node$;
 import com.csf.cloud.entity.Job;
 import com.csf.cloud.excute.ExcutorManager;
 import com.csf.cloud.partition.DBRangePartition;
@@ -21,21 +23,19 @@ public class TestExcutorManager {
             CanGenerateHashFrom.CanGenerateHashFromString$.MODULE$);
 
     public static void main(String[] args) {
-        testTbJuchaoTestSDao();
+        //testTbJuchaoTestSDao();
+        testDemoService();
     }
 
 
-    public static void testTbJuchaoTestSDao(){
+    public static void testTbJuchaoTestSDao() {
 
         bloomFilter.add("test_id");
-        if(bloomFilter.mightContain("test_id")) {
+        if (bloomFilter.mightContain("test_id")) {
             System.out.println("true");
-        }else System.out.println("false");
+        } else System.out.println("false");
 
-
-
-
-
+        Node.setNodeId(1);
         CloudConf conf = new CloudConf();
         conf.init();
         ExcutorManager excutorManager = new ExcutorManager(conf);
@@ -58,9 +58,9 @@ public class TestExcutorManager {
     }
 
 
-    public static void testDemoService(){
+    public static void testDemoService() {
 
-
+        Node.setNodeId(1);
 
         CloudConf conf = new CloudConf();
         conf.init();
@@ -72,7 +72,6 @@ public class TestExcutorManager {
         Map<Long, Integer> workerToPartitionNumMap = new java.util.HashMap<Long, Integer>();
         workerToPartitionNumMap.put(1L, 2);
         workerToPartitionNumMap.put(2L, 1);
-        workerToPartitionNumMap.put(3L, 3);
         String workerPartitionNum = JSON.toJSONString(workerToPartitionNumMap, true);
         job.getPartition().setWorkerPartitionNum(workerPartitionNum);
         job.getPartition().setPartitionNum(1);

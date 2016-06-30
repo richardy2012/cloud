@@ -419,6 +419,8 @@ private[cloud] object Node extends Logging {
   var nodeStarted = new AtomicBoolean(false)
   var nodeId: Long = _
 
+  def setNodeId(nodeId: Long) = this.nodeId = nodeId
+
   val _jobPath = "^/status/([0-9|a-z]+)$".r
   val jobNameMatch = "^/status/([0-9|a-z]+)/\\w+$".r
 

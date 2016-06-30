@@ -112,11 +112,11 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
         val minAvailableWorkerNodeId = sortedArrayWorker2PartitionNum.map(_._1).min
 
         if (fromVal.isInstanceOf[Int]) {
-          args(fromIndex) = Integer.valueOf(doubleNewArgs._1.toString)
-          args(toIndex) = Integer.valueOf(doubleNewArgs._2.toString)
+          args(fromIndex) = Integer.valueOf(longNewArgs._1.toString)
+          args(toIndex) = Integer.valueOf(longNewArgs._2.toString)
         } else if (fromVal.isInstanceOf[Long]) {
-          args(fromIndex) = java.lang.Long.valueOf(doubleNewArgs._1.toString)
-          args(toIndex) = java.lang.Long.valueOf(doubleNewArgs._2.toString)
+          args(fromIndex) = java.lang.Long.valueOf(longNewArgs._1.toString)
+          args(toIndex) = java.lang.Long.valueOf(longNewArgs._2.toString)
         } else if (fromVal.isInstanceOf[Float]) {
           args(fromIndex) = java.lang.Float.valueOf(doubleNewArgs._1.toString)
           args(toIndex) = java.lang.Float.valueOf(doubleNewArgs._2.toString)
@@ -152,6 +152,34 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
           (newFrom, newTo)
         }
+
+
+        def longNewArgs: (Long, Long) = {
+          val from = java.lang.Long.valueOf(fromVal.toString)
+          val to = java.lang.Long.valueOf(toVal.toString)
+          var newFrom: Long = -1
+          var newTo: Long = -1
+          val moneyPerPartition = (to - from) / totalPartitionNum
+
+          def caculateNewBoundary(): (Long, Long) = {
+            if (leftOp == Op.GTE && rightOp == Op.LTE) {
+              newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition + 1
+            } else if ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE)) {
+              newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition
+            } else if (leftOp == Op.GT && rightOp == Op.LT) {
+              newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition - 1
+            }
+            if (minAvailableWorkerNodeId == Node.nodeId && currentPartitionNum == 1) {
+              //first worker,first partition
+              newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition
+            }
+            newTo = from + currentLocationPartitionNum * moneyPerPartition
+
+            (newFrom, newTo)
+          }
+          caculateNewBoundary
+        }
+
 
         def dateNewArg: (Date, Date) = {
 

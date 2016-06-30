@@ -20,4 +20,9 @@ public class DemoService extends Service<DemoService> {
         return "haha";
     }
 
+    @NeedPartition(from = "from", to = "to", leftOp = Op.GTE, rightOp = Op.LTE)
+    public void demoPartitionIntegerAnnotation( Integer from,Integer to) {
+        System.out.println("Come in method demoPartitionAnnotation \nfrom:" + from + "\n to" + to);
+    }
+
 }

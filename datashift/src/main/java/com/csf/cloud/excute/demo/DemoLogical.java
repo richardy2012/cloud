@@ -28,7 +28,9 @@ public class DemoLogical extends DefaultExcutor<DemoService> {
         c.set(Calendar.HOUR, c.get(Calendar.HOUR - 10));
         Date currentDate = new Date();
         System.out.println("last time:" + c.getTime() + "\t current Time" + currentDate);
-        demoService.demoPartitionAnnotation(c.getTime(), currentDate);
+        //demoService.demoPartitionAnnotation(c.getTime(), currentDate);
+        demoService.demoPartitionIntegerAnnotation(1,7);
+
         log.info("This is demo Service.");
     }
 }
