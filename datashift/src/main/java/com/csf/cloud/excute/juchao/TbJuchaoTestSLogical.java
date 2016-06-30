@@ -1,5 +1,8 @@
 package com.csf.cloud.excute.juchao;
 
+import com.csf.cloud.bloomfilter.CanGenerateHashFrom;
+import com.csf.cloud.bloomfilter.mutable.BloomFilter;
+import com.csf.cloud.config.JavaConfiguration;
 import com.csf.cloud.entity.test.Dog;
 import com.csf.cloud.entity.test.Finger;
 import com.csf.cloud.excute.DefaultExcutor;
@@ -15,6 +18,20 @@ import java.util.List;
  * Created by soledede.weng on 2016/6/27.
  */
 public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
+
+    //just for test
+    static BloomFilter<String> bloomFilter = BloomFilter.apply("unqiue_primary_key", JavaConfiguration.expectedElements(),
+            JavaConfiguration.falsePositiveRate(),
+            CanGenerateHashFrom.CanGenerateHashFromString$.MODULE$);
+
+    static {
+        bloomFilter.add("test_id");
+        if (bloomFilter.mightContain("test_id")) {
+            System.out.println("true");
+        } else System.out.println("false");
+
+    }
+
 
     @Override
     public void service() {
@@ -63,6 +80,5 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
         dogUnique.setHair("long yellow");
         dogUnique.setHeight(1.2);
         this.bizService().saveOrupdateDog(dogUnique);
-
     }
 }

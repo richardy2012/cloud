@@ -23,8 +23,8 @@ public class TestExcutorManager {
             CanGenerateHashFrom.CanGenerateHashFromString$.MODULE$);
 
     public static void main(String[] args) {
-        //testTbJuchaoTestSDao();
-        testDemoService();
+        testTbJuchaoTestSDao();
+       // testDemoService();
     }
 
 

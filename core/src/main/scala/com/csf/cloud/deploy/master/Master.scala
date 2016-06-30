@@ -96,7 +96,7 @@ private[cloud] class Master(
       val job = conf.queue.take()
       job.setState(JobState.STARTED)
       conf.listenerWaiter.post(JobStarted(job))
-      logInfo(s"Master get job ${job.getName}successfully!")
+      logInfo(s"Master get job ${job.getName} successfully!")
       schedule(job)
       job.setState(JobState.RUNNING)
       conf.listenerWaiter.post(JobRunning(job))

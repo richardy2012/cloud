@@ -17,10 +17,16 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
       try {
         task.setState(TaskState.STARTED)
         conf.listenerWaiter.post(TaskStarted(job.getName, task))
-        val excutor = excutorInstance(job, conf)
-        excutor.conf = conf
-        excutor.job = job
+        var excutor: Excutor = null
+        this.synchronized {
+          excutor = excutorInstance(job, conf)
+          excutor.conf = conf
+          excutor.job = job
+          println("synchronized excutor manager...current Thread:"+Thread.currentThread().getId+"excutor:"+excutor.job.getPartition.getPartitionNum)
+        }
+
         if (excutor != null) {
+          println("excutor manager...current Thread:"+Thread.currentThread().getId+"excutor:"+excutor.job.getPartition.getPartitionNum)
           excutor.start(task)
         }
       } catch {
@@ -35,7 +41,6 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
     task
   }
 
-  private def excutorInstance(job: Job, conf: CloudConf): Excutor = this.synchronized {
+  private def excutorInstance(job: Job, conf: CloudConf): Excutor =
     Excutor.getExcutor(job, conf)
-  }
 }

@@ -12,6 +12,7 @@ import com.csf.cloud.partition.Task
 private[cloud] class ExcutorRunner(conf: CloudConf, job: Job, task: Task) extends Callable[Task] {
 
   override def call(): Task = {
+    println("current threadId:"+Thread.currentThread().getId+"runner partitionNum:"+job.getPartition.getPartitionNum)
     conf.excutorManager.start(job, task)
   }
 

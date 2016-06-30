@@ -1,5 +1,6 @@
 package com.csf.cloud.deploy.node
 
+import java.util.Date
 import java.util.concurrent.{Future, TimeUnit}
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -230,7 +231,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   private[cloud] val assginsCacheListener = new PathChildrenCacheListener() {
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
       event.getType match {
+        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+          println("WORKER ASSIGN CHILD_ADDED COME IN....."+new Date())
+          processReceiveTask(event.getData.getPath)
         case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
+          println("WORKER ASSIGNCHILD_UPDATED COME IN....."+new Date())
           processReceiveTask(event.getData.getPath)
         case _ =>
       }
@@ -481,4 +486,9 @@ private[cloud] object Node extends Logging {
     logWarning(s"worker${path} is lost")
   }
 
+  def main(args: Array[String]) {
+    for (i <- 1 until  2) {
+      println(i)
+    }
+  }
 }

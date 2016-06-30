@@ -44,14 +44,14 @@ private[cloud] object Excutor extends Logging {
       //partial class path eg:excute.Logical
       className = Constant.PREFFIX_CLASSNAME + className
     }
-    var excutorCache = excutorCacheManager.getIfPresent(className)
+    var excutorCache = excutorCacheManager.getIfPresent(className + "_" + job.getPartition.getPartitionNum)
     if (excutorCache != null) {
       // update excutor cache, keep alive
-      excutorCacheManager.put(className, excutorCache)
+      excutorCacheManager.put(className + "_" + job.getPartition.getPartitionNum, excutorCache)
     } else {
       excutorCache = getExcutorInstanceByReflect(className, conf)
       // update excutor cache
-      excutorCacheManager.put(className, excutorCache)
+      excutorCacheManager.put(className + "_" + job.getPartition.getPartitionNum, excutorCache)
     }
     excutorCache
   }
