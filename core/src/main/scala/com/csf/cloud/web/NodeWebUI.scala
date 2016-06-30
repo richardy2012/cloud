@@ -29,7 +29,7 @@ class NodeWebUI(conf: CloudConf, requestedPort: Int)
 }
 
 private[cloud] object NodeWebUI {
-  private val STATIC_RESOURCE_DIR = "com/chinascope/cloud/ui/static"
+  private val STATIC_RESOURCE_DIR = "com/csf/cloud/ui/static"
   var _conf: CloudConf = _
   val setConf = (conf: CloudConf) => _conf = conf
 }

@@ -17,6 +17,10 @@ import scala.xml.Node
   */
 private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
 
+  /* <div class="input-group input-group-lg text_form_input">
+               <span class="input-group-addon">PartitionField:</span>
+               <input type="text" class="form-control" id="partitionField" name="partitionField" placeholder="time" aria-describedby="sizing-addon1"/>
+             </div>*/
 
   override def renderJson(request: HttpServletRequest): JValue = {
     JsonProtocol.responseExample(new NodeInfo(3))
@@ -64,15 +68,11 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
 
           <span class="expand-additional-metrics">
             <span class="expand-additional-metrics-arrow arrow-closed"></span>
-            <a>NeedPartition</a>
+            <a><button type="button" id="partitionBtn" class="btn btn-warning">NeedPartition</button></a>
           </span>
+          <input type="hidden" name="isNeedPartition" id="isNeedPartition"/>
           <br/>
           <div class="additional-metrics collapsed">
-            <div class="input-group input-group-lg text_form_input">
-              <span class="input-group-addon">PartitionField:</span>
-              <input type="text" class="form-control" id="partitionField" name="partitionField" placeholder="time" aria-describedby="sizing-addon1"/>
-            </div>
-
             <div class="input-group input-group-lg text_form_input">
               <span class="input-group-addon">PartitionNum:</span>
               <input type="text" class="form-control" id="partitionNum" name="partitionNum" placeholder="10" aria-describedby="sizing-addon1"/>

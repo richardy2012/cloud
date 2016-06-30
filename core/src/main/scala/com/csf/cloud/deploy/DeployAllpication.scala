@@ -11,6 +11,10 @@ import com.csf.cloud.deploy.node.Node
 object DeployAllpication {
 
   def main(args: Array[String]) {
+    boot();
+  }
+
+  def boot()={
     val conf = CloudConf.get()
     //read config from zk and set it to conf
     conf.readConfigFromZookeeper()
@@ -36,5 +40,4 @@ object DeployAllpication {
     // node.stop()
     Thread.currentThread().suspend()
   }
-
 }

@@ -34,6 +34,7 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val partitionField = request.getParameter("partitionField")
     val partitionNum = request.getParameter("partitionNum")
     val parents = request.getParameter("parents")
+    val isNeedPartition = request.getParameter("isNeedPartition")
 
     var msg: Msg = null
 
@@ -48,10 +49,11 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
       job.setBizService(bizServiceBean)
       job.setBizDao(bizDaoBean)
       val partition = new DBRangePartition()
-      if (partitionField == null || partitionField.trim.equalsIgnoreCase("")) {
+      if (isNeedPartition == null || isNeedPartition.trim.equalsIgnoreCase("false")) {
         job.setNeedPartition(false)
       } else {
-        partition.setPartitionField(partitionField)
+        if (partitionField != null && !partitionField.trim.equalsIgnoreCase(""))
+          partition.setPartitionField(partitionField)
         if (partitionNum != null && partitionNum.toInt > 0)
           partition.setPartitionNum(partitionNum.toInt)
       }

@@ -35,5 +35,7 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
     task
   }
 
-  private def excutorInstance(job: Job, conf: CloudConf): Excutor = Excutor.getExcutor(job, conf)
+  private def excutorInstance(job: Job, conf: CloudConf): Excutor = this.synchronized {
+    Excutor.getExcutor(job, conf)
+  }
 }

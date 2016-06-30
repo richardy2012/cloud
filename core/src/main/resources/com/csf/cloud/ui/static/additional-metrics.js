@@ -1,11 +1,18 @@
 $(function () {
+    $("#isNeedPartition").val("false")
+    window.localStorage.setItem("expand-additional-metrics", "" + false);
     $("span.expand-additional-metrics").click(function () {
         var status = window.localStorage.getItem("expand-additional-metrics") == "true";
-        if (status == false) {
-            $("#partitionField").val("");
-            $("#partitionNum").val("");
-        }
         status = !status;
+        if (status == true) {
+            // $("#partitionField").val("");
+            $("#partitionNum").val("");
+            $("#partitionBtn").removeClass("btn btn-warning").addClass("btn btn-success")
+            $("#isNeedPartition").val("true")
+        } else {
+            $("#isNeedPartition").val("false")
+            $("#partitionBtn").removeClass("btn btn-success").addClass("btn btn-warning")
+        }
         var additionalMetricsDiv = $(this).parent().find('.additional-metrics');
         $(additionalMetricsDiv).toggleClass('collapsed');
         // Switch the class of the arrow from open to closed.
