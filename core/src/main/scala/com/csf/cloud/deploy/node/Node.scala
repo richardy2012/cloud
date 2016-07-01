@@ -376,6 +376,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   private def processReceiveTask(path: String): Unit = {
     val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)
+    processReceiveTaskForJob(jobOption)
+  }
+
+  def processReceiveTaskForJob(jobOption: Option[Job]): Unit = {
     jobOption match {
       case Some(job) =>
         logInfo(s"Node worker-${
@@ -415,7 +419,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       case None => logWarning(s"Can't receive job successfully!")
     }
   }
-
 }
 
 private[cloud] object Node extends Logging {

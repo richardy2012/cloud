@@ -3,6 +3,7 @@ package com.csf.cloud.excute.demo;
 import com.csf.cloud.entity.Job;
 import com.csf.cloud.excute.DefaultExcutor;
 import com.csf.cloud.service.demo.DemoService;
+import com.csf.cloud.util.BizException;
 import com.csf.cloud.util.JavaLogging;
 import org.slf4j.Logger;
 
@@ -19,7 +20,7 @@ public class DemoLogical extends DefaultExcutor<DemoService> {
     }
 
     @Override
-    public void service() {
+    public void service() throws BizException {
         Job job = this.bizService().getJob();
         System.out.println("demoLogical Service " + job.getName());
         DemoService demoService = this.bizService();

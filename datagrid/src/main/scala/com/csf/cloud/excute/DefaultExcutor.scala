@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.csf.cloud.context.ApplicationContextBuilder
 import com.csf.cloud.dao.BaseDao
 import com.csf.cloud.service.Service
+import com.csf.cloud.util.BizException
 
 /**
   * Created by soledede.weng on 2016/6/20.
@@ -34,6 +35,7 @@ private[cloud] abstract class DefaultExcutor[T] extends Excutor {
     service()
   }
 
+  @throws(classOf[Exception])
   def service(): Unit
 
 

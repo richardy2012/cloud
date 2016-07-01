@@ -9,9 +9,11 @@ import com.csf.cloud.deploy.node.Node;
 import com.csf.cloud.deploy.node.Node$;
 import com.csf.cloud.entity.Job;
 import com.csf.cloud.excute.ExcutorManager;
+import com.csf.cloud.excute.runner.ExcutorRunner;
 import com.csf.cloud.partition.DBRangePartition;
 import com.csf.cloud.partition.Task;
 
+import java.security.cert.PKIXRevocationChecker;
 import java.util.Map;
 
 /**
@@ -56,6 +58,10 @@ public class TestExcutorManager {
         bloomFilter.dispose();
 
     }
+
+
+
+
 
 
     public static void testDemoService() {

@@ -7,6 +7,7 @@ import com.csf.cloud.entity.test.Dog;
 import com.csf.cloud.entity.test.Finger;
 import com.csf.cloud.excute.DefaultExcutor;
 import com.csf.cloud.service.juchao.TbJuchaoTestSService;
+import com.csf.cloud.util.BizException;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
@@ -34,51 +35,55 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
 
 
     @Override
-    public void service() {
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.set(Calendar.HOUR, c.get(Calendar.HOUR) - 10);
-        Date date1 = c.getTime();
-        Date currentDate = new Date();
-        System.out.println("last time:" + date1 + "\t current Time" + currentDate);
-        //test for oracle mybatis
-        this.bizService().fetchJuchaoDataService(date1, currentDate);
-        //test for mongo
-        List<Finger> figers = new ArrayList<Finger>();
-        for (int i = 0; i < 10; i++) {
-            figers.add(new Finger("finger" + i + 1));
-        }
+    public void service() throws BizException{
+        try {
+            Calendar c = Calendar.getInstance();
+            c.setTime(new Date());
+            c.set(Calendar.HOUR, c.get(Calendar.HOUR) - 10);
+            Date date1 = c.getTime();
+            Date currentDate = new Date();
+            System.out.println("last time:" + date1 + "\t current Time" + currentDate);
+            //test for oracle mybatis
+            this.bizService().fetchJuchaoDataService(date1, currentDate);
+            //test for mongo
+            List<Finger> figers = new ArrayList<Finger>();
+            for (int i = 0; i < 10; i++) {
+                figers.add(new Finger("finger" + i + 1));
+            }
        /* for (int i = 0; i < 3; i++) {
             this.bizService().saveDog(new Dog("zhuangzhuang" + i, "white", 14.4 + i, figers));
         }*/
-        Dog saveDog = new Dog("zhuangzhuang", "white", 40.3, figers);
-        saveDog.setId("test_id");
-        this.bizService().saveDog(saveDog);
+            Dog saveDog = new Dog("zhuangzhuang", "white", 40.3, figers);
+            saveDog.setId("test_id");
+            this.bizService().saveDog(saveDog);
 
-        this.bizService().findDogs().forEach(d -> System.out.println(d.toString()));
+            this.bizService().findDogs().forEach(d -> System.out.println(d.toString()));
 
 
-        //test update
-        Dog dog = this.bizService().findDog();
-        System.out.println("Before updated:dog:" + dog.toString());
-        if (dog != null) {
-            Dog dogNew = new Dog();
-            dogNew.setId(dog.getId());
-            dogNew.setName("bad guy");
-            this.bizService().updateDog(dogNew);
-            dog = this.bizService().findDog();
-            System.out.println("After updated:dog:" + dog.toString());
+            //test update
+            Dog dog = this.bizService().findDog();
+            System.out.println("Before updated:dog:" + dog.toString());
+            if (dog != null) {
+                Dog dogNew = new Dog();
+                dogNew.setId(dog.getId());
+                dogNew.setName("bad guy");
+                this.bizService().updateDog(dogNew);
+                dog = this.bizService().findDog();
+                System.out.println("After updated:dog:" + dog.toString());
+            }
+            //test query by contition
+
+
+            //test save or update check unique
+
+            Dog dogUnique = new Dog();
+            dogUnique.setId(dog.getId());
+            dogUnique.setName("check unique dog");
+            dogUnique.setHair("long yellow");
+            dogUnique.setHeight(1.2);
+            this.bizService().saveOrupdateDog(dogUnique);
+        } catch (Exception e) {
+            throw new BizException("framework will get this exception and report it to zk,so remember do this like me");
         }
-        //test query by contition
-
-
-        //test save or update check unique
-
-        Dog dogUnique = new Dog();
-        dogUnique.setId(dog.getId());
-        dogUnique.setName("check unique dog");
-        dogUnique.setHair("long yellow");
-        dogUnique.setHeight(1.2);
-        this.bizService().saveOrupdateDog(dogUnique);
     }
 }

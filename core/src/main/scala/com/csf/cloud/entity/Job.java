@@ -176,6 +176,12 @@ public class Job extends BaseJob {
     }
 
     @Override
+    protected Object clone() throws CloneNotSupportedException {
+
+        return super.clone();
+    }
+
+    @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
