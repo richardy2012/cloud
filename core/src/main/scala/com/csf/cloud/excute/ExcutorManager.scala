@@ -21,7 +21,7 @@ private[cloud] class ExcutorManager(conf: CloudConf) extends Logging {
         this.synchronized {
           excutor = excutorInstance(job, conf)
           excutor.conf = conf
-          excutor.job = job
+          excutor.setJob(job)
           println("synchronized excutor manager...current Thread:"+Thread.currentThread().getId+"excutor:"+excutor.job.getPartition.getPartitionNum)
         }
 

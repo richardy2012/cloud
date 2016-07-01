@@ -148,6 +148,26 @@ private[cloud] object Utils extends Logging {
     }
   }
 
+  // for clone
+  def deepClone(src: Object): Object = {
+    var o: Object = null
+    try {
+      if (src != null) {
+        val baos = new ByteArrayOutputStream()
+        val oos = new ObjectOutputStream(baos)
+        oos.writeObject(src)
+        oos.close()
+        val bais = new ByteArrayInputStream(baos.toByteArray())
+        val ois = new ObjectInputStream(bais)
+        o = ois.readObject()
+        ois.close()
+      }
+    } catch {
+      case e: Exception => logError("clone failed!", e.getCause)
+    }
+    return o
+  }
+
   /** Deserialize via nested stream using specific serializer */
   def deserializeViaNestedStream(is: InputStream, ser: SerializerInstance)(
     f: DeserializationStream => Unit): Unit = {

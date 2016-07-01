@@ -1,6 +1,7 @@
 package com.csf.cloud.entity;
 
 import com.csf.cloud.partition.Partition;
+import com.csf.cloud.util.Utils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -176,9 +177,8 @@ public class Job extends BaseJob {
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException {
-
-        return super.clone();
+    public Job clone() throws CloneNotSupportedException {
+        return (Job) Utils.deepClone(this);
     }
 
     @Override

@@ -232,10 +232,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED =>
-          println("WORKER ASSIGN CHILD_ADDED COME IN....."+new Date())
+          println("WORKER ASSIGN CHILD_ADDED COME IN....." + new Date())
           processReceiveTask(event.getData.getPath)
         case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
-          println("WORKER ASSIGNCHILD_UPDATED COME IN....."+new Date())
+          println("WORKER ASSIGNCHILD_UPDATED COME IN....." + new Date())
           processReceiveTask(event.getData.getPath)
         case _ =>
       }
@@ -394,8 +394,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
           Node.nodeId
         }")
         for (i <- 1 to partitionNum) {
-          job.getPartition.setPartitionNum(i)
-          job.setState(JobState.RUNNING)
+          val cloneJob = job.clone()
+          cloneJob.getPartition.setPartitionNum(i)
+          cloneJob.setState(JobState.RUNNING)
           val task = new Task()
           val startTime = System.currentTimeMillis()
           //  task.setId(s"${Node.nodeId}_${i}_${job.getPartition.getVersion}")
@@ -405,7 +406,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
             i
           }")
           task.setStartTime(startTime)
-          val runner = new ExcutorRunner(conf, job, task)
+          val runner = new ExcutorRunner(conf, cloneJob, task)
           val taskFuture = consumerManageThreadPool.submit(runner)
           if (!jobNameToTask.contains(job.getName)) {
             val taskFutureSet = new mutable.HashSet[Future[Task]]()
@@ -490,7 +491,7 @@ private[cloud] object Node extends Logging {
   }
 
   def main(args: Array[String]) {
-    for (i <- 1 until  2) {
+    for (i <- 1 until 2) {
       println(i)
     }
   }

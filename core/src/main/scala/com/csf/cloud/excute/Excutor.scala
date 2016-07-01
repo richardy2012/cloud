@@ -17,8 +17,18 @@ private[cloud] abstract class Excutor extends Logging {
   var conf: CloudConf = _
   var job: Job = _
 
+
+  def setServiceAndDao(job: Job)
+
+  def setJob(job: Job): Unit = {
+    this.job = job
+    setServiceAndDao(job)
+  }
+
+  @throws(classOf[Exception])
   def excute(): Unit
 
+  @throws(classOf[Exception])
   def start(task: Task): Unit = {
     //pre process
     excute()
@@ -34,8 +44,22 @@ private[cloud] object Excutor extends Logging {
       }
     }
 
+
+
   // Excutor instances cache (Key[job.getLogical]->Value[Excutor])])
   private val excutorCacheManager = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(cacheLoader)
+
+
+  val serviceAndDaoLoader: CacheLoader[java.lang.String, java.lang.Object] =
+    new CacheLoader[java.lang.String, java.lang.Object]() {
+      def load(key: java.lang.String): java.lang.Object = {
+        null.asInstanceOf[java.lang.Object]
+      }
+    }
+
+  // Service and Dao instances cache (Key[job.getLogical]->Value[Service or Dao])])
+  val serviceAndDaoCacheManager = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(serviceAndDaoLoader)
+
 
 
   def getExcutor(job: Job, conf: CloudConf): Excutor = {

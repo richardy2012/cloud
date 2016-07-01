@@ -56,4 +56,9 @@ private[cloud] object Constant extends ZookeeperConfiguration {
 
   final val PREFFIX_CLASSNAME = "com.csf.cloud."
 
+
+  //instance service and dao by logical classname+partition number
+  final val PREFFIX_SERVICE = "service_"
+  final val PREFFIX_DAO = "dao_"
+
 }

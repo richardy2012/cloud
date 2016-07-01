@@ -10,7 +10,7 @@
         <property name="sqlSessionFactory" ref="sessionFactory_juchao"></property>
     </bean>
 
-    <bean id="tbJuchaoTestSDao" class="com.csf.cloud.dao.juchao.TbJuchaoTestSDao"/>
+    <bean id="tbJuchaoTestSDao" scope="prototype" class="com.csf.cloud.dao.juchao.TbJuchaoTestSDao"/>
 
 
     <!-- mongo dao-->

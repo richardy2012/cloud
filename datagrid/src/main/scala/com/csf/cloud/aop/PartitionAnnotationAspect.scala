@@ -56,6 +56,7 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
       val args = proceedingJoinPoint.getArgs()
       var cnt = 0
+      //get parameters'value of target method
       breakable {
         for (i <- 0 to parameterNames.length - 1) {
           if (parameterNames(i).equalsIgnoreCase(from)) {
@@ -72,11 +73,12 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
         }
       }
 
-      logInfo(s"Before partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}")
+
 
       val targetObj = proceedingJoinPoint.getTarget
 
       val job = getValueByField[Job]("getJob", targetObj)
+      logDebug(s"job's name: ${job.getName}\tpartition number of job: ${job.getPartition.getPartitionNum}")
 
       if (!job.getNeedPartition) {
         proceedingJoinPoint.proceed()
@@ -89,7 +91,7 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
           * algorithm
           * 1.caculate total partition num in cluster N
           * 2.caculate how mutch we shoud give per period  (from ... to)  O =(to - from)/N
-          * 3.order by workerId asc,find where is the pre worker'spartition  and sum them  M
+          * 3.order by workerId asc,find where is the pre worker's partition  and sum them  M
           * 4.get partition number for this worker  S
           * 5.caculate loacation of current partition X  X= M+S
           * 6.change parameters for (from ... to),need think about the  equation operational character
@@ -97,18 +99,19 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
           * eg: field: Date
           * >=     <
           * >=     <=
-          * >       <
-          * >       <=
+          * >      <
+          * >      <=
           */
         val currentPartitionNum = partition.getPartitionNum
         val worker2PartitionNum: JSONObject = JSON.parseObject(partition.getWorkerPartitionNum)
         val arrayWorker2PartitionNum = worker2PartitionNum.toArray
-        val totalPartitionNum = arrayWorker2PartitionNum.map(_._2.toString.toInt).sum
+        val totalPartitionNum = arrayWorker2PartitionNum.map(_._2.toString.toInt).sum //N
         val sortedArrayWorker2PartitionNum = arrayWorker2PartitionNum.map(x => (x._1.toLong, x._2.toString.toInt)).sortBy(_._1)
         //the location of current Node(Worker),Need order by workerId  (_1:nodeId,_2:partitionNum)
-        val prePartitionNums = sortedArrayWorker2PartitionNum.filter { x => x._1 < Node.nodeId }.map(_._2).sum
-        val currentLocationPartitionNum = prePartitionNums + currentPartitionNum
+        val prePartitionNums = sortedArrayWorker2PartitionNum.filter { x => x._1 < Node.nodeId }.map(_._2).sum //M
+        val currentLocationPartitionNum = prePartitionNums + currentPartitionNum //X
 
+        logInfo(s"Before partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
         val minAvailableWorkerNodeId = sortedArrayWorker2PartitionNum.map(_._1).min
 
         if (fromVal.isInstanceOf[Int]) {
@@ -129,13 +132,13 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
         }
 
-        logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}")
+        logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
         def doubleNewArgs: (Double, Double) = {
           val from = fromVal.asInstanceOf[Double]
           val to = toVal.asInstanceOf[Double]
           var newFrom: Double = -1
           var newTo: Double = -1
-          val moneyPerPartition = (to - from) / totalPartitionNum
+          val moneyPerPartition = (to - from) / totalPartitionNum //O
 
           if (leftOp == Op.GTE && rightOp == Op.LTE) {
             newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition + 1
@@ -188,7 +191,7 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
           var newFrom: Date = null
           var newTo: Date = null
           //var newTo = fromVal.asInstanceOf[Date]
-          val moneyPerPartition = (to.getTime - from.getTime) / totalPartitionNum
+          val moneyPerPartition = (to.getTime - from.getTime) / totalPartitionNum //O
 
           if (leftOp == Op.GTE && rightOp == Op.LTE) {
             c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition + 1)

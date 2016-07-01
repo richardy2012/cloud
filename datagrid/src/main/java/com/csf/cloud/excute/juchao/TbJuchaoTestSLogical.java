@@ -43,6 +43,8 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
             Date date1 = c.getTime();
             Date currentDate = new Date();
             System.out.println("last time:" + date1 + "\t current Time" + currentDate);
+
+            System.out.println("excutor service...current Thread:"+Thread.currentThread().getId()+"excutor:"+this.job().getPartition().getPartitionNum());
             //test for oracle mybatis
             this.bizService().fetchJuchaoDataService(date1, currentDate);
             //test for mongo
