@@ -35,7 +35,7 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
 
 
     @Override
-    public void service() throws BizException{
+    public void service() throws Exception{
         try {
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
