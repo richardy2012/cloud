@@ -25,11 +25,23 @@ private[cloud] class DefaultCheck(conf: CloudConf) extends Check with DefaultCon
     else true
   }
 
+
   private def submitPrimaryKeyToZk(primaryKey: String): Unit = {
-    conf.zkNodeClient.persist(BLOOM_FILTER_NODER + "/" + primaryKey, "b".getBytes())
+    delFinishedPKFromZk()
+    conf.zkNodeClient.persist(BLOOM_FILTER_NODER + "/" + primaryKey + SEPARATOR + System.currentTimeMillis(), "b".getBytes())
   }
 
   private def addField(key: String, value: String): Boolean = {
     if (storage.setStringByKey(PREFFIX_CHECK + key, value).equalsIgnoreCase("ok")) true else false
+  }
+
+  private def delFinishedPKFromZk() = {
+    val bloomChildren = conf.zkNodeClient.getChildren(BLOOM_FILTER_NODER)
+    bloomChildren.filter { p =>
+      val time = p.split(SEPARATOR)(1).toLong
+      (System.currentTimeMillis() - time) > 1800000 //30 minutes
+    }.foreach { past =>
+      conf.zkNodeClient.delete(BLOOM_FILTER_NODER + "/" + past)
+    }
   }
 }

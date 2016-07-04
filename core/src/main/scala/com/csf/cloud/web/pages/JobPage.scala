@@ -43,7 +43,7 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
             <a href="/check">Manual Check</a>
           </li>
         </ul>
-        <form action="/" method="post">
+        <form action="/" enctype="multipart/form-data" method="post">
           <div class="input-group input-group-lg text_form_input">
             <span class="input-group-addon">Name:</span>
             <input type="text" name="name" class="form-control" placeholder="Name" aria-describedby="sizing-addon1"/>
@@ -94,6 +94,10 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
             </select>
           </div>
           <br/>
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">Job files upload:</span>
+            <input type="file" class="form-control" name="jobFile" placeholder="jobs.xml" aria-describedby="sizing-addon1"/>
+          </div>
           <button type="submit" class="btn btn-default">Submit</button>
         </form>
         <div class="container">

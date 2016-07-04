@@ -1,11 +1,13 @@
 package com.csf.cloud.web.pages
 
-import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.{Part, HttpServletRequest}
 
 import com.csf.cloud.deploy.node.NodeInfo
 import com.csf.cloud.entity.{Job, Msg}
 import com.csf.cloud.partition.DBRangePartition
 import com.csf.cloud.web.{JsonProtocol, NodeWebUI, WebUIPage, WebUIUtils}
+import org.apache.commons.fileupload.FileUpload
+import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.json4s.JValue
 import com.csf.cloud
 
@@ -23,8 +25,17 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     JsonProtocol.responseExample(new NodeInfo(3))
   }
 
+  def getFileName(part: Part) = {
+    val header = part.getHeader("Content-Disposition")
+    val fileName = header.substring(header.indexOf("filename=\"") + 10,
+      header.lastIndexOf("\""))
+    fileName
+  }
+
   /** Index view listing applications and executors */
   def render(request: HttpServletRequest): Seq[Node] = {
+    request.setCharacterEncoding("utf-8");
+
     val name = request.getParameter("name")
     val cron = request.getParameter("cron")
     val logical = request.getParameter("logical")
@@ -41,6 +52,13 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val tableName = request.getParameter("tableName")
     val primaryKey = request.getParameter("primaryKey")
     val fields = request.getParameter("fields")
+
+    val isMultipart = ServletFileUpload.isMultipartContent(request)
+    if(isMultipart){
+      val part = request.getPart("jobFile")
+      val fileName = getFileName(part)
+    }
+
 
 
     var msg: Msg = new Msg()

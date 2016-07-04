@@ -1,0 +1,16 @@
+<jobs>
+    <job
+            id="1"
+            name=""
+            cron=""
+            logicalClass=""
+            bizServiceBeanName=""
+            bizDaoBeanName=""
+            needPartition="">
+        <partition number=""/>
+        <parents>
+            <name>job1</name>
+            <name>job2</name>
+        </parents>
+    </job>
+</jobs>

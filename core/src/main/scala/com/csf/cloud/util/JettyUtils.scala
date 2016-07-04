@@ -1,7 +1,8 @@
 package com.csf.cloud.util
 
 import java.net.{BindException, InetSocketAddress, URL}
-import javax.servlet.DispatcherType
+import javax.servlet.{MultipartConfigElement, DispatcherType}
+import javax.servlet.annotation.MultipartConfig
 import javax.servlet.http.{HttpServlet, HttpServletRequest, HttpServletResponse}
 
 import com.csf.cloud.config.CloudConf
@@ -84,6 +85,8 @@ private[cloud] object JettyUtils extends Logging {
     val prefixedPath = attachPrefix(basePath, path)
     val contextHandler = new ServletContextHandler
     val holder = new ServletHolder(servlet)
+
+    holder.getRegistration.setMultipartConfig(new MultipartConfigElement("data/tmp"))
     contextHandler.setContextPath(prefixedPath)
     contextHandler.addServlet(holder, "/")
     contextHandler
