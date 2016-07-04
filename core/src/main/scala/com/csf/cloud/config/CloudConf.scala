@@ -3,6 +3,7 @@ package com.csf.cloud.config
 import java.util.concurrent.ConcurrentHashMap
 
 import com.csf.cloud.bloomfilter.mutable.BloomFilter
+import com.csf.cloud.check.{DefaultCheck, Check}
 import com.csf.cloud.deploy.master.Master
 import com.csf.cloud.deploy.node.Node
 import com.csf.cloud.entity.Job
@@ -71,6 +72,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   //private[cloud] var primaryBloomfilter: BloomFilter[String] = _
 
+  private[cloud] var check: Check = _
+
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
@@ -88,7 +91,10 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.excutorManager = new ExcutorManager(this)
 
     this.listenerWaiter = ManagerListenerWaiter()
-   // this.primaryBloomfilter = BloomFilter[String](expectedElements, falsePositiveRate)
+    // this.primaryBloomfilter = BloomFilter[String](expectedElements, falsePositiveRate)
+
+    //check
+    this.check = new DefaultCheck(this)
 
   }
 

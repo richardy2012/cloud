@@ -39,6 +39,9 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
           <li role="presentation">
             <a href="/job">New Job</a>
           </li>
+          <li role="presentation">
+            <a href="/check">Manual Check</a>
+          </li>
         </ul>
         <form action="/" method="post">
           <div class="input-group input-group-lg text_form_input">

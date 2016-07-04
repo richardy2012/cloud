@@ -48,6 +48,8 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   //counter of dead node
   final val DEAD_COUNTER_ID = "/dead"
 
+
+
   //queue
   final val LINKEDQUEUE_CAPACITY_KEY = "cloud.linked.block.queue.block.size"
 
@@ -60,5 +62,12 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   //instance service and dao by logical classname+partition number
   final val PREFFIX_SERVICE = "service_"
   final val PREFFIX_DAO = "dao_"
+
+
+  //check
+  final val PREFFIX_CHECK = "check_"
+
+  // zkNode for check
+  final val BLOOM_FILTER_NODER = "/bloomfilter"
 
 }

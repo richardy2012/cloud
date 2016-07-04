@@ -2,7 +2,7 @@ package com.csf.cloud.web
 
 import com.csf.cloud.config.CloudConf
 import com.csf.cloud.util.Logging
-import com.csf.cloud.web.pages.{JobPage, NodePage}
+import com.csf.cloud.web.pages.{CheckPage, JobPage, NodePage}
 import com.csf.cloud.util.JettyUtils._
 
 /**
@@ -22,6 +22,8 @@ class NodeWebUI(conf: CloudConf, requestedPort: Int)
   def initialize() {
     val nodePage = new NodePage(this)
     val jobPage = new JobPage(this)
+    val checkPage = new CheckPage(this)
+    attachPage(checkPage)
     attachPage(jobPage)
     attachPage(nodePage)
     attachHandler(createStaticHandler(NodeWebUI.STATIC_RESOURCE_DIR, "/static"))

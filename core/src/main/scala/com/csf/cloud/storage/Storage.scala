@@ -12,7 +12,8 @@ private[cloud] trait Storage {
 
   def getAllByKeyPreffix[T: ClassTag](preffix: String): Seq[T]
 
-  def setStringByKey(key: String,value: String)
+  def setStringByKey(key: String,value: String): String
+
 }
 
 private[cloud] object Storage {

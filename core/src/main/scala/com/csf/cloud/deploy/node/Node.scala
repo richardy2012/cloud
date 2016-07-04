@@ -192,6 +192,12 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     val partitionJobsTreeNodeCache: TreeCache = new TreeCache(zk, Constant.STATUS)
     partitionJobsTreeNodeCache.getListenable.addListener(partitionStatusCacheListener)
     partitionJobsTreeNodeCache.start()
+
+    //Watch tablename_primarykey ,and added to bloomfilter for check fields,Avoiding to be covered by new data
+    val checkCache: PathChildrenCache = new PathChildrenCache(zk, Constant.BLOOM_FILTER_NODER, true)
+    //watch jobs by local workers for timer schedule
+    checkCache.getListenable.addListener(checkCacheListener)
+    checkCache.start()
   }
 
   private def startZK() = {
@@ -290,6 +296,20 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
             path
           } for timer schedule!")
           conf.schedule.deleteJob(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
+        case _ =>
+      }
+    }
+  }
+
+  private[cloud] val checkCacheListener = new PathChildrenCacheListener() {
+    override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
+
+      event.getType match {
+        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+          val path = event.getData.getPath
+          logInfo(s"receive  primarykey ${path} for bloomfilter!")
+          val primaryKey = path.replace(Constant.BLOOM_FILTER_NODER + "/", "")
+          conf.check.addPrimaryKeyToBloomfilter(primaryKey)
         case _ =>
       }
     }
@@ -448,6 +468,8 @@ private[cloud] object Node extends Logging {
 
     zk.mkdir(Constant.DEAD_COUNTER_ID)
 
+
+    zk.mkdir(Constant.BLOOM_FILTER_NODER)
   }
 
   def initCache(cacheName: String, expiredTime: Long): LoadingCache[java.lang.String, java.lang.Long] = {

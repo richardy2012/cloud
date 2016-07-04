@@ -18,7 +18,15 @@ public class TestChek {
     static Storage storage = Storage$.MODULE$.apply("redis");
 
     public static void main(String[] args) {
-       addPrimaryKeyToRedis();
+        testBloomFilter();
+    }
+
+    public static void testBloomFilter(){
+        System.out.println(bloomFilter.expectedFalsePositiveRate());
+    }
+
+    public static void testCoverEntity(){
+        addPrimaryKeyToRedis();
         bloomFilter.add("height");
         bloomFilter.add("hair");
         if(bloomFilter.mightContain("hair")) {

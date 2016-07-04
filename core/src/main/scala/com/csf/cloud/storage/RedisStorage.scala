@@ -14,7 +14,7 @@ private[cloud] class RedisStorage private extends Storage with Logging {
   override def getStringBykey(key: String): String = JedisNewAdaptor.get(key)
 
 
-  override def setStringByKey(key: String, value: String): Unit = JedisNewAdaptor.set(key, value)
+  override def setStringByKey(key: String, value: String): String = JedisNewAdaptor.set(key, value)
 
   override def getBykey[T: ClassTag](key: String): T = ???
 

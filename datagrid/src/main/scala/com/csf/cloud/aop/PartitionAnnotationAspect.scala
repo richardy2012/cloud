@@ -80,91 +80,67 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
       val job = getValueByField[Job]("getJob", targetObj)
       logDebug(s"job's name: ${job.getName}\tpartition number of job: ${job.getPartition.getPartitionNum}")
 
-      if (!job.getNeedPartition) {
-        proceedingJoinPoint.proceed()
-        logWarning("You guys chose no partition,Did't it")
-      } else {
-        val partition = job.getPartition
+      if (job != null) {
+        if (!job.getNeedPartition) {
+          proceedingJoinPoint.proceed()
+          logWarning("You guys chose no partition,Did't it")
+        } else {
+          val partition = job.getPartition
 
 
-        /**
-          * algorithm
-          * 1.caculate total partition num in cluster N
-          * 2.caculate how mutch we shoud give per period  (from ... to)  O =(to - from)/N
-          * 3.order by workerId asc,find where is the pre worker's partition  and sum them  M
-          * 4.get partition number for this worker  S
-          * 5.caculate loacation of current partition X  X= M+S
-          * 6.change parameters for (from ... to),need think about the  equation operational character
-          *
-          * eg: field: Date
-          * >=     <
-          * >=     <=
-          * >      <
-          * >      <=
-          */
-        val currentPartitionNum = partition.getPartitionNum
-        val worker2PartitionNum: JSONObject = JSON.parseObject(partition.getWorkerPartitionNum)
-        val arrayWorker2PartitionNum = worker2PartitionNum.toArray
-        val totalPartitionNum = arrayWorker2PartitionNum.map(_._2.toString.toInt).sum //N
-        val sortedArrayWorker2PartitionNum = arrayWorker2PartitionNum.map(x => (x._1.toLong, x._2.toString.toInt)).sortBy(_._1)
-        //the location of current Node(Worker),Need order by workerId  (_1:nodeId,_2:partitionNum)
-        val prePartitionNums = sortedArrayWorker2PartitionNum.filter { x => x._1 < Node.nodeId }.map(_._2).sum //M
-        val currentLocationPartitionNum = prePartitionNums + currentPartitionNum //X
+          /**
+            * algorithm
+            * 1.caculate total partition num in cluster N
+            * 2.caculate how mutch we shoud give per period  (from ... to)  O =(to - from)/N
+            * 3.order by workerId asc,find where is the pre worker's partition  and sum them  M
+            * 4.get partition number for this worker  S
+            * 5.caculate loacation of current partition X  X= M+S
+            * 6.change parameters for (from ... to),need think about the  equation operational character
+            *
+            * eg: field: Date
+            * >=     <
+            * >=     <=
+            * >      <
+            * >      <=
+            */
+          val currentPartitionNum = partition.getPartitionNum
+          val worker2PartitionNum: JSONObject = JSON.parseObject(partition.getWorkerPartitionNum)
+          val arrayWorker2PartitionNum = worker2PartitionNum.toArray
+          val totalPartitionNum = arrayWorker2PartitionNum.map(_._2.toString.toInt).sum //N
+          val sortedArrayWorker2PartitionNum = arrayWorker2PartitionNum.map(x => (x._1.toLong, x._2.toString.toInt)).sortBy(_._1)
+          //the location of current Node(Worker),Need order by workerId  (_1:nodeId,_2:partitionNum)
+          val prePartitionNums = sortedArrayWorker2PartitionNum.filter { x => x._1 < Node.nodeId }.map(_._2).sum //M
+          val currentLocationPartitionNum = prePartitionNums + currentPartitionNum //X
 
-        logInfo(s"Before partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
-        val minAvailableWorkerNodeId = sortedArrayWorker2PartitionNum.map(_._1).min
+          logInfo(s"Before partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
+          val minAvailableWorkerNodeId = sortedArrayWorker2PartitionNum.map(_._1).min
 
-        if (fromVal.isInstanceOf[Int]) {
-          args(fromIndex) = Integer.valueOf(longNewArgs._1.toString)
-          args(toIndex) = Integer.valueOf(longNewArgs._2.toString)
-        } else if (fromVal.isInstanceOf[Long]) {
-          args(fromIndex) = java.lang.Long.valueOf(longNewArgs._1.toString)
-          args(toIndex) = java.lang.Long.valueOf(longNewArgs._2.toString)
-        } else if (fromVal.isInstanceOf[Float]) {
-          args(fromIndex) = java.lang.Float.valueOf(doubleNewArgs._1.toString)
-          args(toIndex) = java.lang.Float.valueOf(doubleNewArgs._2.toString)
-        } else if (fromVal.isInstanceOf[Double]) {
-          args(fromIndex) = java.lang.Double.valueOf(doubleNewArgs._1.toString)
-          args(toIndex) = java.lang.Double.valueOf(doubleNewArgs._2.toString)
-        } else if (fromVal.isInstanceOf[Date]) {
-          args(fromIndex) = dateNewArg._1
-          args(toIndex) = dateNewArg._2
+          if (fromVal.isInstanceOf[Int]) {
+            args(fromIndex) = Integer.valueOf(longNewArgs._1.toString)
+            args(toIndex) = Integer.valueOf(longNewArgs._2.toString)
+          } else if (fromVal.isInstanceOf[Long]) {
+            args(fromIndex) = java.lang.Long.valueOf(longNewArgs._1.toString)
+            args(toIndex) = java.lang.Long.valueOf(longNewArgs._2.toString)
+          } else if (fromVal.isInstanceOf[Float]) {
+            args(fromIndex) = java.lang.Float.valueOf(doubleNewArgs._1.toString)
+            args(toIndex) = java.lang.Float.valueOf(doubleNewArgs._2.toString)
+          } else if (fromVal.isInstanceOf[Double]) {
+            args(fromIndex) = java.lang.Double.valueOf(doubleNewArgs._1.toString)
+            args(toIndex) = java.lang.Double.valueOf(doubleNewArgs._2.toString)
+          } else if (fromVal.isInstanceOf[Date]) {
+            args(fromIndex) = dateNewArg._1
+            args(toIndex) = dateNewArg._2
 
-        }
-
-        logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
-        def doubleNewArgs: (Double, Double) = {
-          val from = fromVal.asInstanceOf[Double]
-          val to = toVal.asInstanceOf[Double]
-          var newFrom: Double = -1
-          var newTo: Double = -1
-          val moneyPerPartition = (to - from) / totalPartitionNum //O
-
-          if (leftOp == Op.GTE && rightOp == Op.LTE) {
-            newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition + 1
-          } else if ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE)) {
-            newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition
-          } else if (leftOp == Op.GT && rightOp == Op.LT) {
-            newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition - 1
           }
-          if (minAvailableWorkerNodeId == Node.nodeId && currentPartitionNum == 1) {
-            //first worker,first partition
-            newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition
-          }
-          newTo = from + currentLocationPartitionNum * moneyPerPartition
 
-          (newFrom, newTo)
-        }
+          logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
+          def doubleNewArgs: (Double, Double) = {
+            val from = fromVal.asInstanceOf[Double]
+            val to = toVal.asInstanceOf[Double]
+            var newFrom: Double = -1
+            var newTo: Double = -1
+            val moneyPerPartition = (to - from) / totalPartitionNum //O
 
-
-        def longNewArgs: (Long, Long) = {
-          val from = java.lang.Long.valueOf(fromVal.toString)
-          val to = java.lang.Long.valueOf(toVal.toString)
-          var newFrom: Long = -1
-          var newTo: Long = -1
-          val moneyPerPartition = (to - from) / totalPartitionNum
-
-          def caculateNewBoundary(): (Long, Long) = {
             if (leftOp == Op.GTE && rightOp == Op.LTE) {
               newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition + 1
             } else if ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE)) {
@@ -180,37 +156,63 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
             (newFrom, newTo)
           }
-          caculateNewBoundary
-        }
 
 
-        def dateNewArg: (Date, Date) = {
+          def longNewArgs: (Long, Long) = {
+            val from = java.lang.Long.valueOf(fromVal.toString)
+            val to = java.lang.Long.valueOf(toVal.toString)
+            var newFrom: Long = -1
+            var newTo: Long = -1
+            val moneyPerPartition = (to - from) / totalPartitionNum
 
-          val from = fromVal.asInstanceOf[Date]
-          val to = toVal.asInstanceOf[Date]
-          var newFrom: Date = null
-          var newTo: Date = null
-          //var newTo = fromVal.asInstanceOf[Date]
-          val moneyPerPartition = (to.getTime - from.getTime) / totalPartitionNum //O
+            def caculateNewBoundary(): (Long, Long) = {
+              if (leftOp == Op.GTE && rightOp == Op.LTE) {
+                newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition + 1
+              } else if ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE)) {
+                newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition
+              } else if (leftOp == Op.GT && rightOp == Op.LT) {
+                newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition - 1
+              }
+              if (minAvailableWorkerNodeId == Node.nodeId && currentPartitionNum == 1) {
+                //first worker,first partition
+                newFrom = from + (currentLocationPartitionNum - 1) * moneyPerPartition
+              }
+              newTo = from + currentLocationPartitionNum * moneyPerPartition
 
-          if (leftOp == Op.GTE && rightOp == Op.LTE) {
-            c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition + 1)
-            newFrom = c.getTime
-          } else if (leftOp == Op.GT && rightOp == Op.LT) {
-            c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition - 1)
-            newFrom = c.getTime
+              (newFrom, newTo)
+            }
+            caculateNewBoundary
           }
-          if ((minAvailableWorkerNodeId == Node.nodeId && currentPartitionNum == 1) || ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE))) {
-            //first worker,first partition
-            c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition)
-            newFrom = c.getTime
-          }
 
-          c.setTimeInMillis(from.getTime + (currentLocationPartitionNum) * moneyPerPartition)
-          newTo = c.getTime
-          (newFrom, newTo)
+
+          def dateNewArg: (Date, Date) = {
+
+            val from = fromVal.asInstanceOf[Date]
+            val to = toVal.asInstanceOf[Date]
+            var newFrom: Date = null
+            var newTo: Date = null
+            //var newTo = fromVal.asInstanceOf[Date]
+            val moneyPerPartition = (to.getTime - from.getTime) / totalPartitionNum //O
+
+            if (leftOp == Op.GTE && rightOp == Op.LTE) {
+              c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition + 1)
+              newFrom = c.getTime
+            } else if (leftOp == Op.GT && rightOp == Op.LT) {
+              c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition - 1)
+              newFrom = c.getTime
+            }
+            if ((minAvailableWorkerNodeId == Node.nodeId && currentPartitionNum == 1) || ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE))) {
+              //first worker,first partition
+              c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition)
+              newFrom = c.getTime
+            }
+
+            c.setTimeInMillis(from.getTime + (currentLocationPartitionNum) * moneyPerPartition)
+            newTo = c.getTime
+            (newFrom, newTo)
+          }
+          proceedingJoinPoint.proceed(args)
         }
-        proceedingJoinPoint.proceed(args)
       }
 
     }
