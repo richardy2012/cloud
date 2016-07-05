@@ -70,4 +70,7 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   // zkNode for check
   final val BLOOM_FILTER_NODER = "/bloomfilter"
 
+  //jobs file for zookeeper
+  final val ZK_FILE = "/file"
+
 }

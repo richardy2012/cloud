@@ -124,7 +124,7 @@ private[cloud] class JobGraph(conf: CloudConf) extends Logging {
       case (jobName: String, job: Option[Job]) =>
         job match {
           case None =>
-            logWarning(s"Parent $jobName of job ${job.get.getName} not found in job graph!")
+            logWarning(s"Parent $jobName  not found in job graph!")
             failure = true
             None
           case Some(baseJob: Job) =>

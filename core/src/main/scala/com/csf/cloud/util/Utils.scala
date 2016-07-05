@@ -382,6 +382,34 @@ private[cloud] object Utils extends Logging {
     bytes
   }
 
+
+  def serializeStreamToBytes[T: ClassTag](input: InputStream, needClose: Boolean = true): Array[Byte] = {
+    val outSteam = new ByteArrayOutputStream()
+    val buffer = new Array[Byte](1024)
+    var len: Int = input.read(buffer)
+    while (len != -1) {
+      outSteam.write(buffer, 0, len)
+      len = input.read(buffer)
+    }
+    outSteam.close()
+    if (needClose)
+      input.close()
+    outSteam.toByteArray()
+  }
+
+  def cloneInputStream(input: InputStream): (InputStream, InputStream) = {
+    val outSteam = new ByteArrayOutputStream()
+    val buffer = new Array[Byte](1024)
+    var len: Int = input.read(buffer)
+    while (len != -1) {
+      outSteam.write(buffer, 0, len)
+      len = input.read(buffer)
+    }
+    outSteam.close()
+    input.close()
+    (new ByteArrayInputStream(outSteam.toByteArray()), new ByteArrayInputStream(outSteam.toByteArray()))
+  }
+
   private var customHostname: Option[String] = sys.env.get("CLOUD_LOCAL_HOSTNAME")
 
 

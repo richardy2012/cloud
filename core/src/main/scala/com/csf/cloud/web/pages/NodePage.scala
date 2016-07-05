@@ -5,6 +5,7 @@ import javax.servlet.http.{Part, HttpServletRequest}
 import com.csf.cloud.deploy.node.NodeInfo
 import com.csf.cloud.entity.{Job, Msg}
 import com.csf.cloud.partition.DBRangePartition
+import com.csf.cloud.tool.JobUpload
 import com.csf.cloud.web.{JsonProtocol, NodeWebUI, WebUIPage, WebUIUtils}
 import org.apache.commons.fileupload.FileUpload
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -53,11 +54,7 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val primaryKey = request.getParameter("primaryKey")
     val fields = request.getParameter("fields")
 
-    val isMultipart = ServletFileUpload.isMultipartContent(request)
-    if(isMultipart){
-      val part = request.getPart("jobFile")
-      val fileName = getFileName(part)
-    }
+
 
 
 
@@ -66,35 +63,44 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
     val jobs = NodeWebUI._conf.node._jobs.map(_._2)
     val jobStatus = Array("READY", "STARTED", "RUNNING", "FINISHED", "ERROR", "RUNNING_EXCEPTION", "STOPIPNG", "STOPPED")
 
-    if (referer.contains("job")) {
-      if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
-        val job = new Job()
-        job.setName(name)
-        job.setCron(cron)
-        job.setLogical(logical)
-        job.setBizService(bizServiceBean)
-        job.setBizDao(bizDaoBean)
-        val partition = new DBRangePartition()
-        if (isNeedPartition == null || isNeedPartition.trim.equalsIgnoreCase("false")) {
-          job.setNeedPartition(false)
-        } else {
-          if (partitionField != null && !partitionField.trim.equalsIgnoreCase(""))
-            partition.setPartitionField(partitionField)
-          if (partitionNum != null && partitionNum.toInt > 0)
-            partition.setPartitionNum(partitionNum.toInt)
+    if (referer != null && referer.contains("job")) {
+
+      val isMultipart = ServletFileUpload.isMultipartContent(request)
+      if (isMultipart) {
+        val part = request.getPart("jobFile")
+        val fileName = getFileName(part)
+        msg = JobUpload.submitJobFile(part.getInputStream, fileName, NodeWebUI._conf)
+      } else {
+        if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
+          val job = new Job()
+          job.setName(name)
+          job.setCron(cron)
+          job.setLogical(logical)
+          job.setBizService(bizServiceBean)
+          job.setBizDao(bizDaoBean)
+          val partition = new DBRangePartition()
+          if (isNeedPartition == null || isNeedPartition.trim.equalsIgnoreCase("false")) {
+            job.setNeedPartition(false)
+          } else {
+            if (partitionField != null && !partitionField.trim.equalsIgnoreCase(""))
+              partition.setPartitionField(partitionField)
+            if (partitionNum != null && partitionNum.toInt > 0)
+              partition.setPartitionNum(partitionNum.toInt)
+          }
+          job.setPartition(partition)
+          if (parents != null && !parents.equalsIgnoreCase("")) {
+            import scala.collection.JavaConversions._
+            val parentsSeq = parents.split(",").filter(!_.equalsIgnoreCase("Nothing selected")).toList
+            job.setParents(parentsSeq)
+          }
+          if (!cloud.deploy.node.Node.nodeStarted.get()) {
+            msg.setCode(-1)
+            msg.setMessage("Please hold on ,Cluster is starting...")
+          } else msg = NodeWebUI._conf.jobManager.submitJob(job)
         }
-        job.setPartition(partition)
-        if (parents != null && !parents.equalsIgnoreCase("")) {
-          import scala.collection.JavaConversions._
-          val parentsSeq = parents.split(",").filter(!_.equalsIgnoreCase("Nothing selected")).toList
-          job.setParents(parentsSeq)
-        }
-        if (!cloud.deploy.node.Node.nodeStarted.get()) {
-          msg.setCode(-1)
-          msg.setMessage("Please hold on ,Cluster is starting...")
-        } else msg = NodeWebUI._conf.jobManager.submitJob(job)
+
       }
-    } else if (referer.contains("check")) {
+    } else if (referer != null && referer.contains("check")) {
       if (tableName == null || tableName.equalsIgnoreCase("")) {
         msg.setCode(-1)
         msg.setMessage("tableName can't be null")

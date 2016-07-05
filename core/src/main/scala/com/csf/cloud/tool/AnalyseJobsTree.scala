@@ -17,12 +17,12 @@ private[cloud] object AnalyseJobsTree extends Logging {
 
 
   def geneJobs(jobSchema: InputStream): Seq[Job] = {
-    var node = null
-    read(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jobSchema).getDocumentElement, node)
+
+    var node = read(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jobSchema).getDocumentElement)
     node.asInstanceOf[Seq[Job]]
   }
 
-  private def genereNode(node: Node, obj: => AnyRef): Unit = {
+  private def genereNode(node: Node, obj: => AnyRef): AnyRef = {
     var newObj = obj
     if (node.isInstanceOf[Element]) {
       val element: Element = node.asInstanceOf[Element]
@@ -30,7 +30,7 @@ private[cloud] object AnalyseJobsTree extends Logging {
       if ("jobs".equalsIgnoreCase(tagName)) {
         newObj = new ListBuffer[Job]()
       } else if ("job".equalsIgnoreCase(tagName)) {
-        val job = newObj.asInstanceOf[Job]
+        val job = obj.asInstanceOf[Job]
         job.setName(element.getAttribute("name").trim)
         job.setCron(element.getAttribute("cron").trim)
         job.setLogical(element.getAttribute("logicalClass").trim)
@@ -42,9 +42,10 @@ private[cloud] object AnalyseJobsTree extends Logging {
         partition.setPartitionNum(element.getAttribute("number").trim.toInt)
       } else if ("name".equalsIgnoreCase(tagName)) {
         val name = newObj.asInstanceOf[DBRangePartition]
-        newObj = element.getNodeValue
+        newObj = element.getFirstChild.getNodeValue
       }
     }
+    newObj
   }
 
   private def read(jobXml: Node): AnyRef = read(jobXml, null)
@@ -52,29 +53,29 @@ private[cloud] object AnalyseJobsTree extends Logging {
   private def read(jobXml: Node, node: => AnyRef): AnyRef = {
     var preNode = node
 
-    genereNode(jobXml, preNode)
+    preNode = genereNode(jobXml, preNode)
 
 
     val xmlChildNodeList: NodeList = jobXml.getChildNodes
     var i: Int = 0
     while (i < xmlChildNodeList.getLength) {
-      val node = xmlChildNodeList.item(i)
-      if (node.isInstanceOf[Element]) {
-        val element: Element = node.asInstanceOf[Element]
-        val tagName: String = element.getTagName.toLowerCase
+      val nodeXml = xmlChildNodeList.item(i)
+      if (nodeXml.isInstanceOf[Element]) {
+        val element: Element = nodeXml.asInstanceOf[Element]
+        val tagName: String = element.getTagName.toLowerCase()
         tagName match {
           case "job" =>
-            node.asInstanceOf[ListBuffer[Job]] += read(element, new Job()).asInstanceOf[Job]
+            preNode.asInstanceOf[ListBuffer[Job]] += read(element, new Job()).asInstanceOf[Job]
           case "partition" =>
-            node.asInstanceOf[Job].setPartition(read(element, new DBRangePartition()).asInstanceOf[Partition])
+            preNode.asInstanceOf[Job].setPartition(read(element, new DBRangePartition()).asInstanceOf[Partition])
           case "parents" =>
-            node.asInstanceOf[Job].setParents(read(element, new java.util.ArrayList[String]()).asInstanceOf[java.util.List[String]])
+            preNode.asInstanceOf[Job].setParents(read(element, new java.util.ArrayList[String]()).asInstanceOf[java.util.List[String]])
           case "name" =>
-            node.asInstanceOf[ListBuffer[String]] += read(element, null).asInstanceOf[String]
+            preNode.asInstanceOf[java.util.ArrayList[String]].add(read(element, null).asInstanceOf[String])
         }
       }
       i += 1
     }
-    null.asInstanceOf[Job]
+    preNode
   }
 }

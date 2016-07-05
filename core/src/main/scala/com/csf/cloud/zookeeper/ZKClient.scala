@@ -1,5 +1,7 @@
 package com.csf.cloud.zookeeper
 
+import java.io.InputStream
+
 import com.csf.cloud.config.CloudConf
 import org.apache.curator.framework.recipes.leader.LeaderLatch
 
@@ -25,6 +27,10 @@ abstract class ZKClient(conf: CloudConf) {
     * depend on the store used.
     */
   def persist(path: String, obj: Object): Unit
+
+  def persist(path: String, input: InputStream,needClose: Boolean=true)
+
+  def persist(path: String,bytes: Array[Byte])
 
 
   def delete(path: String): Unit

@@ -1,5 +1,6 @@
 package com.csf.cloud.zookeeper
 
+import java.io.{ByteArrayOutputStream, InputStream}
 import java.nio.ByteBuffer
 
 import com.csf.cloud.config.{CloudConf, ZookeeperConfiguration}
@@ -95,6 +96,27 @@ private[cloud] class CuratorZKClient(
     }
   }
 
+
+  override def persist(path: String, bytes: Array[Byte]): Unit = started {
+    val isExists = client.checkExists().forPath(path)
+    if (isExists == null) {
+      client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, bytes)
+    }
+    else {
+      client.setData().forPath(path, bytes)
+    }
+  }
+
+  override def persist(path: String, input: InputStream, needClose: Boolean = true): Unit = started {
+    val isExists = client.checkExists().forPath(path)
+    val bytes = Utils.serializeStreamToBytes(input, needClose)
+    if (isExists == null) {
+      client.create().creatingParentsIfNeeded().withMode(CreateMode.PERSISTENT).forPath(path, bytes)
+    }
+    else {
+      client.setData().forPath(path, bytes)
+    }
+  }
 
   private def started(block: => Unit) = {
     if (isStarted) block

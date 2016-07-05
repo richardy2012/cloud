@@ -1,16 +1,24 @@
 <jobs>
     <job
-            id="1"
-            name=""
-            cron=""
-            logicalClass=""
+            name="job1"
+            cron="*/30 * * * * ?"
+            logicalClass="excute.juchao.TbJuchaoTestSLogical"
             bizServiceBeanName=""
             bizDaoBeanName=""
-            needPartition="">
-        <partition number=""/>
+            needPartition="true">
+        <partition number="4"/>
         <parents>
             <name>job1</name>
             <name>job2</name>
         </parents>
+    </job>
+    <job
+            name="job2"
+            cron="* */3 * * * ?"
+            logicalClass="excute.juchao.TbJuchaoTestSLogical"
+            bizServiceBeanName=""
+            bizDaoBeanName=""
+            needPartition="true">
+        <partition number="2"/>
     </job>
 </jobs>
