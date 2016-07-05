@@ -51,6 +51,8 @@ private[cloud] class Master(
     watchs()
     //recovery
     //TODO
+    conf.zkRecovery.moveToDeadNode()
+
 
     //recieve jobs from distribute queue
     processJob()

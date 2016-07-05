@@ -12,6 +12,7 @@ import com.csf.cloud.graph.JobGraph
 import com.csf.cloud.listener.ManagerListenerWaiter
 import com.csf.cloud.queue.Queue
 import com.csf.cloud.queue.impl.ZookeeperDistributeQueue
+import com.csf.cloud.recovery.ZookeeperRecovery
 import com.csf.cloud.serializer.{JavaSerializer, Serializer}
 import com.csf.cloud.timer.ZkJobManager
 import com.csf.cloud.timer.schedule.trigger.{CronTrigger, Trigger}
@@ -74,6 +75,9 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   private[cloud] var check: Check = _
 
+  //recovery
+  private[cloud] var zkRecovery: ZookeeperRecovery = _
+
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
@@ -95,6 +99,9 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
     //check
     this.check = new DefaultCheck(this)
+
+    //recovery
+    this.zkRecovery = new ZookeeperRecovery(this)
 
   }
 
