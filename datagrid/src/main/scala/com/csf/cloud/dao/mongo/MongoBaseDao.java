@@ -30,7 +30,23 @@ public abstract class MongoBaseDao<T> extends BaseDao {
             CanGenerateHashFrom.CanGenerateHashFromString$.MODULE$);
     Storage storage = Storage$.MODULE$.apply("redis");
 
+
+    //this method for merge source row and target row
+    // if some field of source are null and target has been updated by human,It will not update the target,
+    //on the contrary,it will be covered by source
     protected Boolean saveOrUpdate(T entity, Datastore ds) {
+        if (ds == null) return false;
+        try {
+            ds.merge(entity);
+            return true;
+        } catch (Exception e) {
+            log.error("failed for update entity!");
+            return false;
+        }
+    }
+
+
+    protected Boolean saveOrUpdateTarget(T entity, Datastore ds) {
         if (ds == null) return false;
         try {
             Class clazz = entity.getClass();
@@ -62,6 +78,8 @@ public abstract class MongoBaseDao<T> extends BaseDao {
                         ds.save(entity);
                     } else {
                         String[] reDuplicateFieleds = fieldsForObjectId.split("\\" + JavaConfiguration.checkSeparator());
+
+
                         //set these filds for null
                         for (String dupFieldName : reDuplicateFieleds) {
                             Field field = clazz.getDeclaredField(dupFieldName);
@@ -84,6 +102,7 @@ public abstract class MongoBaseDao<T> extends BaseDao {
             return false;
         }
     }
+
 
     private String get(String fieldName) {
         return "get" + Utils.toUpperCaseFirstOne(fieldName);

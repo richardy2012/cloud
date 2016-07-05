@@ -51,6 +51,7 @@ private[cloud] class Master(
     watchs()
     //recovery
     //TODO
+
     //recieve jobs from distribute queue
     processJob()
   }

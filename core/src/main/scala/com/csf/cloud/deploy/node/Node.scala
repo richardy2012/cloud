@@ -226,6 +226,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
+  //register to Master
   private def boostrapTmpNodeToZk() = {
     Node.nodeId = workerId
     workerNode = new PersistentNode(zk, CreateMode.EPHEMERAL, false, Constant.WORKER_TMP_TEMPLE + Node.nodeId,

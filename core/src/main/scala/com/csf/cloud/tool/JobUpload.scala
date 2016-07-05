@@ -22,7 +22,7 @@ private[cloud] object JobUpload extends Logging {
     val inputClone = Utils.cloneInputStream(input)
 
     //save file to zk
-    conf.zkNodeClient.persist(Constant.ZK_FILE + "/" + fileName, Utils.serializeStreamToBytes(inputClone._1))
+    conf.zkNodeClient.persist(Constant.ZK_FILE + "/" + fileName+"_"+System.currentTimeMillis(), Utils.serializeStreamToBytes(inputClone._1))
     logInfo(s"save ${fileName} file to zookeeper successfully!")
 
     val jobs = AnalyseJobsTree.geneJobs(inputClone._2)
