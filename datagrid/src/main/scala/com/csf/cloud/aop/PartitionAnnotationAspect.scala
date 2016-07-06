@@ -23,7 +23,7 @@ import scala.util.control.Breaks._
 private[cloud] class PartitionAnnotationAspect extends Logging {
 
 
-  val c = Calendar.getInstance()
+
   /*  @Before(value = "@annotation(com.chinascope.cloud.aop.annotation.NeedPartition)")
     def partitionAdviceBefor(joinPoint: JoinPoint) = {
       println(joinPoint.getSignature.getName)
@@ -33,6 +33,8 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
   @Around(value = "@annotation(needPartition)")
   def partitionAdvice(proceedingJoinPoint: ProceedingJoinPoint, needPartition: NeedPartition) = Utils.tryOrException {
+    val c = Calendar.getInstance()
+
     var parameterNames: Array[String] = null
     val staticSignature = proceedingJoinPoint.getStaticPart.getSignature
     if (staticSignature.isInstanceOf[MethodSignature]) {
@@ -133,7 +135,7 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
 
           }
 
-          logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}")
+          logInfo(s"After partition parameters: from=${args(fromIndex)}\tto=${args(toIndex)}\tcurrentLocationPartitionNum:${currentLocationPartitionNum}\tcurrentThread:${Thread.currentThread().getId}")
           def doubleNewArgs: (Double, Double) = {
             val from = fromVal.asInstanceOf[Double]
             val to = toVal.asInstanceOf[Double]
@@ -202,9 +204,11 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
               newFrom = c.getTime
             }
             if ((minAvailableWorkerNodeId == Node.nodeId && currentPartitionNum == 1) || ((leftOp == Op.GTE && rightOp == Op.LT) || (leftOp == Op.GT && rightOp == Op.LTE))) {
+
               //first worker,first partition
               c.setTimeInMillis(from.getTime + (currentLocationPartitionNum - 1) * moneyPerPartition)
               newFrom = c.getTime
+              println("new From" + newFrom + "currentLocationPartitionNum" + currentLocationPartitionNum + "\tcurent Thread" + Thread.currentThread().getId)
             }
 
             c.setTimeInMillis(from.getTime + (currentLocationPartitionNum) * moneyPerPartition)

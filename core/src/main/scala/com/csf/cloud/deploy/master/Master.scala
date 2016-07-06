@@ -97,6 +97,7 @@ private[cloud] class Master(
   private def checkAndAssginJob() = {
     while (true) {
       val job = conf.queue.take()
+
       job.setState(JobState.STARTED)
       conf.listenerWaiter.post(JobStarted(job))
       logInfo(s"Master get job ${job.getName} successfully!")
@@ -138,7 +139,7 @@ private[cloud] class Master(
           job.getPartition.setWorkerPartitionNum(workerPartitionNum)
           job.getPartition.setVersion(System.currentTimeMillis())
           //Allocate to worker by zookeeper /root/assgin/worker-xxx/jobname[1-n]
-          logInfo(s"Master assign task,Worker partition number:$workerPartitionNum")
+          logInfo(s"Master assign task,Worker partition number:\n$workerPartitionNum")
 
           workerToPartitionNumMap.foreach { w =>
             val path = Constant.ASSIGN_TEMPLE + w._1 + "/" + job.getName

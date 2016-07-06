@@ -68,7 +68,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   })
 
   private def init() = {
-    conf.initQueue()
+    conf.initNodeQueue()
     //init web ui
     webUi = new NodeWebUI(conf, conf.getInt("webui.port", webUiPort))
     webUi.bind()

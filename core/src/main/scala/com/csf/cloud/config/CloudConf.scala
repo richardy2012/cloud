@@ -67,6 +67,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
   private[cloud] var queue: Queue[Job] = _
 
+  private[cloud] var nodeQueue: Queue[Job] = _
+
   private[cloud] var excutorManager: ExcutorManager = _
 
   private[cloud] var listenerWaiter: ManagerListenerWaiter = _
@@ -112,8 +114,15 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
           this.queue = new ZookeeperDistributeQueue(this)
       }
     }
+  }
 
-
+  def initNodeQueue() = {
+    if (this.nodeQueue == null) {
+      this.synchronized {
+        if (this.nodeQueue == null)
+          this.nodeQueue = new ZookeeperDistributeQueue(this)
+      }
+    }
   }
 
   /** Set a configuration variable. */

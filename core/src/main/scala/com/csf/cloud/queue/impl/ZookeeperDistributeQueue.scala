@@ -2,6 +2,7 @@ package com.csf.cloud.queue.impl
 
 
 import com.csf.cloud.config.CloudConf
+import com.csf.cloud.deploy.node.Node
 import com.csf.cloud.queue.Queue
 import com.csf.cloud.util.{Constant, Utils}
 import com.csf.cloud.zookeeper.{DistributedQueueConsumer, DistributedQueueProducer}
@@ -14,13 +15,16 @@ import scala.reflect.ClassTag
   */
 private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf, path: String = Constant.JOB_QUEUE) extends Queue[T](conf) {
 
-  val producter = new DistributedQueueProducer[T](conf, path)
-  val consumer = new DistributedQueueConsumer[T](conf, path)
+  var producter: DistributedQueueProducer[T] = null
+  var consumer: DistributedQueueConsumer[T] = null
+  val isLeader = Node.isLeader.get()
+  if (isLeader)
+    consumer = new DistributedQueueConsumer[T](conf, path)
+  if (!isLeader) producter = new DistributedQueueProducer[T](conf, path)
 
+  override def put(item: T) = if (producter != null) producter.put(item)
 
-  override def put(item: T) = producter.put(item)
-
-  override def take(): T = consumer.take()
+  override def take(): T = if (consumer != null) consumer.take() else null.asInstanceOf[T]
 
 
 }

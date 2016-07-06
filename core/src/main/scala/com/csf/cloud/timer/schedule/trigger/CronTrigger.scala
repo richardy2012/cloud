@@ -63,7 +63,7 @@ private[cloud] class CronTrigger(conf: CloudConf) extends Trigger with Logging {
         cron = cronExpressionQueue.poll()
         cronExpressionQueue.offer(cron)
         //submit job to distribute queue
-        conf.queue.put(expToJob(cron.getJobName))
+        conf.nodeQueue.put(expToJob(cron.getJobName))
         logInfo(s"Trigger  ${cron.getCronExpression} of ${cron.getJobName} Successfully! ")
         -1
       } else {
