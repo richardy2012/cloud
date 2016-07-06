@@ -4,6 +4,7 @@ import com.csf.cloud.config.CloudConf
 import com.csf.cloud.util.Logging
 import com.csf.cloud.web.pages.{CheckPage, JobPage, NodePage}
 import com.csf.cloud.util.JettyUtils._
+import com.csf.cloud.web.rest.JobTriggerRestServlet
 
 /**
   * Web UI server
@@ -27,6 +28,7 @@ class NodeWebUI(conf: CloudConf, requestedPort: Int)
     attachPage(jobPage)
     attachPage(nodePage)
     attachHandler(createStaticHandler(NodeWebUI.STATIC_RESOURCE_DIR, "/static"))
+    attachHandler(createRestHandler("/rest/trigger",new JobTriggerRestServlet()))
   }
 }
 

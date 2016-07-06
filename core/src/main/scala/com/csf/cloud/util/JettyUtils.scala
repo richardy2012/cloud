@@ -148,6 +148,14 @@ private[cloud] object JettyUtils extends Logging {
     contextHandler
   }
 
+  def createRestHandler(path: String,servlet:HttpServlet): ServletContextHandler = {
+    val contextHandler = new ServletContextHandler
+    val holder = new ServletHolder(servlet)
+    contextHandler.setContextPath(path)
+    contextHandler.addServlet(holder, "/")
+    contextHandler
+  }
+
   /** Add filters, if any, to the given list of ServletContextHandlers */
   def addFilters(handlers: Seq[ServletContextHandler], conf: CloudConf) {
     val filters: Array[String] = conf.get("cloud.ui.filters", "").split(',').map(_.trim())

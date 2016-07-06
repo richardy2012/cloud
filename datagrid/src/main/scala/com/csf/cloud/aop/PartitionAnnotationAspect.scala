@@ -34,7 +34,6 @@ private[cloud] class PartitionAnnotationAspect extends Logging {
   @Around(value = "@annotation(needPartition)")
   def partitionAdvice(proceedingJoinPoint: ProceedingJoinPoint, needPartition: NeedPartition) = Utils.tryOrException {
     val c = Calendar.getInstance()
-
     var parameterNames: Array[String] = null
     val staticSignature = proceedingJoinPoint.getStaticPart.getSignature
     if (staticSignature.isInstanceOf[MethodSignature]) {

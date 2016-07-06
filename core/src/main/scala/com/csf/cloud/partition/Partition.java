@@ -13,6 +13,7 @@ public abstract class Partition implements Serializable {
     private String workerPartitionNum;
     private Set<Task> tasks;
     private Long version;
+    private Object data;
 
     public Partition() {
     }
@@ -23,6 +24,15 @@ public abstract class Partition implements Serializable {
         this.workerPartitionNum = workerPartitionNum;
         this.tasks = tasks;
         this.version = version;
+    }
+
+    public Partition(Integer state, Integer partitionNum, String workerPartitionNum, Set<Task> tasks, Long version, Object data) {
+        this.state = state;
+        this.partitionNum = partitionNum;
+        this.workerPartitionNum = workerPartitionNum;
+        this.tasks = tasks;
+        this.version = version;
+        this.data = data;
     }
 
     public Integer getState() {
@@ -63,5 +73,13 @@ public abstract class Partition implements Serializable {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
     }
 }

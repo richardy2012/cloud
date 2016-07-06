@@ -68,8 +68,11 @@
         <guava.version>14.0.1</guava.version>
         <commons-collections.version>3.2.1</commons-collections.version>
         <mmseg4j.version>1.8.6</mmseg4j.version>
-        <commons-io.version>1.2.4</commons-io.version>
+        <commons-io.version>2.5</commons-io.version>
+        <httpclient-version>4.4.1</httpclient-version>
+        <jackson-mapper-asl-version>1.9.13</jackson-mapper-asl-version>
         <jackson.version>2.5.4</jackson.version>
+        <fasterxml.jackson.version>2.7.3</fasterxml.jackson.version>
         <jgrapht.version>0.9.1</jgrapht.version>
         <redisclient.version>1.2.4</redisclient.version>
         <PermGen>64m</PermGen>
@@ -178,14 +181,14 @@
             </snapshots>
         </repository>
 
-        <repository>
+       <!-- <repository>
             <id>opensesame</id>
             <name>Alibaba OpenSource Repsoitory</name>
             <url>http://code.alibabatech.com/mvn/releases/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository>-->
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -524,9 +527,30 @@
                 <version>${jetty.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.codehaus.jackson</groupId>
+                <artifactId>jackson-mapper-asl</artifactId>
+                <version>${jackson-mapper-asl-version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.json4s</groupId>
                 <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
                 <version>${json4s.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
+                <version>${fasterxml.jackson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${fasterxml.jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.chenlb.mmseg4j</groupId>
@@ -564,6 +588,12 @@
                 <groupId>org.javabits.jgrapht</groupId>
                 <artifactId>jgrapht-ext</artifactId>
                 <version>${jgrapht.version}</version>
+            </dependency>
+            <!-- http client-->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
