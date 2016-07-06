@@ -28,7 +28,7 @@ private[cloud] class Master(
                            ) extends LeaderCandidate with Logging {
   private val zk: CuratorFramework = this.conf.zkClient.zk[CuratorFramework]
 
-  conf.listenerWaiter.addListener(new JobTaskTraceListener(conf))
+  conf.listenerWaiter.addListener(conf.jobTaskTraceListener)
   conf.listenerWaiter.start()
 
   // Watch list of workers
@@ -36,8 +36,6 @@ private[cloud] class Master(
   private var workersCache: PathChildrenCache = _
   // Watch list of resources
   private var resourcesWorkersCache: PathChildrenCache = _
-  //Watch jobs in workers for tree
-  private var workersJobsTreeNodeCache: TreeCache = _
 
 
   val idToNodes = new mutable.HashMap[Long, NodeInfo]()
@@ -63,7 +61,6 @@ private[cloud] class Master(
     conf.initQueue()
     this.workersCache = new PathChildrenCache(zk, Constant.WORKER_DIR, true)
     this.resourcesWorkersCache = new PathChildrenCache(zk, Constant.RESOURCE_DIR, true)
-    this.workersJobsTreeNodeCache = new TreeCache(zk, Constant.JOBS_DIR)
 
 
   }
@@ -75,9 +72,6 @@ private[cloud] class Master(
 
     this.resourcesWorkersCache.getListenable.addListener(resourceCacheListener)
     this.resourcesWorkersCache.start()
-
-    this.workersJobsTreeNodeCache.getListenable.addListener(workersJobsCacheListener)
-    this.workersJobsTreeNodeCache.start()
 
 
   }
@@ -113,8 +107,8 @@ private[cloud] class Master(
         val availableNodes = idToNodes.map(_._2).filter(n => n.cpuUsageRatio <= 0.95 && n.memUsageRatio <= 0.95).toArray
         if (availableNodes != null && availableNodes.length > 0) {
           val workerUsable = availableNodes.length
-          val availableCores = availableNodes.map(n => (n.id, n.availableCores)).sortBy(_._2).reverse
-          val availableCoresNum = availableCores.map(_._2).sum
+          val availableCoreWorkerReverse = availableNodes.map(n => (n.id, n.availableCores)).sortBy(_._2).reverse //more cores more power
+          val availableCoresNum = availableCoreWorkerReverse.map(_._2).sum
           var partitionNum = 0
           if (!job.getNeedPartition)
             partitionNum = 1
@@ -133,7 +127,7 @@ private[cloud] class Master(
           }
           val workerToPartitionNumMap = new java.util.HashMap[Long, Int]()
           for (i <- 0 until assigned.length) {
-            workerToPartitionNumMap(availableCores(i)._1) = assigned(i)
+            workerToPartitionNumMap(availableCoreWorkerReverse(i)._1) = assigned(i)
           }
           val workerPartitionNum = JSON.toJSONString(workerToPartitionNumMap, true)
           job.getPartition.setWorkerPartitionNum(workerPartitionNum)
@@ -166,7 +160,6 @@ private[cloud] class Master(
     logError("Leadership has been revoked -- master shutting down.")
     CloseableUtils.closeQuietly(workersCache)
     CloseableUtils.closeQuietly(resourcesWorkersCache)
-    CloseableUtils.closeQuietly(workersJobsTreeNodeCache)
 
     CloseableUtils.closeQuietly(zk)
     System.exit(0)
@@ -199,43 +192,11 @@ private[cloud] class Master(
   }
 
 
-  private[cloud] val workersJobsCacheListener = new TreeCacheListener {
-    override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
-      event.getType match {
-        case TreeCacheEvent.Type.NODE_ADDED =>
-          val path = event.getData.getPath
-          jobToGraph(path, "add")
-        case TreeCacheEvent.Type.NODE_REMOVED =>
-          val path = event.getData.getPath
-          jobToGraph(path, "del")
-        case _ =>
-      }
-    }
-  }
-
-
-  def jobToGraph(path: String, source: String): Unit = {
-    val pathArray = path.split("/")
-    if (pathArray.size == 4) {
-      conf.zkClient.read[Job](path) match {
-        case Some(job) =>
-          source match {
-            case "del" =>
-              logInfo(s"tree node workers jobs removed: ${path}")
-              conf.dagSchedule.deleteJob(job)
-            case "add" =>
-              logInfo(s"tree node  workers jobs added: ${path}")
-              conf.dagSchedule.addJob(job)
-            case _ =>
-          }
-
-        case None =>
-      }
-    }
-  }
 }
 
-private[cloud] object Master {
+private[cloud] object Master extends Logging {
+
+
 
 
   def main(args: Array[String]) {

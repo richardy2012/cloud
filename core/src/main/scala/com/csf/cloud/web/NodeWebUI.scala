@@ -28,7 +28,7 @@ class NodeWebUI(conf: CloudConf, requestedPort: Int)
     attachPage(jobPage)
     attachPage(nodePage)
     attachHandler(createStaticHandler(NodeWebUI.STATIC_RESOURCE_DIR, "/static"))
-    attachHandler(createRestHandler("/rest/trigger",new JobTriggerRestServlet()))
+    attachHandler(createRestHandler("/rest/trigger",new JobTriggerRestServlet(conf)))
   }
 }
 

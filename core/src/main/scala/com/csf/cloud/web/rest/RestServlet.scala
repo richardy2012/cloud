@@ -3,7 +3,10 @@ package com.csf.cloud.web.rest
 import java.io.{ByteArrayOutputStream, InputStream}
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest, HttpServlet}
 
+import com.alibaba.fastjson.JSON
+import com.csf.cloud.config.CloudConf
 import com.csf.cloud.entity.Msg
+import com.csf.cloud.listener.DataComming
 import com.csf.cloud.util.Logging
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.{SerializationFeature, DeserializationFeature, ObjectMapper}
@@ -75,10 +78,31 @@ private[cloud] abstract class JsonRestServlet extends RestServlet {
   override def doGet(req: HttpServletRequest, resp: HttpServletResponse): Unit = this.doPost(req, resp)
 }
 
-private[cloud] class JobTriggerRestServlet extends JsonRestServlet {
+private[cloud] class JobTriggerRestServlet(conf: CloudConf) extends JsonRestServlet {
   override protected def handle(requestMessageJson: String): AnyRef = {
-    println("request parametor:" + requestMessageJson)
-    return new Msg(0, "称呼")
+    val msg = new Msg(0, "success")
+    val dataJsonObj = JSON.parseObject(requestMessageJson)
+    if (dataJsonObj == null) {
+      msg.setCode(-1)
+      msg.setMessage("no data")
+      return msg
+    }
+    val jobName = dataJsonObj.getString("jobname")
+    if (jobName == null || "".equalsIgnoreCase(jobName.trim)) {
+      msg.setCode(-1)
+      msg.setMessage("can't find field jobname")
+      return msg
+    }
+    val data = dataJsonObj.getJSONObject("data")
+    if (data == null) {
+      msg.setCode(-1)
+      msg.setMessage("can't find field data")
+      return msg
+    }
+    val jobClone = conf.node.name2Job(jobName).clone()
+    jobClone.getPartition.setData(data)
+    conf.listenerWaiter.post(DataComming(jobClone))
+    return msg
   }
 }
 

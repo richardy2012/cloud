@@ -24,5 +24,7 @@ case class TaskBizException(task: (String, Task)) extends TraceListenerEvent
 
 case class TaskError(task: (String, Task)) extends TraceListenerEvent
 
+case class DataComming(job: Job) extends TraceListenerEvent
+
 
 

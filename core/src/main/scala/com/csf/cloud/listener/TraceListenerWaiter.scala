@@ -40,6 +40,8 @@ trait TraceListenerWaiter extends ListenerWaiter[TraceListener, TraceListenerEve
         listener.onTaskBizException(taskBizException)
       case taskError: TaskError =>
         listener.onTaskError(taskError)
+      case dataComming: DataComming =>
+        listener.onDataComing(dataComming)
     }
   }
 }

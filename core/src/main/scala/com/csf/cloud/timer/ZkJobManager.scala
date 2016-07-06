@@ -85,7 +85,7 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
       var path: String = null
       val jobPaths = zk.getChildren(Constant.JOBS_DIR)
 
-      if (activeWorkerPaths.size - jobPaths.size > 0) {
+      if (activeWorkerPaths.size - jobPaths.size > 0) { //a few of jobs
         val worker = activeWorkerPaths.filter(!jobPaths.contains(_)).head
         path = Constant.JOBS_DIR + "/" + worker + "/" + job.getName
       } else {

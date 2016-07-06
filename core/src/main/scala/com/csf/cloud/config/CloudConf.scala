@@ -9,7 +9,7 @@ import com.csf.cloud.deploy.node.Node
 import com.csf.cloud.entity.Job
 import com.csf.cloud.excute.ExcutorManager
 import com.csf.cloud.graph.JobGraph
-import com.csf.cloud.listener.ManagerListenerWaiter
+import com.csf.cloud.listener.{TraceListener, JobTaskTraceListener, ManagerListenerWaiter}
 import com.csf.cloud.queue.Queue
 import com.csf.cloud.queue.impl.ZookeeperDistributeQueue
 import com.csf.cloud.recovery.ZookeeperRecovery
@@ -80,6 +80,9 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   //recovery
   private[cloud] var zkRecovery: ZookeeperRecovery = _
 
+  //listener
+  private[cloud] var jobTaskTraceListener: TraceListener = _
+
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
@@ -104,6 +107,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
     //recovery
     this.zkRecovery = new ZookeeperRecovery(this)
+
+    this.jobTaskTraceListener = new JobTaskTraceListener(this)
 
   }
 

@@ -24,4 +24,8 @@ trait TraceListener extends Logging {
   def onJobFinished(jobFinished: JobFinished)
 
 
+  //submit job to zk,when data stream coming
+  def onDataComing(dataComming: DataComming)
+
+
 }

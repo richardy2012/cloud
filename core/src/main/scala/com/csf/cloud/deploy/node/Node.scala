@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.alibaba.fastjson.JSON
 import com.csf.cloud.clock.CloudTimerWorker
 import com.csf.cloud.config.{CloudConf, DefaultConfiguration}
+import com.csf.cloud.deploy.master.Master
+import com.csf.cloud.deploy.master.Master.jobsChanges
 import com.csf.cloud.entity.{Job, JobState, TaskState}
 import com.csf.cloud.excute.runner.ExcutorRunner
 import com.csf.cloud.listener.{JobFinished, JobRunning, JobTaskTraceListener, TaskFinished}
@@ -36,6 +38,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   val _jobs = new mutable.HashMap[String, Job]()
   var completedJobNames = Node.initCache("completedJobNames", 10 * 60 * 1000)
+
+  val name2Job = new mutable.HashMap[String, Job]()
+
 
   val jobNameToTask = new mutable.HashMap[String, mutable.Set[Future[Task]]]()
 
@@ -198,6 +203,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     //watch jobs by local workers for timer schedule
     checkCache.getListenable.addListener(checkCacheListener)
     checkCache.start()
+
+    //Watch jobs in workers for tree
+    val workersJobsTreeNodeCache: TreeCache = new TreeCache(zk, Constant.JOBS_DIR)
+    workersJobsTreeNodeCache.getListenable.addListener(workersJobsCacheListener)
+    workersJobsTreeNodeCache.start()
   }
 
   private def startZK() = {
@@ -316,6 +326,20 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
+  private[cloud] val workersJobsCacheListener = new TreeCacheListener {
+    override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
+      event.getType match {
+        case TreeCacheEvent.Type.NODE_ADDED =>
+          val path = event.getData.getPath
+          jobsChanges(path, "add")
+        case TreeCacheEvent.Type.NODE_REMOVED =>
+          val path = event.getData.getPath
+          jobsChanges(path, "del")
+        case _ =>
+      }
+    }
+  }
+
 
   private[cloud] val partitionStatusCacheListener = new TreeCacheListener {
     override def childEvent(client: CuratorFramework, event: TreeCacheEvent): Unit = {
@@ -325,6 +349,36 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
           stateChanges(path)
         }
         case _ =>
+      }
+    }
+  }
+
+
+  def jobsChanges(path: String, source: String): Unit = {
+    val pathArray = path.split("/")
+    if (pathArray.size == 4) {
+      conf.zkClient.read[Job](path) match {
+        case Some(job) =>
+          source match {
+            case "del" =>
+              logInfo(s"tree node workers jobs removed: ${path}")
+              if (Node.isLeader.get())
+                conf.dagSchedule.deleteJob(job) //delete job from DAG
+              else {
+                name2Job.remove(job.getName)
+              }
+            case "add" =>
+              logInfo(s"tree node  workers jobs added: ${path}")
+              if (Node.isLeader.get())
+                conf.dagSchedule.addJob(job) //add job from DAG
+              else {
+                //cache Map(name->job) to local worker
+                name2Job(job.getName) = job
+              }
+            case _ =>
+          }
+
+        case None =>
       }
     }
   }
