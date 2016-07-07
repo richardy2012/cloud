@@ -123,6 +123,18 @@ private[cloud] object Utils extends Logging {
     math.max(totalMb - 1024, 512)
   }
 
+  def correctURI(path: String): URI = {
+    try {
+      val uri = new URI(path)
+      if (uri.getScheme() != null) {
+        return uri
+      }
+    } catch {
+      case e: URISyntaxException =>
+    }
+    new File(path).getAbsoluteFile().toURI()
+  }
+
   def namedThreadFactory(prefix: String): ThreadFactory = {
     daemonThreadFactoryBuilder.setNameFormat(prefix + "-%d").build()
   }

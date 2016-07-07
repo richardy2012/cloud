@@ -18,7 +18,7 @@ public class Dog {
     @Id
     private String id;
 
-    private String name;
+    private String name="zhuangzhuang";
     private String hair;
     private Double height;
     @Embedded
