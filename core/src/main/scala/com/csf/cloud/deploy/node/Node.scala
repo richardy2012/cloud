@@ -451,8 +451,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 
   private def processReceiveTask(path: String): Unit = {
+    logInfo(s"processReceive task, zk path=$path")
     val jobOption: Option[Job] = conf.zkNodeClient.read[Job](path)
     processReceiveTaskForJob(jobOption)
+    conf.zkNodeClient.delete(path)
   }
 
   def processReceiveTaskForJob(jobOption: Option[Job]): Unit = {
@@ -489,23 +491,24 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         var actualPartitionNum = partitionNum
         if (mod > 0 && numPerPartition == 0) actualPartitionNum = mod
 
+        var index = mod //if partition number is not average,then average mod to every partition
 
         for (i <- 1 to actualPartitionNum) {
           val cloneJob = job.clone()
           if (numPerPartition > 0 || mod > 0) {
             val taskDataList = new util.ArrayList[Object]()
             if (mod == 0) {
-              for (j <- numPerPartition * (i - 1) until numPerPartition) {
+              for (j <- numPerPartition * (i - 1) until numPerPartition*i) {
                 taskDataList.add(dataList.get(j))
               }
             } else if (mod > 0 && numPerPartition == 0) {
-              taskDataList.add(dataList.get(i))
+              taskDataList.add(dataList.get(i-1))
             } else if (mod > 0 && numPerPartition > 0) {
-              var index = mod
-              for (j <- numPerPartition * (i - 1) until numPerPartition) {
+
+              for (j <- numPerPartition * (i - 1) until numPerPartition*i) {
                 if (index > 0) {
-                  index -= 1
                   taskDataList.add(dataList.get(dataList.size() - index))
+                  index -= 1
                 }
                 taskDataList.add(dataList.get(j))
               }

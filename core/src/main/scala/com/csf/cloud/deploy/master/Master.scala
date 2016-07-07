@@ -152,8 +152,10 @@ private[cloud] class Master(
 
                 while (needAssignData < jsonData.size) {
                   if (point >= partitionNum) point = 0
-                  var datasOfPoint = workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1)
-                  if (datasOfPoint == null) datasOfPoint = new java.util.ArrayList[Object]()
+                  var datasOfPoint: java.util.ArrayList[Object]  =null
+                  if(!workerToDataSeq.contains(availableCoreWorkerReverse(point % workerUsable)._1)){
+                    datasOfPoint = new java.util.ArrayList[Object]()
+                  }else
                   datasOfPoint.add(jsonData.get(needAssignData))
                   workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1) = datasOfPoint
                   point += 1
@@ -186,11 +188,10 @@ private[cloud] class Master(
   }
 
   private def returnJobToQueue(job: Job): Unit = {
+    logWarning("No Node hava enough resource to allocate job!")
     //No Node ,sleep 10 second
     Thread.sleep(10 * 1000)
     conf.queue.put(job)
-
-    logWarning("No Node hava enough resource to allocate job!")
   }
 
   override def revokedLeadership(): Unit = {

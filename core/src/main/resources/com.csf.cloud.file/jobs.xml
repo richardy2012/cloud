@@ -23,7 +23,7 @@
     </job>
     <job
             name="job3"
-            logicalClass="excute.DataStreamExcutor"
+            logicalClass="excute.DefaultDataStreamExcutor"
             needPartition="true"
             type="stream">
         <partition number="3"/>

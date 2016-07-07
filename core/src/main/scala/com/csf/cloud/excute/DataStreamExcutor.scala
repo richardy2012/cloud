@@ -14,5 +14,6 @@ private[cloud] abstract class DataStreamExcutor extends Excutor {
     else logError("data can't be null and must be instance of java.util.ArrayList[Object]")
   }
 
+  @throws(classOf[Exception])
   def service(data: java.util.ArrayList[Object])
 }
