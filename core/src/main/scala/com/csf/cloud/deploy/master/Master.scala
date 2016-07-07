@@ -3,7 +3,7 @@ package com.csf.cloud.deploy.master
 import java.util
 import java.util.Date
 
-import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.{JSONArray, JSON}
 import com.csf.cloud.config.CloudConf
 import com.csf.cloud.deploy.election.LeaderCandidate
 import com.csf.cloud.deploy.node.{Node, NodeInfo}
@@ -90,8 +90,8 @@ private[cloud] class Master(
 
   private def checkAndAssginJob() = {
     while (true) {
-      val job = conf.queue.take()
-
+      val jobReceive = conf.queue.take()
+      val job = jobReceive.clone()
       job.setState(JobState.STARTED)
       conf.listenerWaiter.post(JobStarted(job))
       logInfo(s"Master get job ${job.getName} successfully!")
@@ -135,11 +135,49 @@ private[cloud] class Master(
           //Allocate to worker by zookeeper /root/assgin/worker-xxx/jobname[1-n]
           logInfo(s"Master assign task,Worker partition number:\n$workerPartitionNum")
 
-          workerToPartitionNumMap.foreach { w =>
-            val path = Constant.ASSIGN_TEMPLE + w._1 + "/" + job.getName
-            conf.zkClient.persist(path, job)
-            logInfo(s"job ${job.getName} assgin to woker-${w._1}")
+          val data = job.getPartition.getData
+          var jsonData: JSONArray = null
+
+
+          //assign for data stream
+          if (data != null) {
+            if (data.isInstanceOf[JSONArray]) {
+              jsonData = data.asInstanceOf[JSONArray]
+              if (jsonData.size() > 0) {
+
+                val workerToDataSeq = new mutable.HashMap[Long, java.util.ArrayList[Object]]() //worker -> datas
+
+                var needAssignData = 0
+                var point = 0
+
+                while (needAssignData < jsonData.size) {
+                  if (point >= partitionNum) point = 0
+                  var datasOfPoint = workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1)
+                  if (datasOfPoint == null) datasOfPoint = new java.util.ArrayList[Object]()
+                  datasOfPoint.add(jsonData.get(needAssignData))
+                  workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1) = datasOfPoint
+                  point += 1
+                  needAssignData += 1
+                }
+                workerToDataSeq.foreach { w =>
+                  val path = Constant.ASSIGN_TEMPLE + w._1 + "/" + job.getName
+                  job.getPartition.setData(w._2) //set data for every worker that need excute task
+                  conf.zkClient.persist(path, job)
+                  logInfo(s"job ${job.getName} assgin to woker-${w._1} by stream data")
+                }
+              } else {
+                //TODO  need alarm
+                logInfo("no data stream,data stream should be jsonArray")
+              }
+            }
+          } else {
+            workerToPartitionNumMap.foreach { w =>
+              val path = Constant.ASSIGN_TEMPLE + w._1 + "/" + job.getName
+              conf.zkClient.persist(path, job)
+              logInfo(s"job ${job.getName} assgin to woker-${w._1}")
+            }
           }
+
           //Update status of Job to Started
           //TODO
         } else returnJobToQueue(job)
@@ -195,8 +233,6 @@ private[cloud] class Master(
 }
 
 private[cloud] object Master extends Logging {
-
-
 
 
   def main(args: Array[String]) {

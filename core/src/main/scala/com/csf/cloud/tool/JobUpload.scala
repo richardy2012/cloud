@@ -3,6 +3,7 @@ package com.csf.cloud.tool
 import java.io.InputStream
 
 import com.csf.cloud.config.CloudConf
+import com.csf.cloud.deploy.node.Node
 import com.csf.cloud.entity.Msg
 import com.csf.cloud.util.{Utils, Constant, Logging}
 import org.apache.commons.io.IOUtils
@@ -19,10 +20,12 @@ private[cloud] object JobUpload extends Logging {
   def submitJobFile(input: InputStream, fileName: String, conf: CloudConf): Msg = {
     val msg = new Msg()
 
+
+
     val inputClone = Utils.cloneInputStream(input)
 
     //save file to zk
-    conf.zkNodeClient.persist(Constant.ZK_FILE + "/" + fileName+"_"+System.currentTimeMillis(), Utils.serializeStreamToBytes(inputClone._1))
+    conf.zkNodeClient.persist(Constant.ZK_FILE + "/" + fileName + "_" + System.currentTimeMillis(), Utils.serializeStreamToBytes(inputClone._1))
     logInfo(s"save ${fileName} file to zookeeper successfully!")
 
     val jobs = AnalyseJobsTree.geneJobs(inputClone._2)

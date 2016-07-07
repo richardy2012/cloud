@@ -55,7 +55,10 @@ class JobTaskTraceListener(conf: CloudConf) extends TraceListener {
   //submit job to zk,when data stream coming
   override def onDataComing(dataComming: DataComming): Unit = {
     //submit job to distribute queue
-    conf.nodeQueue.put(dataComming.job)
+    val job = dataComming.job
+    conf.nodeQueue.put(job)
+    logInfo(s"submit  ${job.getName} to zk queue successful!")
+
   }
 }
 

@@ -21,4 +21,11 @@
             needPartition="true">
         <partition number="2"/>
     </job>
+    <job
+            name="job3"
+            logicalClass="excute.DataStreamExcutor"
+            needPartition="true"
+            type="stream">
+        <partition number="3"/>
+    </job>
 </jobs>

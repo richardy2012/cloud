@@ -1,5 +1,6 @@
 package com.csf.cloud.deploy.node
 
+import java.util
 import java.util.Date
 import java.util.concurrent.{Future, TimeUnit}
 import java.util.concurrent.atomic.AtomicBoolean
@@ -8,7 +9,6 @@ import com.alibaba.fastjson.JSON
 import com.csf.cloud.clock.CloudTimerWorker
 import com.csf.cloud.config.{CloudConf, DefaultConfiguration}
 import com.csf.cloud.deploy.master.Master
-import com.csf.cloud.deploy.master.Master.jobsChanges
 import com.csf.cloud.entity.{Job, JobState, TaskState}
 import com.csf.cloud.excute.runner.ExcutorRunner
 import com.csf.cloud.listener.{JobFinished, JobRunning, JobTaskTraceListener, TaskFinished}
@@ -291,10 +291,12 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
-          logInfo(s"add  job ${
-            path
-          } for timer schedule!")
-          conf.schedule.schedule(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
+
+          val job = conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job])
+          if (job != null && !job.getType.equalsIgnoreCase("stream")){
+            conf.schedule.schedule(job)
+            logInfo(s"add  job $path for timer schedule!")
+          }
         }
         catch {
           case e: Exception => {
@@ -303,10 +305,13 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         }
         case PathChildrenCacheEvent.Type.CHILD_REMOVED =>
           val path = event.getData.getPath
-          logInfo(s"delete  job ${
-            path
-          } for timer schedule!")
-          conf.schedule.deleteJob(conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job]))
+
+          val job = conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job])
+          if (job != null && !job.getType.equalsIgnoreCase("stream")){
+            conf.schedule.deleteJob(job)
+            logInfo(s"delete  job $path for timer schedule!")
+          }
+
         case _ =>
       }
     }
@@ -364,17 +369,13 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
               logInfo(s"tree node workers jobs removed: ${path}")
               if (Node.isLeader.get())
                 conf.dagSchedule.deleteJob(job) //delete job from DAG
-              else {
                 name2Job.remove(job.getName)
-              }
             case "add" =>
               logInfo(s"tree node  workers jobs added: ${path}")
               if (Node.isLeader.get())
                 conf.dagSchedule.addJob(job) //add job from DAG
-              else {
                 //cache Map(name->job) to local worker
                 name2Job(job.getName) = job
-              }
             case _ =>
           }
 
@@ -468,8 +469,50 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         val partitionNum = workerPartitionNum.getInteger(s"${
           Node.nodeId
         }")
-        for (i <- 1 to partitionNum) {
+
+        val data = job.getPartition.getData
+
+        var numPerPartition = 0
+        var mod = 0
+        var dataList: java.util.List[Object] = null
+
+
+        /**
+          * this is for datastream partition
+          */
+        if (data != null) {
+          dataList = data.asInstanceOf[java.util.ArrayList[Object]]
+          numPerPartition = dataList.size() / partitionNum
+          mod = dataList.size() % partitionNum
+        }
+
+        var actualPartitionNum = partitionNum
+        if (mod > 0 && numPerPartition == 0) actualPartitionNum = mod
+
+
+        for (i <- 1 to actualPartitionNum) {
           val cloneJob = job.clone()
+          if (numPerPartition > 0 || mod > 0) {
+            val taskDataList = new util.ArrayList[Object]()
+            if (mod == 0) {
+              for (j <- numPerPartition * (i - 1) until numPerPartition) {
+                taskDataList.add(dataList.get(j))
+              }
+            } else if (mod > 0 && numPerPartition == 0) {
+              taskDataList.add(dataList.get(i))
+            } else if (mod > 0 && numPerPartition > 0) {
+              var index = mod
+              for (j <- numPerPartition * (i - 1) until numPerPartition) {
+                if (index > 0) {
+                  index -= 1
+                  taskDataList.add(dataList.get(dataList.size() - index))
+                }
+                taskDataList.add(dataList.get(j))
+              }
+            }
+            cloneJob.getPartition.setData(taskDataList)
+          }
+
           cloneJob.getPartition.setPartitionNum(i)
           cloneJob.setState(JobState.RUNNING)
           val task = new Task()
@@ -538,6 +581,13 @@ private[cloud] object Node extends Logging {
       .expireAfterWrite(expiredTime, TimeUnit.MILLISECONDS).build(cacheLoader)
     cacheManager.apply(cacheName)
     cacheManager
+  }
+
+
+  private[cloud] def haveActivedWorkers(conf: CloudConf) = {
+    val workers = conf.zkNodeClient.getChildren(Constant.WORKER_DIR)
+    if (workers == null || workers.size == 0) false
+    else true
   }
 
   private[cloud] def onNodeAdded(conf: CloudConf, path: String): Unit = {

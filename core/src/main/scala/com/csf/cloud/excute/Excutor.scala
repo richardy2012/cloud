@@ -18,7 +18,7 @@ private[cloud] abstract class Excutor extends Logging {
   var job: Job = _
 
 
-  def setServiceAndDao(job: Job)
+  def setServiceAndDao(job: Job) = {}
 
   def setJob(job: Job): Unit = {
     this.job = job
@@ -31,6 +31,7 @@ private[cloud] abstract class Excutor extends Logging {
   @throws(classOf[Exception])
   def start(task: Task): Unit = {
     //pre process
+    logInfo(s"current partition number: ${this.job.getPartition.getPartitionNum}")
     excute()
     //post process
   }
@@ -43,7 +44,6 @@ private[cloud] object Excutor extends Logging {
         null.asInstanceOf[Excutor]
       }
     }
-
 
 
   // Excutor instances cache (Key[job.getLogical]->Value[Excutor])])
@@ -59,7 +59,6 @@ private[cloud] object Excutor extends Logging {
 
   // Service and Dao instances cache (Key[job.getLogical]->Value[Service or Dao])])
   val serviceAndDaoCacheManager = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(serviceAndDaoLoader)
-
 
 
   def getExcutor(job: Job, conf: CloudConf): Excutor = {

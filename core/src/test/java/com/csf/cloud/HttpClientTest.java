@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.csf.cloud.entity.Msg;
+import com.csf.cloud.entity.StreamDataTest;
 import com.csf.cloud.util.http.HttpClientUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,7 +35,13 @@ public class HttpClientTest {
     public static void testTriggerRestService() {
         String url = "http://192.168.1.72:9898/rest/trigger/";
 
-        Msg obj = new Msg(-22, "中文字符测试POST");
+        StreamDataTest obj = new StreamDataTest();
+        obj.setJobName("job3");
+        List<String> keys = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            keys.add("key" + i);
+        }
+        obj.setData(keys);
         Map headers = new java.util.HashMap<String, String>();
         headers.put("Content-Type", "application/json");
         CloseableHttpResponse httpResp = HttpClientUtil.requestHttpSyn(url, "post", obj, headers);

@@ -116,7 +116,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     if (this.queue == null) {
       this.synchronized {
         if (this.queue == null)
-          this.queue = new ZookeeperDistributeQueue(this)
+          this.queue = new ZookeeperDistributeQueue(this,Some("consumer"))
       }
     }
   }
@@ -125,7 +125,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     if (this.nodeQueue == null) {
       this.synchronized {
         if (this.nodeQueue == null)
-          this.nodeQueue = new ZookeeperDistributeQueue(this)
+          this.nodeQueue = new ZookeeperDistributeQueue(this,Some("producter"))
       }
     }
   }

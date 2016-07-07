@@ -33,6 +33,7 @@ private[cloud] object AnalyseJobsTree extends Logging {
         val job = obj.asInstanceOf[Job]
         job.setName(element.getAttribute("name").trim)
         job.setCron(element.getAttribute("cron").trim)
+        job.setType(element.getAttribute("type").trim)
         job.setLogical(element.getAttribute("logicalClass").trim)
         job.setBizService(element.getAttribute("bizServiceBeanName").trim)
         job.setBizDao(element.getAttribute("bizDaoBeanName").trim)

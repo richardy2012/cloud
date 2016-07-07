@@ -13,14 +13,14 @@ import scala.reflect.ClassTag
 /**
   * Created by soledede.weng on 2016/6/13.
   */
-private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf, path: String = Constant.JOB_QUEUE) extends Queue[T](conf) {
+private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf,queueType: Option[String], path: String = Constant.JOB_QUEUE) extends Queue[T](conf) {
 
   var producter: DistributedQueueProducer[T] = null
   var consumer: DistributedQueueConsumer[T] = null
   val isLeader = Node.isLeader.get()
-  if (isLeader)
+  if (isLeader && "consumer".equalsIgnoreCase(queueType.getOrElse("consumer")))
     consumer = new DistributedQueueConsumer[T](conf, path)
-  if (!isLeader) producter = new DistributedQueueProducer[T](conf, path)
+  if ("producter".equalsIgnoreCase(queueType.getOrElse("consumer"))) producter = new DistributedQueueProducer[T](conf, path)
 
   override def put(item: T) = if (producter != null) producter.put(item)
 

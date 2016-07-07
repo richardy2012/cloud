@@ -22,4 +22,6 @@ public abstract class BaseJob implements Serializable, Cloneable {
     protected Long endTime;
     protected Long startExecTime;
     protected Long endExecTime;
+    protected String type; //cron or stream
+
 }

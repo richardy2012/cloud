@@ -26,8 +26,11 @@ public class Job extends BaseJob {
     }
 
     public static Msg valiateNull(Job job) {
-        if (!checkString(job.getName()) || !checkString(job.getCron()) || !checkString(job.getLogical()))
-            return new Msg(-1, "jobName or cron or logical can't be null");
+       /* if (!checkString(job.getName()) || !checkString(job.getCron()) || !checkString(job.getLogical()))
+            return new Msg(-1, "jobName or cron or logical can't be null");*/
+        if (!checkString(job.getName())){
+            return new Msg(-1, "jobName can't be null");
+        }
         return new Msg(0, "ok");
     }
 
@@ -156,6 +159,16 @@ public class Job extends BaseJob {
     public void setBizDao(String bizDao) {
         this.bizDao = bizDao;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+
 
     @Override
     public boolean equals(Object o) {

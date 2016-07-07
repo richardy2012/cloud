@@ -81,28 +81,38 @@ private[cloud] abstract class JsonRestServlet extends RestServlet {
 private[cloud] class JobTriggerRestServlet(conf: CloudConf) extends JsonRestServlet {
   override protected def handle(requestMessageJson: String): AnyRef = {
     val msg = new Msg(0, "success")
-    val dataJsonObj = JSON.parseObject(requestMessageJson)
-    if (dataJsonObj == null) {
-      msg.setCode(-1)
-      msg.setMessage("no data")
+    try {
+      val dataJsonObj = JSON.parseObject(requestMessageJson)
+      if (dataJsonObj == null) {
+        msg.setCode(-1)
+        msg.setMessage("no data")
+        return msg
+      }
+      var jobName = dataJsonObj.getString("jobname")
+      if (jobName == null || "".equalsIgnoreCase(jobName.trim)) {
+        jobName = dataJsonObj.getString("jobName")
+        if (jobName == null || "".equalsIgnoreCase(jobName.trim)) {
+          msg.setCode(-1)
+          msg.setMessage("can't find field jobname or jobName")
+          return msg
+        }
+      }
+      val data = dataJsonObj.getJSONArray("data")
+      if (data == null) {
+        msg.setCode(-1)
+        msg.setMessage("can't find field data")
+        return msg
+      }
+      val jobClone = conf.node.name2Job(jobName).clone()
+      jobClone.getPartition.setData(data)
+      conf.listenerWaiter.post(DataComming(jobClone))
       return msg
+    } catch {
+      case e: Exception =>
+        msg.setCode(-1)
+        msg.setMessage("faield" + e.getMessage)
+        msg
     }
-    val jobName = dataJsonObj.getString("jobname")
-    if (jobName == null || "".equalsIgnoreCase(jobName.trim)) {
-      msg.setCode(-1)
-      msg.setMessage("can't find field jobname")
-      return msg
-    }
-    val data = dataJsonObj.getJSONObject("data")
-    if (data == null) {
-      msg.setCode(-1)
-      msg.setMessage("can't find field data")
-      return msg
-    }
-    val jobClone = conf.node.name2Job(jobName).clone()
-    jobClone.getPartition.setData(data)
-    conf.listenerWaiter.post(DataComming(jobClone))
-    return msg
   }
 }
 
