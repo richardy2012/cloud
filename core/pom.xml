@@ -28,7 +28,7 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>com.etaty.rediscala</groupId>
             <artifactId>rediscala_${scala.binary.version}</artifactId>
             <exclusions>
@@ -41,7 +41,7 @@
                     <groupId>com.typesafe.akka</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>com.aug3.storage</groupId>
             <artifactId>redisclient</artifactId>
