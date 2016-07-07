@@ -155,7 +155,7 @@ private[cloud] class Master(
                   var datasOfPoint: java.util.ArrayList[Object]  =null
                   if(!workerToDataSeq.contains(availableCoreWorkerReverse(point % workerUsable)._1)){
                     datasOfPoint = new java.util.ArrayList[Object]()
-                  }else
+                  }else datasOfPoint= workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1)
                   datasOfPoint.add(jsonData.get(needAssignData))
                   workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1) = datasOfPoint
                   point += 1
