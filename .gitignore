@@ -7,3 +7,5 @@ core/target/
 .log
 core/*.iml
 datagrid/*.iml
+cloud-parent.iml
+core/core.iml
