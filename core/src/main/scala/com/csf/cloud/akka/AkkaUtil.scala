@@ -107,7 +107,7 @@ private[cloud] object AkkaUtil extends Logging {
   }
 
   def maxFrameSizeBytes(conf: CloudConf): Int = {
-    conf.getInt("cloud.akka.frameSize", 10) * 1024 * 1024
+    conf.getInt("cloud.akka.frameSize", 100) * 1024 * 1024
   }
 
   /** Space reserved for extra data in an Akka message besides serialized task or task result. */

@@ -108,9 +108,8 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   private def addJarToClassLoader(path: String) = {
     val uri = Utils.correctURI(path)
     val file = new File(uri.getPath)
-    // val file = new File(path)
-    println(uri)
     conf.classLoader.addURL(file.toURI.toURL)
+    logInfo(s"add $uri to ClassLoader successful!")
   }
 
   /**
@@ -223,6 +222,14 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     val workersJobsTreeNodeCache: TreeCache = new TreeCache(zk, Constant.JOBS_DIR)
     workersJobsTreeNodeCache.getListenable.addListener(workersJobsCacheListener)
     workersJobsTreeNodeCache.start()
+
+
+    //Watch jars in zkNode /cloud/jars
+    val jarsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JARS, true)
+    jarsCache.getListenable.addListener(jarsCacheListener)
+    jarsCache.start()
+
+
   }
 
   private def startZK() = {
@@ -264,11 +271,23 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED =>
-          println("WORKER ASSIGN CHILD_ADDED COME IN....." + new Date())
           processReceiveTask(event.getData.getPath)
         case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
-          println("WORKER ASSIGNCHILD_UPDATED COME IN....." + new Date())
           processReceiveTask(event.getData.getPath)
+        case _ =>
+      }
+    }
+  }
+
+  private[cloud] val jarsCacheListener = new PathChildrenCacheListener() {
+
+
+    override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
+      event.getType match {
+        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+          assginJarsToClassLoader(event.getData.getPath, jarDir)
+        case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
+          assginJarsToClassLoader(event.getData.getPath, jarDir)
         case _ =>
       }
     }
@@ -306,8 +325,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
-          val jarPath = "D:\\workspace\\cloud-parent\\datagrid\\target\\datagrid-1.0-SNAPSHOT-DistributedMaster.jar"
-          addJarToClassLoader(jarPath)
           val job = conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job])
           if (job != null && !job.getType.equalsIgnoreCase("stream")) {
             conf.schedule.schedule(job)
@@ -372,6 +389,20 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         case _ =>
       }
     }
+  }
+
+  //process jars form zk and add jars url to UrlClassLoader
+  private def assginJarsToClassLoader(path: String, dir: String): Unit = {
+    logInfo(s"received $path jar from zk")
+    val jarFileName = path.replace(Constant.JARS + "/", "")
+    val jarsByes = conf.zkNodeClient.readByte(path)
+    val fileDir = new File(dir)
+    if (!fileDir.exists() && !fileDir.isDirectory) {
+      fileDir.mkdirs()
+    }
+    val jarLocalFilePath = fileDir.getAbsolutePath + File.separator + jarFileName
+    val hasSave = Utils.writeBytesToFile(jarsByes, jarLocalFilePath)
+    if (hasSave) addJarToClassLoader(jarLocalFilePath)
   }
 
 
@@ -587,6 +618,8 @@ private[cloud] object Node extends Logging {
 
 
     zk.mkdir(Constant.BLOOM_FILTER_NODER)
+
+    zk.mkdir(Constant.JARS)
   }
 
   def initCache(cacheName: String, expiredTime: Long): LoadingCache[java.lang.String, java.lang.Long] = {

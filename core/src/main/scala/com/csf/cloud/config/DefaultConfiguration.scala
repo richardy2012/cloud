@@ -1,5 +1,7 @@
 package com.csf.cloud.config
 
+import java.io.File
+
 import scala.util.Try
 
 /**
@@ -21,4 +23,10 @@ trait DefaultConfiguration extends Configuration {
     * check for unique
     */
   lazy val checkSeparator: String = Try(config.getString("check.field.separator")).getOrElse("|")
+
+
+  /**
+    * jar dir
+    */
+  lazy val jarDir: String = Try(config.getString("jar.dir")).getOrElse(s".${File.separator}jars")
 }

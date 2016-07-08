@@ -145,6 +145,20 @@ private[cloud] object Utils extends Logging {
   }
 
 
+  def writeBytesToFile(byte: Array[Byte], filePath: String): Boolean = {
+    try {
+      val os = new FileOutputStream(filePath)
+      os.write(byte, 0, byte.length)
+      os.close()
+      logInfo(s"write file $filePath to filesystem successful")
+      true
+    } catch {
+      case e: Exception => logError("write file to filesystem failed!", e.getCause)
+        false
+    }
+  }
+
+
   /** Serialize via nested stream using specific serializer */
   def serializeViaNestedStream(os: OutputStream, ser: SerializerInstance)(
     f: SerializationStream => Unit): Unit = {
@@ -497,6 +511,13 @@ private[cloud] object Utils extends Logging {
       case _ => false
     }
   }
+
+  def inputStream2Bytes(is: InputStream): Array[Byte] = {
+    val bytes = (Iterator continually is.read takeWhile (-1 !=) map (_.toByte) toArray)
+    is.close()
+    bytes
+  }
+
 
   /**
     * Get the local machine's hostname.

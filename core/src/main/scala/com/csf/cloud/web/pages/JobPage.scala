@@ -95,7 +95,11 @@ private[web] class JobPage(parent: NodeWebUI) extends WebUIPage("job") {
           </div>
           <br/>
           <div class="input-group input-group-lg text_form_input">
-            <span class="input-group-addon">Job files upload:</span>
+            <span class="input-group-addon">Jar file upload:</span>
+            <input type="file" class="form-control" name="jarFile" placeholder="datagrid.jar" aria-describedby="sizing-addon1"/>
+          </div>
+          <div class="input-group input-group-lg text_form_input">
+            <span class="input-group-addon">Job file upload:</span>
             <input type="file" class="form-control" name="jobFile" placeholder="jobs.xml" aria-describedby="sizing-addon1"/>
           </div>
           <button type="submit" class="btn btn-default">Submit</button>

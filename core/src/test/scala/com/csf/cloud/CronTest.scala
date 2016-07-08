@@ -1,4 +1,4 @@
-package com.csf.cloud.util.zookeeper
+package com.csf.cloud
 
 import java.text.ParseException
 import java.util.{Calendar, Date, TimeZone}

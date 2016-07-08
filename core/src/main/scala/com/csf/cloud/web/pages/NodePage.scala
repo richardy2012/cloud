@@ -5,7 +5,7 @@ import javax.servlet.http.{Part, HttpServletRequest}
 import com.csf.cloud.deploy.node.NodeInfo
 import com.csf.cloud.entity.{Job, Msg}
 import com.csf.cloud.partition.DBRangePartition
-import com.csf.cloud.tool.JobUpload
+import com.csf.cloud.tool.{JarUpload, JobUpload}
 import com.csf.cloud.web.{JsonProtocol, NodeWebUI, WebUIPage, WebUIUtils}
 import org.apache.commons.fileupload.FileUpload
 import org.apache.commons.fileupload.servlet.ServletFileUpload
@@ -69,12 +69,18 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
       if (!com.csf.cloud.deploy.node.Node.haveActivedWorkers(NodeWebUI._conf)) {
         msg.setCode(-1)
         msg.setMessage("Please submit later,Workers is starting...")
-      }else{
+      } else {
         val isMultipart = ServletFileUpload.isMultipartContent(request)
         if (isMultipart) {
+          val jarPart = request.getPart("jarFile")
+          val jarFileName = getFileName(jarPart)
+          if (jarFileName != null && !"".equalsIgnoreCase(jarFileName.trim))
+            msg = JarUpload.submitJarFile(jarPart.getInputStream, jarFileName, NodeWebUI._conf)
+
           val part = request.getPart("jobFile")
           val fileName = getFileName(part)
-          msg = JobUpload.submitJobFile(part.getInputStream, fileName, NodeWebUI._conf)
+          if (fileName != null && !"".equalsIgnoreCase(fileName.trim))
+            msg = JobUpload.submitJobFile(part.getInputStream, fileName, NodeWebUI._conf)
         } else {
           if (name != null && !name.trim.equalsIgnoreCase("") || logical != null && logical.trim.equalsIgnoreCase("")) {
             val job = new Job()

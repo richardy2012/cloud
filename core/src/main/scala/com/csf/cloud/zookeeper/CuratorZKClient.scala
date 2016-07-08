@@ -144,6 +144,11 @@ private[cloud] class CuratorZKClient(
     deserializeFromFile(path)
   }
 
+
+  override def readByte(path: String): Array[Byte] = {
+    client.getData().forPath(path)
+  }
+
   /**
     * Gives all objects, matching a prefix. This defines how objects are
     * read/deserialized back.

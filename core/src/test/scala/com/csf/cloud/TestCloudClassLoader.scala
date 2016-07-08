@@ -1,4 +1,4 @@
-package com.csf.cloud.util.zookeeper
+package com.csf.cloud
 
 import java.io.File
 import java.net.URL
@@ -12,7 +12,8 @@ import com.csf.cloud.web.NodeWebUI
   * Created by soledede.weng on 2016/7/7.
   */
 private[cloud] object TestCloudClassLoader {
-
+  //val path = "D:\\workspace\\jars\\datagrid-1.0-SNAPSHOT-DistributedMaster.jar"
+  //val path = "D:\\workspace\\jars\\datagrid.jar"
   val path = "D:\\workspace\\cloud-parent\\datagrid\\target\\datagrid-1.0-SNAPSHOT-DistributedMaster.jar"
   val conf = new CloudConf()
   conf.init()
