@@ -38,7 +38,7 @@ public class HttpClientTest {
         StreamDataTest obj = new StreamDataTest();
         obj.setJobName("job3");
         List<String> keys = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 5; i++) {
             keys.add("key" + i);
         }
         obj.setData(keys);
