@@ -1,5 +1,6 @@
 package com.csf.cloud.deploy.node
 
+import java.io.File
 import java.util
 import java.util.Date
 import java.util.concurrent.{Future, TimeUnit}
@@ -57,6 +58,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   val consumerManageThreadPool = Utils.newDaemonFixedThreadPool(currentThreadsNum, "task_thread_excutor")
 
 
+  Thread.currentThread.setContextClassLoader(conf.classLoader)
+
+
+
+
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
       while (!newState.isConnected) {
@@ -96,6 +102,15 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
     if (jobNameToTask.isEmpty) Thread.sleep(10 * 1000)
 
+  }
+
+
+  private def addJarToClassLoader(path: String) = {
+    val uri = Utils.correctURI(path)
+    val file = new File(uri.getPath)
+    // val file = new File(path)
+    println(uri)
+    conf.classLoader.addURL(file.toURI.toURL)
   }
 
   /**
@@ -291,9 +306,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       event.getType match {
         case PathChildrenCacheEvent.Type.CHILD_ADDED => try {
           val path = event.getData.getPath
-
+          val jarPath = "D:\\workspace\\cloud-parent\\datagrid\\target\\datagrid-1.0-SNAPSHOT-DistributedMaster.jar"
+          addJarToClassLoader(jarPath)
           val job = conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job])
-          if (job != null && !job.getType.equalsIgnoreCase("stream")){
+          if (job != null && !job.getType.equalsIgnoreCase("stream")) {
             conf.schedule.schedule(job)
             logInfo(s"add  job $path for timer schedule!")
           }
@@ -307,7 +323,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
           val path = event.getData.getPath
 
           val job = conf.zkNodeClient.read(path).getOrElse(null.asInstanceOf[Job])
-          if (job != null && !job.getType.equalsIgnoreCase("stream")){
+          if (job != null && !job.getType.equalsIgnoreCase("stream")) {
             conf.schedule.deleteJob(job)
             logInfo(s"delete  job $path for timer schedule!")
           }
@@ -369,13 +385,13 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
               logInfo(s"tree node workers jobs removed: ${path}")
               if (Node.isLeader.get())
                 conf.dagSchedule.deleteJob(job) //delete job from DAG
-                name2Job.remove(job.getName)
+              name2Job.remove(job.getName)
             case "add" =>
               logInfo(s"tree node  workers jobs added: ${path}")
               if (Node.isLeader.get())
                 conf.dagSchedule.addJob(job) //add job from DAG
-                //cache Map(name->job) to local worker
-                name2Job(job.getName) = job
+              //cache Map(name->job) to local worker
+              name2Job(job.getName) = job
             case _ =>
           }
 
@@ -498,14 +514,14 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
           if (numPerPartition > 0 || mod > 0) {
             val taskDataList = new util.ArrayList[Object]()
             if (mod == 0) {
-              for (j <- numPerPartition * (i - 1) until numPerPartition*i) {
+              for (j <- numPerPartition * (i - 1) until numPerPartition * i) {
                 taskDataList.add(dataList.get(j))
               }
             } else if (mod > 0 && numPerPartition == 0) {
-              taskDataList.add(dataList.get(i-1))
+              taskDataList.add(dataList.get(i - 1))
             } else if (mod > 0 && numPerPartition > 0) {
 
-              for (j <- numPerPartition * (i - 1) until numPerPartition*i) {
+              for (j <- numPerPartition * (i - 1) until numPerPartition * i) {
                 if (index > 0) {
                   taskDataList.add(dataList.get(dataList.size() - index))
                   index -= 1

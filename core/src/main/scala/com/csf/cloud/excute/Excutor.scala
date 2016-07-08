@@ -84,7 +84,7 @@ private[cloud] object Excutor extends Logging {
   private def getExcutorInstanceByReflect(className: String, conf: CloudConf): Excutor = {
     var excutor: Excutor = null
     try {
-      val con = Class.forName(className).getDeclaredConstructors
+      val con = Thread.currentThread.getContextClassLoader.loadClass(className).getDeclaredConstructors
       if (con.length > 0) {
         breakable {
           for (c <- 0 to con.length - 1) {
@@ -100,7 +100,7 @@ private[cloud] object Excutor extends Logging {
           }
         }
       } else {
-        excutor = Class.forName(className).newInstance().asInstanceOf[Excutor]
+        excutor = Thread.currentThread.getContextClassLoader.loadClass(className).newInstance().asInstanceOf[Excutor]
       }
 
       //excutor = .newInstance().asInstanceOf[Excutor]

@@ -1,5 +1,6 @@
 package com.csf.cloud.config
 
+import java.net.{URLClassLoader, URL}
 import java.util.concurrent.ConcurrentHashMap
 
 import com.csf.cloud.bloomfilter.mutable.BloomFilter
@@ -17,7 +18,7 @@ import com.csf.cloud.serializer.{JavaSerializer, Serializer}
 import com.csf.cloud.timer.ZkJobManager
 import com.csf.cloud.timer.schedule.trigger.{CronTrigger, Trigger}
 import com.csf.cloud.timer.schedule.{DAGSchedule, DefaultSchedule, Schedule}
-import com.csf.cloud.util.{Logging, Utils}
+import com.csf.cloud.util.{CloudClassLoader, Logging, Utils}
 import com.csf.cloud.zookeeper.ZKClient
 import org.apache.curator.RetryPolicy
 import org.apache.curator.retry.ExponentialBackoffRetry
@@ -84,6 +85,10 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   private[cloud] var jobTaskTraceListener: TraceListener = _
 
 
+  //classloader
+  private[cloud] var classLoader: CloudClassLoader = _
+
+
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
     this.zkClient = ZKClient(this)
@@ -109,6 +114,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     this.zkRecovery = new ZookeeperRecovery(this)
 
     this.jobTaskTraceListener = new JobTaskTraceListener(this)
+
+    this.classLoader = new CloudClassLoader(new Array[URL](0),Thread.currentThread.getContextClassLoader)
 
   }
 

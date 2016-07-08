@@ -11,7 +11,7 @@ import com.csf.cloud.deploy.node.Node
 object DeployAllpication {
 
   def main(args: Array[String]) {
-    boot();
+    boot()
   }
 
   def boot()={
