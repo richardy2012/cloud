@@ -1,5 +1,6 @@
 package com.csf.cloud.partition;
 
+import java.io.ObjectInput;
 import java.io.Serializable;
 
 /**
@@ -10,6 +11,7 @@ public class Task implements Serializable {
     private Integer state;
     private Long startTime;
     private Long endTime;
+    private Object data;
 
     public Task() {
     }
@@ -53,6 +55,13 @@ public class Task implements Serializable {
         this.endTime = endTime;
     }
 
+    public Object getData() {
+        return data;
+    }
+
+    public void setData(Object data) {
+        this.data = data;
+    }
 
     @Override
     public boolean equals(Object o) {

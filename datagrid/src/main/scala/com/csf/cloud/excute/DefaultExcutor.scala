@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.csf.cloud.context.ApplicationContextBuilder
 import com.csf.cloud.dao.BaseDao
 import com.csf.cloud.entity.Job
+import com.csf.cloud.partition.Task
 import com.csf.cloud.service.Service
 import com.csf.cloud.util.{Constant, BizException}
 import com.google.common.cache.{CacheLoader, CacheBuilder}
@@ -126,9 +127,10 @@ private[cloud] abstract class DefaultExcutor[T] extends Excutor {
   }
 
   @throws(classOf[Exception])
-  override def excute(): Unit = {
+  override def excute(task: Task): Task = {
     // init()
     service()
+    task
   }
 
   @throws(classOf[Exception])

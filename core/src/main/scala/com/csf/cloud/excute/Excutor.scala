@@ -26,14 +26,15 @@ private[cloud] abstract class Excutor extends Logging {
   }
 
   @throws(classOf[Exception])
-  def excute(): Unit
+  def excute(task: Task): Task
 
   @throws(classOf[Exception])
-  def start(task: Task): Unit = {
+  def start(task: Task): Task = {
     //pre process
     logInfo(s"current partition number: ${this.job.getPartition.getPartitionNum}")
-    excute()
+    excute(task)
     //post process
+    task
   }
 }
 
