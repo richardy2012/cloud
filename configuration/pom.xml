@@ -653,7 +653,7 @@
 
 		<!-- 默认采用的plugin -->
 		<plugins>
-			<plugin>
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -663,15 +663,15 @@
 					<target>1.8</target>
 					<verbose>true</verbose>
 				</configuration>
-			</plugin>
-			<plugin>
+			</plugin>-->
+			<!--<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>2.5</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 				</configuration>
-			</plugin>
+			</plugin>-->
 
 		</plugins>
 

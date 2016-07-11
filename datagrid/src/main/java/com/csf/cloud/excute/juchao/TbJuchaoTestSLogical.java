@@ -34,7 +34,7 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
 
 
     @Override
-    public void service() throws Exception{
+    public void service() throws Exception {
         try {
             Calendar c = Calendar.getInstance();
             c.setTime(new Date());
@@ -43,7 +43,7 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
             Date currentDate = new Date();
             System.out.println("last time:" + date1 + "\t current Time" + currentDate);
 
-            System.out.println("excutor service...current Thread:"+Thread.currentThread().getId()+"excutor:"+this.job().getPartition().getPartitionNum());
+            System.out.println("excutor service...current Thread:" + Thread.currentThread().getId() + "excutor:" + this.job().getPartition().getPartitionNum());
             //test for oracle mybatis
             this.bizService().fetchJuchaoDataService(date1, currentDate);
             //test for mongo
@@ -58,8 +58,10 @@ public class TbJuchaoTestSLogical extends DefaultExcutor<TbJuchaoTestSService> {
             saveDog.setId("test_id");
             this.bizService().saveDog(saveDog);
 
-            this.bizService().findDogs().forEach(d -> System.out.println(d.toString()));
-
+            List<Dog> dogs = this.bizService().findDogs();
+            for (Dog dog : dogs) {
+                System.out.println(dog.toString());
+            }
 
             //test update
             Dog dog = this.bizService().findDog();

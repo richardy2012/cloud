@@ -427,30 +427,4 @@
         </plugin>
     </plugins>
     </build>
-
-    <pluginRepositories>
-    <pluginRepository>
-        <id>nexus</id>
-        <url>http://192.168.0.221:8081/nexus/content/groups/public/</url>
-        <releases>
-            <enabled>true</enabled>
-        </releases>
-        <snapshots>
-            <enabled>true</enabled>
-        </snapshots>
-    </pluginRepository>
-    </pluginRepositories>
-
-    <distributionManagement>
-        <repository>
-            <id>releases</id>
-            <url>http://192.168.0.221:8081/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <url>http://192.168.0.221:8081/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-
-    </distributionManagement>
-
 </project>

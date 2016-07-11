@@ -9,3 +9,4 @@ core/*.iml
 datagrid/*.iml
 cloud-parent.iml
 core/core.iml
+*.log
