@@ -10,3 +10,8 @@ datagrid/*.iml
 cloud-parent.iml
 core/core.iml
 *.log
+*.project
+*.settings
+core/.classpath
+core/.settings
+.classpath
