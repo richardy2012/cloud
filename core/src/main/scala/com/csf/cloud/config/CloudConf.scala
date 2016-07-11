@@ -3,10 +3,11 @@ package com.csf.cloud.config
 import java.net.{URLClassLoader, URL}
 import java.util.concurrent.ConcurrentHashMap
 
+import akka.actor.ActorRef
 import com.csf.cloud.bloomfilter.mutable.BloomFilter
 import com.csf.cloud.check.{DefaultCheck, Check}
 import com.csf.cloud.deploy.master.Master
-import com.csf.cloud.deploy.node.Node
+import com.csf.cloud.deploy.node.{NodeActor, Node}
 import com.csf.cloud.entity.Job
 import com.csf.cloud.excute.ExcutorManager
 import com.csf.cloud.graph.JobGraph
@@ -88,6 +89,8 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
   //classloader
   private[cloud] var classLoader: CloudClassLoader = _
 
+  private[cloud] var nodeActor: ActorRef = _
+
 
   private[cloud] def init() = {
     this.zkRetry = new ExponentialBackoffRetry(this.getInt("zookeeper.retryInterval", zkRetryInterval), this.getInt("zookeeper.retryAttempts", zkRetryAttemptsCount))
@@ -115,7 +118,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
 
     this.jobTaskTraceListener = new JobTaskTraceListener(this)
 
-    this.classLoader = new CloudClassLoader(new Array[URL](0),Thread.currentThread.getContextClassLoader)
+    this.classLoader = new CloudClassLoader(new Array[URL](0), Thread.currentThread.getContextClassLoader)
 
   }
 
@@ -123,7 +126,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     if (this.queue == null) {
       this.synchronized {
         if (this.queue == null)
-          this.queue = new ZookeeperDistributeQueue(this,Some("consumer"))
+          this.queue = new ZookeeperDistributeQueue(this, Some("consumer"))
       }
     }
   }
@@ -132,7 +135,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     if (this.nodeQueue == null) {
       this.synchronized {
         if (this.nodeQueue == null)
-          this.nodeQueue = new ZookeeperDistributeQueue(this,Some("producter"))
+          this.nodeQueue = new ZookeeperDistributeQueue(this, Some("producter"))
       }
     }
   }
@@ -148,6 +151,7 @@ private[cloud] class CloudConf(loadDefaults: Boolean) extends Cloneable with Log
     settings.put(key, value)
     this
   }
+
 
   def readConfigFromZookeeper(): CloudConf = {
     //new zkclient

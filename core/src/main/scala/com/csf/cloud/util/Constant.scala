@@ -76,4 +76,7 @@ private[cloud] object Constant extends ZookeeperConfiguration {
   //jobs file for zookeeper
   final val ZK_FILE = "/file"
 
+  //akka remote address
+  final val ZK_AKKA = "/akka"
+
 }

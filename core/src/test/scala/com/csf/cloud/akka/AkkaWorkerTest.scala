@@ -14,8 +14,8 @@ import com.csf.cloud.util.{Utils, Logging}
 private[cloud] class AkkaWorkerTest extends Actor with ActorActorReceive with Logging {
   var testMaster: ActorSelection = null
   val remoteAkkaUrl = "akka.tcp://%s@%s:%s/user/%s".format("testMasterSystem", "127.0.0.1", 10000, "testMaster")
-  //val filePath = "D:\\workspace\\cloud-parent\\datagrid\\target\\datagrid-1.0-SNAPSHOT-DistributedMaster.jar"
-  val filePath = "D:\\report_data2.txt"
+  val filePath = "D:\\workspace\\cloud-parent\\datagrid\\target\\datagrid-1.0-SNAPSHOT-DistributedMaster.jar"
+  //val filePath = "D:\\report_data2.txt"
 
   override def preStart(): Unit = {
     testMaster = context.actorSelection(remoteAkkaUrl)
@@ -28,7 +28,7 @@ private[cloud] class AkkaWorkerTest extends Actor with ActorActorReceive with Lo
       testMaster ! Jar("datagrid",ByteString.fromArray(Utils.serializeStreamToBytes(in)))
       testMaster ! "hello"
       println("send datastrem successful")
-  }
+  };
 }
 
 private[cloud] object AkkaWorkerTest {

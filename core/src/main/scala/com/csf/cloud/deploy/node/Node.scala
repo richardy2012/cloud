@@ -1,12 +1,16 @@
 package com.csf.cloud.deploy.node
 
-import java.io.File
+import java.io.{InputStream, File}
 import java.util
 import java.util.Date
 import java.util.concurrent.{Future, TimeUnit}
 import java.util.concurrent.atomic.AtomicBoolean
 
+import akka.actor.{ActorRef, Props, ActorSystem, Actor}
+import akka.actor.Actor.Receive
 import com.alibaba.fastjson.JSON
+import com.csf.cloud.akka.{AkkaUtil, ActorActorReceive}
+import com.csf.cloud.akka.CaseObjects.{InitJars, Jar}
 import com.csf.cloud.clock.CloudTimerWorker
 import com.csf.cloud.config.{CloudConf, DefaultConfiguration}
 import com.csf.cloud.deploy.master.Master
@@ -64,6 +68,8 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
 
   zk.getConnectionStateListenable().addListener(new ConnectionStateListener {
+
+
     override def stateChanged(client: CuratorFramework, newState: ConnectionState): Unit = {
       while (!newState.isConnected) {
         Node.nodeStarted.compareAndSet(true, false)
@@ -71,8 +77,10 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       }
       Node.nodeStarted.compareAndSet(false, true)
       init
+      loadExtenalJars()
       boostrapTmpNodeToZk
       logInfo(s"Node $WORKER_PREFIX${Node.nodeId} Started.")
+
       watchs()
       sendHeartbeat()
     }
@@ -84,6 +92,12 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     webUi = new NodeWebUI(conf, conf.getInt("webui.port", webUiPort))
     webUi.bind()
   }
+
+
+  private def loadExtenalJars() = {
+    conf.nodeActor ! InitJars
+  }
+
 
   //In local worker by future
   def checkTaskStatus(): Unit = {
@@ -105,7 +119,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 
 
-  private def addJarToClassLoader(path: String) = {
+   def addJarToClassLoader(path: String) = {
     val uri = Utils.correctURI(path)
     val file = new File(uri.getPath)
     conf.classLoader.addURL(file.toURI.toURL)
@@ -225,9 +239,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
 
     //Watch jars in zkNode /cloud/jars
-    val jarsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JARS, true)
-    jarsCache.getListenable.addListener(jarsCacheListener)
-    jarsCache.start()
+    /* val jarsCache: PathChildrenCache = new PathChildrenCache(zk, Constant.JARS, true)
+     jarsCache.getListenable.addListener(jarsCacheListener)
+     jarsCache.start()*/
 
 
   }
@@ -279,19 +293,19 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     }
   }
 
-  private[cloud] val jarsCacheListener = new PathChildrenCacheListener() {
+  /*  private[cloud] val jarsCacheListener = new PathChildrenCacheListener() {
 
 
-    override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
-      event.getType match {
-        case PathChildrenCacheEvent.Type.CHILD_ADDED =>
-          assginJarsToClassLoader(event.getData.getPath, jarDir)
-        case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
-          assginJarsToClassLoader(event.getData.getPath, jarDir)
-        case _ =>
+      override def childEvent(client: CuratorFramework, event: PathChildrenCacheEvent): Unit = {
+        event.getType match {
+          case PathChildrenCacheEvent.Type.CHILD_ADDED =>
+            assginJarsToClassLoader(event.getData.getPath, jarDir)
+          case PathChildrenCacheEvent.Type.CHILD_UPDATED =>
+            assginJarsToClassLoader(event.getData.getPath, jarDir)
+          case _ =>
+        }
       }
-    }
-  }
+    }*/
 
 
   private[cloud] val jobUniqueNameListener = new PathChildrenCacheListener() {
@@ -405,6 +419,17 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     if (hasSave) addJarToClassLoader(jarLocalFilePath)
   }
 
+  //process jars form zk and add jars url to UrlClassLoader
+  def assginJarsToClassLoader(name: String, is: InputStream): Unit = {
+    logInfo(s"received $name jar from Akka")
+    val fileDir = new File(jarDir)
+    if (!fileDir.exists() && !fileDir.isDirectory) {
+      fileDir.mkdirs()
+    }
+    val jarLocalFilePath = fileDir.getAbsolutePath + File.separator + name
+    val hasSave = Utils.writeInputStreamToFile(is, jarLocalFilePath)
+    if (hasSave) addJarToClassLoader(jarLocalFilePath)
+  }
 
   def jobsChanges(path: String, source: String): Unit = {
     val pathArray = path.split("/")
@@ -590,7 +615,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 }
 
-private[cloud] object Node extends Logging {
+private[cloud] object Node extends Logging with DefaultConfiguration {
   //check if this node is a leader
   var isLeader = new AtomicBoolean(false)
   var nodeStarted = new AtomicBoolean(false)
@@ -600,6 +625,7 @@ private[cloud] object Node extends Logging {
 
   val _jobPath = "^/status/([0-9|a-z]+)$".r
   val jobNameMatch = "^/status/([0-9|a-z]+)/\\w+$".r
+
 
   def bootstrap(zk: ZKClient) = {
     zk.mkdir(Constant.JOBS_DIR)
@@ -619,7 +645,7 @@ private[cloud] object Node extends Logging {
 
     zk.mkdir(Constant.BLOOM_FILTER_NODER)
 
-    zk.mkdir(Constant.JARS)
+    //zk.mkdir(Constant.JARS)
   }
 
   def initCache(cacheName: String, expiredTime: Long): LoadingCache[java.lang.String, java.lang.Long] = {
@@ -668,6 +694,7 @@ private[cloud] object Node extends Logging {
 
     logWarning(s"worker${path} is lost")
   }
+
 
   def main(args: Array[String]) {
     for (i <- 1 until 2) {

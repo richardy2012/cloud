@@ -158,6 +158,25 @@ private[cloud] object Utils extends Logging {
     }
   }
 
+  def writeInputStreamToFile(is: InputStream, filePath: String): Boolean = {
+    var fos: FileOutputStream = null
+    try {
+      fos = new FileOutputStream(filePath)
+      var b = new Array[Byte](1024)
+      while ((is.read(b)) != -1) {
+        fos.write(b)
+      }
+      logInfo(s"write file $filePath to filesystem successful")
+      true
+    } catch {
+      case e: Exception => logError("write file to filesystem failed!", e.getCause)
+        false
+    } finally {
+      is.close()
+      fos.close()
+    }
+  }
+
 
   /** Serialize via nested stream using specific serializer */
   def serializeViaNestedStream(os: OutputStream, ser: SerializerInstance)(

@@ -14,6 +14,15 @@ private[cloud] object CaseObjects {
 
   case class Jar(fileName: String, data: ByteString) extends CaseObjects
 
+  case class LoadJar(address: Seq[String], fileName: String, data: ByteString) extends CaseObjects
+
+  case class RemoteJars() extends CaseObjects
+
+  //get remote jars
+  case class Jars(seqJars: Seq[(String, ByteString)]) extends CaseObjects
+
+  case class InitJars() extends CaseObjects
+
   case class Start() extends CaseObjects
 
 

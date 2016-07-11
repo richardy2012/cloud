@@ -2,6 +2,8 @@ package com.csf.cloud.config
 
 import java.io.File
 
+import com.csf.cloud.util.Utils
+
 import scala.util.Try
 
 /**
@@ -29,4 +31,11 @@ trait DefaultConfiguration extends Configuration {
     * jar dir
     */
   lazy val jarDir: String = Try(config.getString("jar.dir")).getOrElse(s".${File.separator}jars")
+
+  /**
+    * Akka Actor
+    *
+    */
+  lazy val akkaHost: String = Try(config.getString("akka.host")).getOrElse(Utils.localHostName())
+  lazy val akkaPort = Try(config.getInt("akka.port")).getOrElse(10000)
 }
