@@ -8,6 +8,7 @@ import java.nio.channels.Channels
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.text.SimpleDateFormat
+import java.util.Properties
 import java.util.concurrent._
 import javax.net.ssl.HttpsURLConnection
 
@@ -15,6 +16,7 @@ import com.csf.cloud.config.CloudConf
 import com.csf.cloud.serializer.{DeserializationStream, SerializationStream, Serializer, SerializerInstance}
 
 import scala.annotation.tailrec
+import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
@@ -30,6 +32,10 @@ import org.apache.log4j.PropertyConfigurator
 import org.eclipse.jetty.util.MultiException
 import org.json4s._
 import org.slf4j.Logger
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.asScalaSet
+import scala.collection.JavaConversions.enumerationAsScalaIterator
+import scala.collection.JavaConversions.propertiesAsScalaMap
 
 
 /**
@@ -228,6 +234,47 @@ private[cloud] object Utils extends Logging {
     }
   }
 
+  def loadDefaultProperties(conf: CloudConf, filePath: String = null): String = {
+    val path = Option(filePath).getOrElse(getDefaultPropertiesFile())
+    Option(path).foreach { confFile =>
+      getPropertiesFromFile(confFile).filter {
+        case (k, v) =>
+          k.startsWith("cloud.")
+      }.foreach {
+        case (k, v) =>
+          conf.setIfMissing(k, v)
+          sys.props.getOrElseUpdate(k, v)
+      }
+    }
+    path
+  }
+
+  def getPropertiesFromFile(filename: String): Map[String, String] = {
+    val file = new File(filename)
+    require(file.exists(), s"Properties file $file does not exist")
+    require(file.isFile(), s"Properties file $file is not a normal file")
+
+    val inReader = new InputStreamReader(new FileInputStream(file), "UTF-8")
+    try {
+      val properties = new Properties()
+      properties.load(inReader)
+      properties.stringPropertyNames().map(k => (k, properties(k).trim)).toMap
+    } catch {
+      case e: IOException =>
+        throw new CloudException(s"Failed when loading Cloud properties from $filename", e)
+    } finally {
+      inReader.close()
+    }
+  }
+
+  def getDefaultPropertiesFile(env: Map[String, String] = sys.env): String = {
+    env.get("CLOUD_CONF_DIR")
+      .orElse(env.get("CLOUD_HOME").map { t => s"$t${File.separator}conf" })
+      .map { t => new File(s"$t${File.separator}application.conf") }
+      .filter(_.isFile)
+      .map(_.getAbsolutePath)
+      .orNull
+  }
 
   /**
     * Get the ClassLoader which loaded Cloud.

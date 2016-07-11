@@ -11,11 +11,13 @@ import com.csf.cloud.deploy.node.{NodeActor, Node}
 object DeployAllpication {
 
   def main(args: Array[String]) {
-    boot()
+    boot(args)
   }
 
-  def boot() = {
+  def boot(args: Array[String]) = {
     val conf = CloudConf.get()
+    val deployArgs = new DeployArguments(args, conf)
+    conf.set("zookeeper.connectionString", deployArgs.zk)
     //read config from zk and set it to conf
     conf.readConfigFromZookeeper()
     //init
