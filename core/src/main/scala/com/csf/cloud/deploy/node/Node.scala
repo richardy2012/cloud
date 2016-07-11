@@ -197,7 +197,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     * Report node's resource,eg: cpu usage ratio, memory usage ratio
     */
   private def sendHeartbeat() = {
-    new CloudTimerWorker(name = "timerPeriodHeartbeat", interval = 500, callback = () => sendHeartbeatToZK()).startUp()
+    new CloudTimerWorker(name = "timerPeriodHeartbeat", interval = 800, callback = () => sendHeartbeatToZK()).startUp()
   }
 
   private def sendHeartbeatToZK(): Long = {
