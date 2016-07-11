@@ -161,7 +161,10 @@ public class ResourseTool {
 
 
                 System.out.println("CPU idle : " + cpuIdle);
-                Float idle = new Float(cpuIdle.substring(0, cpuIdle.indexOf("%")));
+                Float idle = null;
+                if(cpuIdle.contains("%"))
+                    idle  = new Float(cpuIdle.substring(0, cpuIdle.indexOf("%")));
+                else idle = new Float(cpuIdle);
 
                 return (1 - idle / 100);
             }
