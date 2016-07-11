@@ -7,6 +7,6 @@ import com.csf.cloud.deploy.DeployAllpication;
  */
 public class Boot {
     public static void main(String[] args) {
-        DeployAllpication.boot();
+        DeployAllpication.boot(args);
     }
 }

@@ -160,7 +160,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     val tasks = partition.getTasks
     val finshedTasks = tasks.filter(_.getState == TaskState.FINISHED)
     if (allTasks == finshedTasks.size) {
-      //job finished,Move to local cach completedJobNames with 10 minutes
+      //job finished,Move to local cache completedJobNames with 10 minutes
       completedJobNames.put(job.getName, 1L)
       _jobs(job.getName).setState(JobState.FINISHED)
       _jobs(job.getName).setEndTime(System.currentTimeMillis())
