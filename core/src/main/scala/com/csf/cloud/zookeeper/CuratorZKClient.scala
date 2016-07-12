@@ -163,7 +163,8 @@ private[cloud] class CuratorZKClient(
   }
 
   private def deserializeFromFile[T](path: String)(implicit m: ClassTag[T]): Option[T] = {
-    val fileData = client.getData().forPath(path)
+    val   fileData = client.getData().forPath(path)
+    if(fileData==null || fileData.size==0) return None
     try {
       Some(conf.serializer.newInstance().deserialize[T](ByteBuffer.wrap(fileData)))
     } catch {
