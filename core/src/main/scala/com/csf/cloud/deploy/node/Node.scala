@@ -19,6 +19,7 @@ import com.csf.cloud.entity.{Job, JobState, TaskState}
 import com.csf.cloud.excute.runner.ExcutorRunner
 import com.csf.cloud.listener.{JobFinished, JobRunning, JobTaskTraceListener, TaskFinished}
 import com.csf.cloud.partition.Task
+import com.csf.cloud.recovery.ZookeeperRecovery
 import com.csf.cloud.resource.ResourseTool
 import com.csf.cloud.util.{Constant, Logging, Utils}
 import com.csf.cloud.web.NodeWebUI
@@ -708,6 +709,9 @@ private[cloud] object Node extends Logging with DefaultConfiguration {
     //move /root/jobs/deadworkerxxx/jobname...  to /root/jobs/activeworkerxxx/jobname...
     // for trigger in new worker
     moveJobsWorker2Worker(nodeIdPath.replace("/", ""), conf)
+
+    //reassign task for worker,moving tasks from dead worker to active worker
+    ZookeeperRecovery.reassignTasks(nodeIdPath.replace("/", ""), conf)
 
 
   }

@@ -31,6 +31,9 @@ private[cloud] class Master(
   conf.listenerWaiter.addListener(conf.jobTaskTraceListener)
   conf.listenerWaiter.start()
 
+  @volatile var exit = false
+  var thread: Thread = _
+
   // Watch list of workers
   // conf.get(Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR_KEY, Constant.CLOUD_DEPLOY_ZOOKEEPER_DIR)
   private var workersCache: PathChildrenCache = _
@@ -45,6 +48,7 @@ private[cloud] class Master(
     Node.isLeader.compareAndSet(false, true)
     val state = "ALIVE"
     logInfo("I have been elected leader! New state: " + state)
+    exit = true
     init
     watchs()
     //recovery
@@ -63,7 +67,9 @@ private[cloud] class Master(
     conf.zkRecovery.reBlanceJobsInCluster(workerIds, jobWorkerIds)
 
 
-
+    //reassign task for workers,moving tasks from dead workers to active workers
+    val assignWorkerIds = conf.zkClient.getChildren(Constant.ASSIGN)
+    conf.zkRecovery.reAssignJobs(workerIds, assignWorkerIds)
 
     //recieve jobs from distribute queue
     processJob()
@@ -91,18 +97,18 @@ private[cloud] class Master(
 
 
   private def processJob() = {
-    val thread = new Thread("receive and assgin job to nodes") {
+    thread = new Thread("receive and assgin job to nodes") {
       setDaemon(true)
 
       override def run(): Unit = {
         checkAndAssginJob
       }
-    }.start()
-
+    }
+    thread.start()
   }
 
   private def checkAndAssginJob() = {
-    while (true) {
+    while (!exit) {
       val jobReceive = conf.queue.take()
       val job = jobReceive.clone()
       job.setState(JobState.STARTED)
@@ -209,12 +215,15 @@ private[cloud] class Master(
 
   override def revokedLeadership(): Unit = {
     Node.isLeader.compareAndSet(false, true)
+    exit = false
     logError("Leadership has been revoked -- master shutting down.")
     CloseableUtils.closeQuietly(workersCache)
     CloseableUtils.closeQuietly(resourcesWorkersCache)
 
     CloseableUtils.closeQuietly(zk)
+    thread.join()
     System.exit(0)
+
   }
 
 

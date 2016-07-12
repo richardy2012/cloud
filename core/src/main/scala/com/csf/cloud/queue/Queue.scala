@@ -12,6 +12,8 @@ private[cloud] abstract class Queue[T: ClassTag](conf: CloudConf)extends Logging
 
   def put(obj: T): Unit
 
+  def putLocal(obj: T):Unit
+
   def take(): T
 
 }

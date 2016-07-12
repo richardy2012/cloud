@@ -17,9 +17,19 @@ private[cloud] trait MasterRecovery {
 
   /**
     * move jobs from dead workers to active workers
+    *
     * @param workerIds
     * @param jobsWorkerIds
     */
   def reBlanceJobsInCluster(workerIds: Seq[String], jobsWorkerIds: Seq[String])
+
+  /**
+    * reassign task for workers,moving tasks from dead workers to active workers
+    *
+    * @param workerIds
+    * @param assignWorkerIds
+    * @return
+    */
+  def reAssignJobs(workerIds: Seq[String], assignWorkerIds: Seq[String])
 
 }

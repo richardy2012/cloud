@@ -26,7 +26,11 @@ private[cloud] class ZookeeperDistributeQueue[T: ClassTag](conf: CloudConf,queue
 
   override def take(): T = if (consumer != null) consumer.take() else null.asInstanceOf[T]
 
-
+  override def putLocal(obj: T): Unit = {
+    if (consumer != null) {
+      consumer.getLinkedQueue().put(obj)
+    }
+  }
 }
 
 

@@ -30,6 +30,8 @@ private[cloud] class DistributedQueueConsumer[T: ClassTag](conf: CloudConf, path
     linkedQueue.take()
   }
 
+  def getLinkedQueue() = linkedQueue
+
   override def start() = queue.start()
 
   override def stop() = queue.close()

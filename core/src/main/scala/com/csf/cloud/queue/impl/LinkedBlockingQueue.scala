@@ -21,4 +21,6 @@ private[cloud] class LinkedBlockingQueue[T: ClassTag](conf: CloudConf, blockLeng
   override def put(obj: T): Unit = this.itemBlockingQueue.put(obj)
 
   override def take(): T = this.itemBlockingQueue.take()
+
+  override def putLocal(obj: T): Unit = ???
 }
