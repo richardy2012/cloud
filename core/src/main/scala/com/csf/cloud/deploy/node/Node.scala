@@ -715,7 +715,7 @@ private[cloud] object Node extends Logging with DefaultConfiguration {
 
     //move /root/jobs/deadworkerxxx/jobname...  to /root/jobs/activeworkerxxx/jobname...
     // for trigger in new worker
-    moveJobsWorker2Worker(nodeIdPath.replace("/", ""), conf)
+    moveJobsWorker2Worker(nodeIdPath.replace("/", ""), Set[String](nodeIdPath), conf)
 
     //reassign task for worker,moving tasks from dead worker to active worker
     ZookeeperRecovery.reassignTasks(nodeIdPath.replace("/", ""), conf)

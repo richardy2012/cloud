@@ -61,7 +61,7 @@ private[cloud] class ZkJobManager(conf: CloudConf) extends JobManager with Loggi
       msg.setMessage(s"jobname ${job.getName} must be unique!")
       msg.setData(job.getName)
     } else {
-      ZkJobManager.submitToZk(job, zk)
+      ZkJobManager.submitToZk(job, zk, null)
       //job ready
       job.setState(JobState.READY)
       conf.listenerWaiter.post(JobReady(job))
@@ -82,7 +82,7 @@ private[cloud] object ZkJobManager extends Logging {
     *
     * @param job
     */
-  def submitToZk(job: Job, zk: ZKClient): Boolean = {
+  def submitToZk(job: Job, zk: ZKClient, deadJobWorkerIds: Set[String]): Boolean = {
     try {
       val activeWorkerPaths = zk.getChildren(Constant.WORKER_DIR)
       if (activeWorkerPaths.size > 0) {
@@ -90,7 +90,10 @@ private[cloud] object ZkJobManager extends Logging {
         zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
         // /cloud/jobs/worker-xxx/jobname
         var path: String = null
-        val jobPaths = zk.getChildren(Constant.JOBS_DIR)
+        var jobPaths = zk.getChildren(Constant.JOBS_DIR)
+        if (deadJobWorkerIds != null && deadJobWorkerIds.size > 0) {
+          jobPaths = jobPaths.filter(!deadJobWorkerIds.contains(_))
+        }
 
         if (activeWorkerPaths.size - jobPaths.size > 0) {
           //a few of jobs
@@ -101,7 +104,7 @@ private[cloud] object ZkJobManager extends Logging {
         }
         logInfo(activeWorkerPaths + "\n" + jobPaths)
         zk.persist(path, job)
-        logInfo("job submited!")
+        logInfo(s"job ${job.getName} submited!")
       }
       true
     } catch {

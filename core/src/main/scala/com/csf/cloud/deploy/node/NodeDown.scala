@@ -24,12 +24,12 @@ private[cloud] object NodeDown extends Logging {
 
   //move /root/jobs/deadworkerxxx/jobname...  to /root/jobs/activeworkerxxx/jobname...
   // for trigger in new worker
-  def moveJobsWorker2Worker(nodeIdPath: String, conf: CloudConf) = {
+  def moveJobsWorker2Worker(nodeIdPath: String,deadJobWorkerIds: Set[String], conf: CloudConf) = {
     val jobsWorkersPath = Constant.JOBS_DIR + "/" + nodeIdPath
     val pathJobs = conf.zkClient.readByChidren[Job](jobsWorkersPath)
     if (pathJobs != null && pathJobs.size > 0) {
       pathJobs.foreach { pathJob =>
-        if (ZkJobManager.submitToZk(pathJob._2, conf.zkClient))
+        if (ZkJobManager.submitToZk(pathJob._2, conf.zkClient,deadJobWorkerIds))
           conf.zkClient.delete(pathJob._1)
       }
 

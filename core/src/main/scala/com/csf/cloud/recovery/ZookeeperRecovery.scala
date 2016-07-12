@@ -45,7 +45,7 @@ private[cloud] class ZookeeperRecovery(conf: CloudConf) extends Logging with Mas
     val deadJobWorkerIds = jobsWorkerIds &~ activeWorkerIds
 
     if (deadJobWorkerIds != null && deadJobWorkerIds.size > 0) {
-      deadJobWorkerIds.foreach(NodeDown.moveJobsWorker2Worker(_, conf))
+      deadJobWorkerIds.foreach(NodeDown.moveJobsWorker2Worker(_, deadJobWorkerIds.map(_.replace("/", "")), conf))
     }
   }
 
