@@ -706,6 +706,10 @@ private[cloud] object Node extends Logging with DefaultConfiguration {
     logWarning(s"worker ${path} is lost")
     import com.csf.cloud.deploy.node.NodeDown._
     val nodeIdPath = path.replace(Constant.WORKER_DIR, "")
+
+    ////release master cache for nodes and idToNodes
+    outCacheDeadNode(path, conf)
+
     //Unload data from /root/resource/worker-xxx
     unloadResource(nodeIdPath, conf)
 
