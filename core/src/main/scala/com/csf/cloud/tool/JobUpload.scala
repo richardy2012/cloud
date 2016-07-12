@@ -30,17 +30,36 @@ private[cloud] object JobUpload extends Logging {
 
     val jobs = AnalyseJobsTree.geneJobs(inputClone._2)
 
+    val allJobNames = jobs.map(_.getName)
+    val nameToCounts = allJobNames.map(n => (n, 1)).groupBy(_._1).map { case (name, counts) =>
+      (name, counts.foldLeft(0)(_ + _._2))
+    }
+    val reduplicatedNames = nameToCounts.filter(_._2 > 1).map(_._1)
+
+    if (reduplicatedNames != null && reduplicatedNames.size > 0) {
+      msg.setCode(-1)
+      msg.setMessage(s"jobname must be unique,please check jobname in $fileName!")
+      msg.setData(reduplicatedNames.mkString("\n"))
+      return msg
+    }
+
     //submit job
-    val faieldJobs = jobs.filter(conf.jobManager.submitJob(_).getCode() != 0)
+    val faieldJobs = jobs.map(conf.jobManager.submitJob(_)).filter(_.getCode == -1)
     if (faieldJobs.size == 0) {
       logInfo("jobs file submited successfully!")
       msg.setCode(0)
       msg.setMessage("jobs file submited successfully!")
     } else {
       msg.setCode(-1)
-      msg.setMessage("jobs file submited failed!")
+      val reduplicatedJobNames = faieldJobs.filter(_.getData != null)
+      if (reduplicatedJobNames != null && reduplicatedJobNames.size > 0) {
+        val jobNames = reduplicatedJobNames.map(_.getData.toString).mkString("\n")
+        msg.setMessage(s"jobname must be unique,please check jobname in $fileName!")
+        msg.setData(jobNames)
+      } else {
+        msg.setMessage("jobs file submited failed!")
+      }
     }
-
     msg
   }
 

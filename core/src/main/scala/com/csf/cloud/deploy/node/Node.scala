@@ -119,7 +119,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 
 
-   def addJarToClassLoader(path: String) = {
+  def addJarToClassLoader(path: String) = {
     val uri = Utils.correctURI(path)
     val file = new File(uri.getPath)
     conf.classLoader.addURL(file.toURI.toURL)
@@ -153,6 +153,11 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
   }
 
+  /**
+    * check if jobs finished
+    *
+    * @param job
+    */
   def checkJobFinishedMoveAndTriggerDependency(job: Job): Unit = {
     val partition = job.getPartition
     val workerToPartitionNum = JSON.parseObject(partition.getWorkerPartitionNum).toArray
@@ -457,6 +462,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 
   /**
+    * when status changed
     *
     * @param path
     */
@@ -476,6 +482,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   }
 
   /**
+    * this is for status watch about task
     * /cloud/status/job1/1_1_1466417550076  -> nodeId+partitionId+version
     *
     * @param path
@@ -515,7 +522,6 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
         if (!_jobs.contains(job.getName)) _jobs(job.getName) = job
         else {
           _jobs(job.getName).setState(job.getState)
-          _jobs(job.getName).setPartition(job.getPartition)
           _jobs(job.getName).setPartition(job.getPartition)
         }
       case None =>

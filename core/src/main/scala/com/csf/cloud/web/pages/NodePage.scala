@@ -158,9 +158,21 @@ private[web] class NodePage(parent: NodeWebUI) extends WebUIPage("") {
               </strong>
             </span>
           } else {
-            {
-              msg.getMessage
-            }
+            <div>
+              <span>
+                <font color="#CC6600">
+                  {msg.getMessage}
+                </font>
+              </span>
+              <br/>
+              {if (msg.getData != null) {
+              <span>
+                <font color="#FFCC33">
+                  {msg.getData}
+                </font>
+              </span>
+            }}
+            </div>
           }
         }}<ul class="unstyled">
           {jobs.map { job =>

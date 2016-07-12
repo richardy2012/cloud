@@ -55,9 +55,10 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
     val msg = Job.valiateNull(job)
     if (msg.getCode() == -1) return msg
     if (jobNames.contains(job.getName)) {
-      logWarning("jobname must unique!")
+      logWarning(s"jobname ${job.getName} must be unique!")
       msg.setCode(-1)
-      msg.setMessage("jobname must unique!")
+      msg.setMessage(s"jobname ${job.getName} must be unique!")
+      msg.setData(job.getName)
     } else {
       submitToZk(job)
       //job ready

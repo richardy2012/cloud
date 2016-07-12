@@ -64,10 +64,10 @@ private[cloud] object Excutor extends Logging {
 
   def getExcutor(job: Job, conf: CloudConf): Excutor = {
     var className = job.getLogical
-    if (!className.contains(Constant.PREFFIX_CLASSNAME)) {
+   /* if (!className.contains(Constant.PREFFIX_CLASSNAME)) {
       //partial class path eg:excute.Logical
       className = Constant.PREFFIX_CLASSNAME + className
-    }
+    }*/
     var excutorCache = excutorCacheManager.getIfPresent(className + "_" + job.getPartition.getPartitionNum)
     if (excutorCache != null) {
       // update excutor cache, keep alive
