@@ -447,7 +447,13 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
   def jobsChanges(path: String, source: String): Unit = {
     val pathArray = path.split("/")
     if (pathArray.size == 4) {
-      conf.zkClient.read[Job](path) match {
+      var optJobs: Option[Job] = None
+      try {
+        optJobs = conf.zkClient.read[Job](path)
+      } catch {
+        case e: Exception =>
+      }
+      optJobs match {
         case Some(job) =>
           source match {
             case "del" =>
@@ -467,6 +473,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
 
         case None =>
       }
+
     }
   }
 
