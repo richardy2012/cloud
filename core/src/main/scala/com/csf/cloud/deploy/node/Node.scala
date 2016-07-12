@@ -14,6 +14,7 @@ import com.csf.cloud.akka.CaseObjects.{InitJars, Jar}
 import com.csf.cloud.clock.CloudTimerWorker
 import com.csf.cloud.config.{CloudConf, DefaultConfiguration}
 import com.csf.cloud.deploy.master.Master
+import com.csf.cloud.deploy.node.NodeDown._
 import com.csf.cloud.entity.{Job, JobState, TaskState}
 import com.csf.cloud.excute.runner.ExcutorRunner
 import com.csf.cloud.listener.{JobFinished, JobRunning, JobTaskTraceListener, TaskFinished}
@@ -80,9 +81,9 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
       loadExtenalJars()
       boostrapTmpNodeToZk
       logInfo(s"Node $WORKER_PREFIX${Node.nodeId} Started.")
-
       watchs()
       sendHeartbeat()
+
     }
   })
 
@@ -436,6 +437,12 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
     if (hasSave) addJarToClassLoader(jarLocalFilePath)
   }
 
+  /**
+    * this is for all job in zk
+    *
+    * @param path
+    * @param source
+    */
   def jobsChanges(path: String, source: String): Unit = {
     val pathArray = path.split("/")
     if (pathArray.size == 4) {
@@ -449,6 +456,7 @@ private[cloud] class Node(conf: CloudConf) extends Logging with DefaultConfigura
               name2Job.remove(job.getName)
             case "add" =>
               logInfo(s"tree node  workers jobs added: ${path}")
+              // if this is leader,should submit job to DAG
               if (Node.isLeader.get())
                 conf.dagSchedule.addJob(job) //add job from DAG
               //cache Map(name->job) to local worker
@@ -687,18 +695,21 @@ private[cloud] object Node extends Logging with DefaultConfiguration {
   }
 
   private[cloud] def onNodeDeleted(conf: CloudConf, path: String) = {
-    logInfo(s"Node $path down!")
-    //Unload data from /root/resource/worker-xxx
+    logWarning(s"worker ${path} is lost")
+    import com.csf.cloud.deploy.node.NodeDown._
     val nodeIdPath = path.replace(Constant.WORKER_DIR, "")
-    val resourcePath = Constant.RESOURCE_DIR + nodeIdPath
-    conf.zkClient.delete(resourcePath)
-    logInfo(s"Down node resource $resourcePath deleted successfully!")
+    //Unload data from /root/resource/worker-xxx
+    unloadResource(nodeIdPath, conf)
+
     //Delete NodeId->counter eg:Worker-1 -> 1
-
     //Move count(worker-xxx) to /root/dead/xxx
-    conf.zkClient.persist(Constant.DEAD_COUNTER_ID + nodeIdPath, "dead")
+    moveCountWorkerId2Dead(nodeIdPath, conf)
 
-    logWarning(s"worker${path} is lost")
+    //move /root/jobs/deadworkerxxx/jobname...  to /root/jobs/activeworkerxxx/jobname...
+    // for trigger in new worker
+    moveJobsWorker2Worker(nodeIdPath.replace("/", ""), conf)
+
+
   }
 
 

@@ -2,7 +2,7 @@
     <job
             name="job1"
             cron="*/30 * * * * ?"
-            logicalClass="excute.juchao.TbJuchaoTestSLogical"
+            logicalClass="com.csf.cloud.excute.juchao.TbJuchaoTestSLogical"
             bizServiceBeanName=""
             bizDaoBeanName=""
             needPartition="true">
@@ -15,7 +15,7 @@
     <job
             name="job2"
             cron="* */3 * * * ?"
-            logicalClass="excute.juchao.TbJuchaoTestSLogical"
+            logicalClass="com.csf.cloud.excute.juchao.TbJuchaoTestSLogical"
             bizServiceBeanName=""
             bizDaoBeanName=""
             needPartition="true">
@@ -23,7 +23,7 @@
     </job>
     <job
             name="job3"
-            logicalClass="excute.DefaultDataStreamExcutor"
+            logicalClass="com.csf.cloud.excute.DefaultDataStreamExcutor"
             needPartition="true"
             type="stream">
         <partition number="3"/>

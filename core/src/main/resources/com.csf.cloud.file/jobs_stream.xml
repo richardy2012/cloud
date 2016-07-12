@@ -1,9 +1,0 @@
-<jobs>
-    <job
-            name="job3"
-            logicalClass="excute.DefaultDataStreamExcutor"
-            needPartition="true"
-            type="stream">
-        <partition number="3"/>
-    </job>
-</jobs>

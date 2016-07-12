@@ -1,6 +1,7 @@
 package com.csf.cloud.recovery
 
 import com.csf.cloud.config.CloudConf
+import com.csf.cloud.deploy.node.NodeDown
 import com.csf.cloud.util.{Constant, Logging}
 
 /**
@@ -8,16 +9,42 @@ import com.csf.cloud.util.{Constant, Logging}
   */
 private[cloud] class ZookeeperRecovery(conf: CloudConf) extends Logging with MasterRecovery {
 
-  override def moveToDeadNode(): Unit = {
+
+  /**
+    * WorkerId is increase by Distributed Counter in zk
+    * This is for retrieve the workerids that dead
+    *
+    * @param workerIds
+    * @param resourceWorkerIds
+    */
+  override def moveToDeadNode(workerIds: Seq[String], resourceWorkerIds: Seq[String]): Unit = {
     //get all active workers
-    val activeWorkerIds = conf.zkClient.getChildren(Constant.WORKER_DIR).toSet
+    val activeWorkerIds = workerIds.toSet
     //get all workers of /root/resource
-    val jobsWorkerIds = conf.zkClient.getChildren(Constant.RESOURCE_DIR).toSet
+    val jobsWorkerIds = resourceWorkerIds.toSet
 
     //get dead workers
     val deadWorkers = jobsWorkerIds &~ activeWorkerIds
 
     deadWorkers.foreach(w => conf.zkClient.persist(Constant.DEAD_COUNTER_ID + "/" + w, "d".getBytes()))
 
+  }
+
+  /**
+    * move jobs from dead workers to active workers
+    * @param workerIds
+    * @param jobWorkerIds
+    */
+  override def reBlanceJobsInCluster(workerIds: Seq[String], jobWorkerIds: Seq[String]): Unit = {
+    //get all active workers  /root/workers
+    val activeWorkerIds = workerIds.toSet
+    //get all workers of /root/jobs
+    val jobsWorkerIds = jobWorkerIds.toSet
+
+    val deadJobWorkerIds = jobsWorkerIds &~ activeWorkerIds
+
+    if (deadJobWorkerIds != null && deadJobWorkerIds.size > 0) {
+      deadJobWorkerIds.foreach(NodeDown.moveJobsWorker2Worker(_, conf))
+    }
   }
 }

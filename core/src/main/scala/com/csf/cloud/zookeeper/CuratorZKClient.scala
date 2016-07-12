@@ -157,10 +157,27 @@ private[cloud] class CuratorZKClient(
     client.getChildren.forPath(path).filter(_.startsWith(prefix)).map(deserializeFromFile[T]).flatten
   }
 
+
+  override def readByChidren[T: ClassTag](path: String): Seq[(String, T)] = {
+    client.getChildren.forPath(path).map(p => deserializeFromFileWithPath[T](path + "/" + p)).flatten
+  }
+
   private def deserializeFromFile[T](path: String)(implicit m: ClassTag[T]): Option[T] = {
     val fileData = client.getData().forPath(path)
     try {
       Some(conf.serializer.newInstance().deserialize[T](ByteBuffer.wrap(fileData)))
+    } catch {
+      case e: Exception =>
+        logWarning("Exception while reading persisted file, deleting", e)
+        client.delete().forPath(path)
+        None
+    }
+  }
+
+  private def deserializeFromFileWithPath[T](path: String)(implicit m: ClassTag[T]): Option[(String, T)] = {
+    val fileData = client.getData().forPath(path)
+    try {
+      Some(path, conf.serializer.newInstance().deserialize[T](ByteBuffer.wrap(fileData)))
     } catch {
       case e: Exception =>
         logWarning("Exception while reading persisted file, deleting", e)

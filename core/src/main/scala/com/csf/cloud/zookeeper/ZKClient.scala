@@ -48,6 +48,8 @@ abstract class ZKClient(conf: CloudConf) {
     */
   def read[T: ClassTag](path: String, prefix: String): Seq[T]
 
+  def readByChidren[T: ClassTag](path: String): Seq[(String,T)]
+
   def read[T: ClassTag](path: String): Option[T]
 
   def readByte(path: String): Array[Byte]

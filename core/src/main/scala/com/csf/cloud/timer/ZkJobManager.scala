@@ -5,13 +5,14 @@ import com.csf.cloud.deploy.node.Node
 import com.csf.cloud.entity.{Job, JobState, Msg}
 import com.csf.cloud.listener.JobReady
 import com.csf.cloud.util.{Constant, Logging}
+import com.csf.cloud.zookeeper.ZKClient
 
 import scala.collection.mutable
 
 /**
   * Created by soledede.weng on 2016/6/12.
   */
-class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
+private[cloud] class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
 
   private val jobNames = new mutable.HashSet[String]()
   private val zk = conf.zkNodeClient
@@ -60,7 +61,7 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
       msg.setMessage(s"jobname ${job.getName} must be unique!")
       msg.setData(job.getName)
     } else {
-      submitToZk(job)
+      ZkJobManager.submitToZk(job, zk)
       //job ready
       job.setState(JobState.READY)
       conf.listenerWaiter.post(JobReady(job))
@@ -71,30 +72,41 @@ class ZkJobManager(conf: CloudConf) extends JobManager with Logging {
     msg
   }
 
+
+}
+
+private[cloud] object ZkJobManager extends Logging {
   /**
     * add jobname to zk  /cloud/jobname/jobname
     * add job to /cloud/jobs/worker-xxx/jobname need blance it
     *
     * @param job
     */
-  private def submitToZk(job: Job) = {
-    val activeWorkerPaths = zk.getChildren(Constant.WORKER_DIR)
-    if (activeWorkerPaths.size > 0) {
-      //  add jobname to zk
-      zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
-      // /cloud/jobs/worker-xxx/jobname
-      var path: String = null
-      val jobPaths = zk.getChildren(Constant.JOBS_DIR)
+  def submitToZk(job: Job, zk: ZKClient): Boolean = {
+    try {
+      val activeWorkerPaths = zk.getChildren(Constant.WORKER_DIR)
+      if (activeWorkerPaths.size > 0) {
+        //  add jobname to zk
+        zk.persist(Constant.JOB_UNIQUE_NAME + "/" + job.getName, "unique")
+        // /cloud/jobs/worker-xxx/jobname
+        var path: String = null
+        val jobPaths = zk.getChildren(Constant.JOBS_DIR)
 
-      if (activeWorkerPaths.size - jobPaths.size > 0) { //a few of jobs
-        val worker = activeWorkerPaths.filter(!jobPaths.contains(_)).head
-        path = Constant.JOBS_DIR + "/" + worker + "/" + job.getName
-      } else {
-        path = jobPaths.map(w => (zk.getChildren(Constant.JOBS_DIR + "/" + w).size, Constant.JOBS_DIR + "/" + w)).sortBy(_._1).head._2 + "/" + job.getName
+        if (activeWorkerPaths.size - jobPaths.size > 0) {
+          //a few of jobs
+          val worker = activeWorkerPaths.filter(!jobPaths.contains(_)).head
+          path = Constant.JOBS_DIR + "/" + worker + "/" + job.getName
+        } else {
+          path = jobPaths.map(w => (zk.getChildren(Constant.JOBS_DIR + "/" + w).size, Constant.JOBS_DIR + "/" + w)).sortBy(_._1).head._2 + "/" + job.getName
+        }
+        logInfo(activeWorkerPaths + "\n" + jobPaths)
+        zk.persist(path, job)
+        logInfo("job submited!")
       }
-      logInfo(activeWorkerPaths + "\n" + jobPaths)
-      zk.persist(path, job)
-      logInfo("job submited!")
+      true
+    } catch {
+      case e: Exception =>
+        false
     }
   }
 }

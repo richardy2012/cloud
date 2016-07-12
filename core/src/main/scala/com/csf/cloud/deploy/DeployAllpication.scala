@@ -4,11 +4,12 @@ import com.csf.cloud.Factory
 import com.csf.cloud.config.CloudConf
 import com.csf.cloud.deploy.master.Master
 import com.csf.cloud.deploy.node.{NodeActor, Node}
+import com.csf.cloud.util.Logging
 
 /**
   * Created by soledede.weng on 2016/6/3.
   */
-object DeployAllpication {
+object DeployAllpication extends Logging {
 
   def main(args: Array[String]) {
     boot(args)
@@ -31,7 +32,7 @@ object DeployAllpication {
     //leader election
     val master = new Master(conf)
     conf.master = master
-    Factory.leaderElection(conf).createLeaderElectonAgent(master)
+
 
     //Thread.sleep(1000*30)
     //start node
@@ -39,6 +40,17 @@ object DeployAllpication {
     val node = new Node(conf)
     node.start()
     conf.node = node
+
+    println()
+    logInfo("Starting...")
+    println()
+    while (!Node.haveActivedWorkers(conf)) {
+      Thread.sleep(200)
+    }
+    logInfo("Started!")
+
+    Factory.leaderElection(conf).createLeaderElectonAgent(master)
+
     actorSystem.awaitTermination()
     //Thread.sleep(60 * 1000)
     // node.stop()

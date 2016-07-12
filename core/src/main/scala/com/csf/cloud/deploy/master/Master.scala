@@ -49,7 +49,20 @@ private[cloud] class Master(
     watchs()
     //recovery
     //TODO
-    conf.zkRecovery.moveToDeadNode()
+    val workerIds = conf.zkClient.getChildren(Constant.WORKER_DIR)
+    if (workerIds.size == 0) Thread.sleep(500)
+    val resourceWorkerIds = conf.zkClient.getChildren(Constant.RESOURCE_DIR)
+
+    //WorkerId is increase by Distributed Counter in zk
+    //This is for retrieve the workerids that dead
+    conf.zkRecovery.moveToDeadNode(workerIds, resourceWorkerIds)
+
+    val jobWorkerIds = conf.zkClient.getChildren(Constant.JOBS_DIR)
+
+    //move jobs from dead workers to active workers
+    conf.zkRecovery.reBlanceJobsInCluster(workerIds, jobWorkerIds)
+
+
 
 
     //recieve jobs from distribute queue
@@ -152,10 +165,10 @@ private[cloud] class Master(
 
                 while (needAssignData < jsonData.size) {
                   if (point >= partitionNum) point = 0
-                  var datasOfPoint: java.util.ArrayList[Object]  =null
-                  if(!workerToDataSeq.contains(availableCoreWorkerReverse(point % workerUsable)._1)){
+                  var datasOfPoint: java.util.ArrayList[Object] = null
+                  if (!workerToDataSeq.contains(availableCoreWorkerReverse(point % workerUsable)._1)) {
                     datasOfPoint = new java.util.ArrayList[Object]()
-                  }else datasOfPoint= workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1)
+                  } else datasOfPoint = workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1)
                   datasOfPoint.add(jsonData.get(needAssignData))
                   workerToDataSeq(availableCoreWorkerReverse(point % workerUsable)._1) = datasOfPoint
                   point += 1
